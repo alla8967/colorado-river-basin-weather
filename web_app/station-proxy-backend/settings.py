@@ -1,0 +1,130 @@
+from __future__ import annotations
+
+import os
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+
+
+DEFAULT_MODEL_RUN_ID = (
+    "option_c_limit97_5_hubs_10_target_neighbors_multiscale_terrain_"
+    "offset_terrain_standard_random_forest"
+)
+
+
+@dataclass(frozen=True)
+class BackendSettings:
+    """Resolved filesystem and model-run settings for the FastAPI backend."""
+
+    backend_dir: Path
+    project_dir: Path
+    engine_server_dir: Path
+    engine_executable: Path
+    target_data_file: Path
+    hub_data_file: Path
+    confidence_script_dir: Path
+    confidence_target_candidate_file: Path
+    confidence_hub_candidate_file: Path
+    confidence_terrain_feature_file: Path
+    confidence_validation_metrics_file: Path
+    confidence_model_reference: str
+    confidence_score_version: str
+    model_run_root: Path
+    active_model_run_id: str
+
+
+def env_path(name: str, default: Path) -> Path:
+    return Path(os.getenv(name, default)).resolve()
+
+
+def load_settings() -> BackendSettings:
+    backend_dir = Path(__file__).resolve().parent
+    project_dir = env_path("STATION_PROXY_PROJECT_DIR", backend_dir.parents[1])
+    engine_server_dir = env_path(
+        "STATION_PROXY_ENGINE_SERVER_DIR",
+        project_dir / "cpp_scoring_engine" / "Station_Engine_Server",
+    )
+
+    return BackendSettings(
+        backend_dir=backend_dir,
+        project_dir=project_dir,
+        engine_server_dir=engine_server_dir,
+        engine_executable=env_path(
+            "STATION_PROXY_ENGINE_EXECUTABLE",
+            engine_server_dir / "station_engine_server",
+        ),
+        target_data_file=env_path(
+            "STATION_PROXY_TARGET_FILE",
+            project_dir
+            / "ml_reconstruction"
+            / "NOAA_Inventory_Sort"
+            / "target_daily_app_ready.csv",
+        ),
+        hub_data_file=env_path(
+            "STATION_PROXY_HUB_FILE",
+            project_dir
+            / "ml_reconstruction"
+            / "NOAA_Inventory_Sort"
+            / "hub_daily_app_ready.csv",
+        ),
+        confidence_script_dir=(
+            project_dir / "ml_reconstruction" / "weather_reconstruction_model" / "scripts"
+        ),
+        confidence_target_candidate_file=env_path(
+            "STATION_PROXY_CONFIDENCE_TARGET_CANDIDATES",
+            project_dir
+            / "ml_reconstruction"
+            / "NOAA_Inventory_Sort"
+            / "target_station_candidates.csv",
+        ),
+        confidence_hub_candidate_file=env_path(
+            "STATION_PROXY_CONFIDENCE_HUB_CANDIDATES",
+            project_dir
+            / "ml_reconstruction"
+            / "NOAA_Inventory_Sort"
+            / "hub_station_candidates.csv",
+        ),
+        confidence_terrain_feature_file=env_path(
+            "STATION_PROXY_CONFIDENCE_TERRAIN_FEATURES",
+            project_dir
+            / "ml_reconstruction"
+            / "terrain_data"
+            / "processed"
+            / "station_terrain_features.csv",
+        ),
+        confidence_validation_metrics_file=env_path(
+            "STATION_PROXY_CONFIDENCE_VALIDATION_METRICS",
+            project_dir
+            / "ml_reconstruction"
+            / "weather_reconstruction_model"
+            / "outputs"
+            / "reports"
+            / (
+                "option_c_limit97_5_hubs_10_target_neighbors_multiscale_terrain_"
+                "offset_terrain_standard_random_forest_station_metrics.csv"
+            ),
+        ),
+        confidence_model_reference=os.getenv(
+            "STATION_PROXY_CONFIDENCE_MODEL_REFERENCE",
+            "option-c-multiscale-rf",
+        ),
+        confidence_score_version=os.getenv("STATION_PROXY_CONFIDENCE_SCORE_VERSION", ""),
+        model_run_root=env_path(
+            "STATION_PROXY_MODEL_RUN_ROOT",
+            project_dir / "ml_reconstruction" / "weather_reconstruction_model" / "model_runs",
+        ),
+        active_model_run_id=os.getenv(
+            "STATION_PROXY_ACTIVE_MODEL_RUN_ID",
+            DEFAULT_MODEL_RUN_ID,
+        ),
+    )
+
+
+def configure_confidence_import_path(config: BackendSettings) -> None:
+    script_dir = str(config.confidence_script_dir)
+    if script_dir not in sys.path:
+        sys.path.insert(0, script_dir)
+
+
+settings = load_settings()
+configure_confidence_import_path(settings)
