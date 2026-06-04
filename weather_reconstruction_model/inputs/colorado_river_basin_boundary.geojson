@@ -1,0 +1,52 @@
+{
+  "type": "Feature",
+  "properties": {
+    "name": "Station extent reliability boundary",
+    "boundaryType": "station_extent_rectangle",
+    "paddingKm": 30.0,
+    "stationCount": 1246,
+    "rawStationBounds": {
+      "latMin": 31.0158,
+      "latMax": 43.5,
+      "lonMin": -115.0,
+      "lonMax": -102.0
+    },
+    "paddedBounds": {
+      "latMin": 30.746307,
+      "latMax": 43.769493,
+      "lonMin": -115.338594,
+      "lonMax": -101.661406
+    },
+    "sourceFiles": [
+      "/Users/alexanderlangley-valey/Desktop/Colorado River Basin Project/NOAA_Inventory_Sort/hub_station_candidates.csv",
+      "/Users/alexanderlangley-valey/Desktop/Colorado River Basin Project/NOAA_Inventory_Sort/target_station_candidates.csv"
+    ]
+  },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -115.338594,
+          30.746307
+        ],
+        [
+          -101.661406,
+          30.746307
+        ],
+        [
+          -101.661406,
+          43.769493
+        ],
+        [
+          -115.338594,
+          43.769493
+        ],
+        [
+          -115.338594,
+          30.746307
+        ]
+      ]
+    ]
+  }
+}

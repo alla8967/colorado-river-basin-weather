@@ -1,0 +1,485 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NOAA Station Proxy Finder</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <link rel="stylesheet" href="/static/styles.css?v=station-detail-cleanup-v1" />
+</head>
+<body>
+    <header>
+        <h1>NOAA Weather Station Proxy Finder</h1>
+        <p>
+            Enter a latitude and longitude to find the nearest station in the current dataset,
+            then identify the best representative proxy stations using the C++ scoring engine.
+        </p>
+    </header>
+
+    <main>
+        <nav class="app-tabs" aria-label="Application views">
+            <button class="tab-button active" type="button" data-tab-target="proxy-tab">Proxy Finder</button>
+            <button class="tab-button" type="button" data-tab-target="model-support-tab">Model Support</button>
+            <button class="tab-button" type="button" data-tab-target="model-reliability-tab">Reliability Map</button>
+        </nav>
+
+        <div id="proxy-tab" class="tab-panel active" role="tabpanel">
+        <section class="panel">
+            <h2>Analyze Location</h2>
+            <p class="placeholder">
+                Enter coordinates manually or click the map below to select a location.
+            </p>
+
+            <div class="map-panel">
+                <div id="map"></div>
+                <p class="map-help">Click the map to choose a location. The latitude and longitude fields will update automatically.</p>
+                <div class="map-legend">
+                    <span class="legend-item"><span class="legend-dot selected"></span>Selected point</span>
+                    <span class="legend-item"><span class="legend-dot nearest"></span>Nearest station</span>
+                    <span class="legend-item"><span class="legend-dot proxy"></span>Proxy station</span>
+                    <span class="legend-item"><span class="legend-line"></span>Station relationship</span>
+                </div>
+            </div>
+
+            <div class="control-grid">
+                <div>
+                    <label for="latitude">Latitude</label>
+                    <input id="latitude" type="number" step="any" value="39.75" />
+                </div>
+
+                <div>
+                    <label for="longitude">Longitude</label>
+                    <input id="longitude" type="number" step="any" value="-105.0" />
+                </div>
+
+                <button id="analyze-button" disabled>Analyze Location</button>
+            </div>
+
+            <div id="engine-status" class="engine-status loading">
+                <strong>Engine Status</strong>
+                Checking backend and C++ station engine...
+            </div>
+        </section>
+
+        <section class="results" id="results">
+            <div class="card">
+                <h2>Results</h2>
+                <p class="placeholder">
+                    Enter coordinates and click Analyze Location to run the C++ station-matching engine.
+                </p>
+            </div>
+        </section>
+
+        <section class="panel methodology">
+            <h2>Methodology</h2>
+            <p class="methodology-intro">
+                The app finds the nearest available station first. If that station is target-only, it ranks proxy hub stations; if that station is already a hub, it ranks the most similar other hubs.
+            </p>
+
+            <details class="method-card" open>
+                <summary>Target stations</summary>
+                <div class="method-body">
+                    <p>Target stations are recent stations that can represent the clicked point when the nearest available station is not already a hub.</p>
+                    <ul>
+                        <li>Must have both TMAX and TMIN records.</li>
+                        <li>Must be inside the study bounds: 31.0-43.5 latitude and -115.0 to -102.0 longitude.</li>
+                        <li>Must have at least 20 usable overlapping years of TMAX and TMIN.</li>
+                        <li>Must have usable temperature coverage ending in 2020 or later.</li>
+                        <li>Target-only stations are compared against hub stations when they are the nearest station to the clicked point.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details class="method-card">
+                <summary>Hub stations</summary>
+                <div class="method-body">
+                    <p>Hub stations are longer-record stations that can act as proxy options, or as the nearest station itself when a clicked point lands closest to a hub.</p>
+                    <ul>
+                        <li>Must meet the same TMAX, TMIN, recency, and geographic bounds rules as target stations.</li>
+                        <li>Must have at least 42 usable overlapping years of TMAX and TMIN.</li>
+                        <li>Must have usable temperature coverage dating to 1960 or earlier.</li>
+                        <li>The current hub set is generated directly from the NOAA inventory using these record-length rules.</li>
+                        <li>If the nearest station is a hub, the app compares it with the five most similar other hubs.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details class="method-card">
+                <summary>Proxy ranking filters</summary>
+                <div class="method-body">
+                    <p>Before ranking, proxy candidates are screened so distant or weakly supported matches do not dominate the map.</p>
+                    <ul>
+                        <li>Maximum target-to-proxy distance: 300 km.</li>
+                        <li>Maximum elevation difference: 1500 m.</li>
+                        <li>Minimum paired daily observations: 365 days for full datasets.</li>
+                        <li>Stations with missing daily correlation, MAD, or RMSE are excluded.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details class="method-card">
+                <summary>Scoring metrics</summary>
+                <div class="method-body">
+                    <p>The final score is a weighted 0-100 proxy score. Higher is better.</p>
+                    <ul>
+                        <li>Daily correlation measures whether the two stations move together through time.</li>
+                        <li>Daily MAD measures average absolute temperature difference.</li>
+                        <li>Daily RMSE penalizes occasional large mismatches more strongly.</li>
+                        <li>Distance and elevation help keep physically plausible stations near the top.</li>
+                        <li>Monthly metrics are reported for context, but the current score is driven by daily metrics plus geography.</li>
+                    </ul>
+
+                    <div class="formula-grid">
+                        <div class="formula-card">
+                            <h4>Daily correlation</h4>
+                            <p class="formula-note">Correlation is calculated as Pearson correlation on paired daily average temperatures.</p>
+                            <div class="latex-formula">
+                                \[
+                                    r = \frac{\sum_i (T_i - \bar{T})(P_i - \bar{P})}
+                                    {\sqrt{\sum_i (T_i - \bar{T})^2}
+                                    \sqrt{\sum_i (P_i - \bar{P})^2}}
+                                \]
+                                \[
+                                    S_r =
+                                    \begin{cases}
+                                        1, & r \ge 0.95 \\
+                                        0, & r \le 0.75 \\
+                                        \frac{1 + \cos(\pi \cdot \frac{0.95-r}{0.95-0.75})}{2}, & 0.75 < r < 0.95
+                                    \end{cases}
+                                \]
+                            </div>
+                            <code class="formula">r = cov(target, proxy) / (sd(target) * sd(proxy))</code>
+                            <code class="formula">score = 1.0 if r >= 0.95<br>score = 0.0 if r <= 0.75<br>otherwise cosine-smoothed between 0.75 and 0.95</code>
+                            <figure class="curve-figure">
+                                <div class="curve-y-row">
+                                    <span class="axis-label y-axis">Normalized score</span>
+                                    <div>
+                                        <div class="curve-plot">
+                                            <img src="/assets/daily-correlation-score-curve.png" alt="Daily correlation score curve" />
+                                        </div>
+                                        <span class="axis-label x-axis">Daily correlation r</span>
+                                    </div>
+                                </div>
+                                <figcaption class="curve-caption">
+                                    Correlations at or below 0.75 receive no credit, correlations at or above 0.95 receive full credit, and the transition is cosine-smoothed between those thresholds.
+                                </figcaption>
+                            </figure>
+                            <p class="formula-note">The cosine curve avoids a harsh cliff: a station does not suddenly become bad at 0.949, but very weak relationships still fall away quickly.</p>
+                        </div>
+
+                        <div class="formula-card">
+                            <h4>Daily MAD</h4>
+                            <p class="formula-note">Mean absolute difference captures the typical day-to-day temperature offset.</p>
+                            <div class="latex-formula">
+                                \[
+                                    MAD = \frac{1}{n}\sum_i |T_i - P_i|
+                                \]
+                                \[
+                                    S_{MAD} =
+                                    \begin{cases}
+                                        1, & MAD \le 2.0 \\
+                                        e^{-0.12(MAD - 2.0)}, & MAD > 2.0
+                                    \end{cases}
+                                \]
+                            </div>
+                            <code class="formula">MAD = mean(abs(target_tavg - proxy_tavg))</code>
+                            <code class="formula">score = 1.0 if MAD <= 2.0 F<br>score = exp(-0.12 * (MAD - 2.0)) otherwise</code>
+                            <figure class="curve-figure">
+                                <div class="curve-y-row">
+                                    <span class="axis-label y-axis">Normalized score</span>
+                                    <div>
+                                        <div class="curve-plot">
+                                            <img src="/assets/daily-mad-score-curve.png" alt="Daily MAD score curve" />
+                                        </div>
+                                        <span class="axis-label x-axis">Daily MAD (F)</span>
+                                    </div>
+                                </div>
+                                <figcaption class="curve-caption">
+                                    MAD values at or below 2.0 F receive full credit, then the score decays exponentially as the typical temperature offset grows.
+                                </figcaption>
+                            </figure>
+                            <p class="formula-note">This gets the largest weight because a proxy should be close in actual temperature, not just move in the same direction.</p>
+                        </div>
+
+                        <div class="formula-card">
+                            <h4>Daily RMSE</h4>
+                            <p class="formula-note">RMSE is similar to MAD, but larger mismatches are penalized more strongly.</p>
+                            <div class="latex-formula">
+                                \[
+                                    RMSE = \sqrt{\frac{1}{n}\sum_i (T_i - P_i)^2}
+                                \]
+                                \[
+                                    S_{RMSE} =
+                                    \begin{cases}
+                                        1, & RMSE \le 2.75 \\
+                                        e^{-0.13(RMSE - 2.75)}, & RMSE > 2.75
+                                    \end{cases}
+                                \]
+                            </div>
+                            <code class="formula">RMSE = sqrt(mean((target_tavg - proxy_tavg)^2))</code>
+                            <code class="formula">score = 1.0 if RMSE <= 2.75 F<br>score = exp(-0.13 * (RMSE - 2.75)) otherwise</code>
+                            <figure class="curve-figure">
+                                <div class="curve-y-row">
+                                    <span class="axis-label y-axis">Normalized score</span>
+                                    <div>
+                                        <div class="curve-plot">
+                                            <img src="/assets/daily-rmse-score-curve.png" alt="Daily RMSE score curve" />
+                                        </div>
+                                        <span class="axis-label x-axis">Daily RMSE (F)</span>
+                                    </div>
+                                </div>
+                                <figcaption class="curve-caption">
+                                    RMSE values at or below 2.75 F receive full credit, then the score decays exponentially as larger errors become more severe.
+                                </figcaption>
+                            </figure>
+                            <p class="formula-note">This helps reject stations that usually look fine but occasionally diverge in a way that would be risky for proxy use.</p>
+                        </div>
+
+                        <div class="formula-card">
+                            <h4>Distance</h4>
+                            <p class="formula-note">Distance is calculated with the haversine formula between the target and proxy coordinates.</p>
+                            <div class="latex-formula">
+                                \[
+                                    a_1 = \sin^2\left(\frac{\Delta\phi}{2}\right)
+                                \]
+                                \[
+                                    a_2 = \cos(\phi_1)\cos(\phi_2)
+                                    \sin^2\left(\frac{\Delta\lambda}{2}\right)
+                                \]
+                                \[
+                                    a = a_1 + a_2
+                                \]
+                                \[
+                                    d = 2R\arctan2(\sqrt{a}, \sqrt{1-a})
+                                \]
+                                \[
+                                    S_d =
+                                    \begin{cases}
+                                        1, & d \le 35 \\
+                                        e^{-0.006(d - 35)}, & d > 35
+                                    \end{cases}
+                                \]
+                            </div>
+                            <code class="formula">distance = great-circle km between stations</code>
+                            <code class="formula">score = 1.0 if distance <= 35 km<br>score = exp(-0.006 * (distance - 35)) otherwise</code>
+                            <figure class="curve-figure">
+                                <div class="curve-y-row">
+                                    <span class="axis-label y-axis">Normalized score</span>
+                                    <div>
+                                        <div class="curve-plot">
+                                            <img src="/assets/distance-score-curve.png" alt="Distance score curve" />
+                                        </div>
+                                        <span class="axis-label x-axis">Station distance (km)</span>
+                                    </div>
+                                </div>
+                                <figcaption class="curve-caption">
+                                    Distances at or below 35 km receive full credit, then distance credit decays gradually so nearby-but-not-perfect stations can still rank well.
+                                </figcaption>
+                            </figure>
+                            <p class="formula-note">Distance is not allowed to dominate temperature similarity, but nearby stations are more likely to share storm tracks, terrain exposure, and regional patterns.</p>
+                        </div>
+
+                        <div class="formula-card">
+                            <h4>Elevation</h4>
+                            <p class="formula-note">Elevation difference is the absolute vertical separation between the two stations.</p>
+                            <div class="latex-formula">
+                                \[
+                                    \Delta z = |z_{target} - z_{proxy}|
+                                \]
+                                \[
+                                    S_z =
+                                    \begin{cases}
+                                        1, & \Delta z \le 50 \\
+                                        e^{-0.0025(\Delta z - 50)}, & \Delta z > 50
+                                    \end{cases}
+                                \]
+                            </div>
+                            <code class="formula">elevation_diff = abs(target_elevation - proxy_elevation)</code>
+                            <code class="formula">score = 1.0 if elevation_diff <= 50 m<br>score = exp(-0.0025 * (elevation_diff - 50)) otherwise</code>
+                            <figure class="curve-figure">
+                                <div class="curve-y-row">
+                                    <span class="axis-label y-axis">Normalized score</span>
+                                    <div>
+                                        <div class="curve-plot">
+                                            <img src="/assets/elevation-score-curve.png" alt="Elevation difference score curve" />
+                                        </div>
+                                        <span class="axis-label x-axis">Elevation difference (m)</span>
+                                    </div>
+                                </div>
+                                <figcaption class="curve-caption">
+                                    Elevation differences at or below 50 m receive full credit, then elevation credit decays gradually as stations become vertically less comparable.
+                                </figcaption>
+                            </figure>
+                            <p class="formula-note">Elevation matters in mountain regions, but it gets the smallest weight because good climate matches can still exist across imperfect elevation pairs.</p>
+                        </div>
+
+                        <div class="formula-card">
+                            <h4>Final score</h4>
+                            <p class="formula-note">Each normalized metric becomes a 0-1 subscore. The weighted result is multiplied by 100.</p>
+                            <div class="latex-formula">
+                                \[
+                                    Score = 100(
+                                    0.35S_{MAD} +
+                                    0.25S_{RMSE} +
+                                    0.20S_r +
+                                    0.15S_d +
+                                    0.05S_z)
+                                \]
+                            </div>
+                            <code class="formula">final = 100 * (0.35*MAD + 0.25*RMSE + 0.20*r + 0.15*distance + 0.05*elevation)</code>
+                            <figure class="score-weight-graphic">
+                                <div class="stacked-weight-bar" aria-label="Final score weight distribution">
+                                    <span class="weight-segment mad" title="Daily MAD: 35%"></span>
+                                    <span class="weight-segment rmse" title="Daily RMSE: 25%"></span>
+                                    <span class="weight-segment correlation" title="Daily correlation: 20%"></span>
+                                    <span class="weight-segment distance" title="Distance: 15%"></span>
+                                    <span class="weight-segment elevation" title="Elevation difference: 5%"></span>
+                                </div>
+                                <figcaption class="weight-legend">
+                                    <span class="weight-legend-item"><span class="weight-swatch mad"></span><span>Daily MAD</span><strong>35%</strong></span>
+                                    <span class="weight-legend-item"><span class="weight-swatch rmse"></span><span>Daily RMSE</span><strong>25%</strong></span>
+                                    <span class="weight-legend-item"><span class="weight-swatch correlation"></span><span>Daily correlation</span><strong>20%</strong></span>
+                                    <span class="weight-legend-item"><span class="weight-swatch distance"></span><span>Distance</span><strong>15%</strong></span>
+                                    <span class="weight-legend-item"><span class="weight-swatch elevation"></span><span>Elevation</span><strong>5%</strong></span>
+                                </figcaption>
+                            </figure>
+                            <p class="formula-note">Record overlap is used as a quality gate rather than a direct score component, because targets and hubs are intentionally allowed to have different record lengths.</p>
+                        </div>
+                    </div>
+
+                    <div class="weight-list">
+                        <div class="weight-row">
+                            <span>Daily MAD</span>
+                            <span class="weight-track"><span class="weight-fill" style="width: 35%;"></span></span>
+                            <strong>35%</strong>
+                        </div>
+                        <div class="weight-row">
+                            <span>Daily RMSE</span>
+                            <span class="weight-track"><span class="weight-fill" style="width: 25%;"></span></span>
+                            <strong>25%</strong>
+                        </div>
+                        <div class="weight-row">
+                            <span>Daily correlation</span>
+                            <span class="weight-track"><span class="weight-fill" style="width: 20%;"></span></span>
+                            <strong>20%</strong>
+                        </div>
+                        <div class="weight-row">
+                            <span>Distance</span>
+                            <span class="weight-track"><span class="weight-fill" style="width: 15%;"></span></span>
+                            <strong>15%</strong>
+                        </div>
+                        <div class="weight-row">
+                            <span>Elevation difference</span>
+                            <span class="weight-track"><span class="weight-fill" style="width: 5%;"></span></span>
+                            <strong>5%</strong>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </section>
+        </div>
+
+        <div id="model-support-tab" class="tab-panel" role="tabpanel">
+            <section class="panel">
+                <h2>Model Confidence Layer</h2>
+                <p class="placeholder">
+                    Explore the calibrated full-region confidence surface for the learning-model workflow. These points estimate expected error from held-out validation evidence and station support strength.
+                </p>
+
+                <div class="map-panel">
+                    <div id="confidence-map"></div>
+                    <p class="map-help">Colored points come from the active model run's calibrated confidence grid. Hover or click a point to inspect confidence, expected MAE, and risk reasons.</p>
+                    <div class="map-legend">
+                        <span class="legend-item"><span class="legend-dot confidence-very-high"></span>Very high confidence</span>
+                        <span class="legend-item"><span class="legend-dot confidence-high"></span>High confidence</span>
+                        <span class="legend-item"><span class="legend-dot confidence-moderate"></span>Moderate confidence</span>
+                        <span class="legend-item"><span class="legend-dot confidence-low"></span>Low confidence</span>
+                        <span class="legend-item"><span class="legend-dot confidence-very-low"></span>Very low confidence</span>
+                    </div>
+                    <div class="map-tools">
+                        <span id="confidence-layer-status" class="map-status">Loading calibrated confidence grid...</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="results" id="confidence-results">
+                <div class="card">
+                    <h2>Clicked Point Support Estimate</h2>
+                    <p class="placeholder">
+                        Click the map to calculate an exact support-style score for that point. This clicked estimate is not calibrated model confidence yet.
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <div id="model-reliability-tab" class="tab-panel" role="tabpanel">
+            <section class="panel">
+                <h2>Colorado Basin Model Reliability</h2>
+                <p class="placeholder">
+                    View the precomputed Paloma v1 reliability surface clipped to the Colorado River Basin.
+                    The raster shows the relative surface trend for the current layer; station points show daily temperature reconstruction quality from holdout metrics.
+                </p>
+
+                <div class="map-panel">
+                    <div id="reliability-map"></div>
+                    <p id="reliability-map-help" class="map-help mode-description">Click the raster to inspect a grid cell, or click a station point to inspect station-level reconstruction metrics below the map.</p>
+
+                    <div class="map-tools reliability-tools">
+                        <label class="compact-label" for="reliability-map-mode-select">Map</label>
+                        <select id="reliability-map-mode-select" class="map-select">
+                            <option value="quality" selected>Overall</option>
+                            <option value="correlation">Holdout Correlation</option>
+                            <option value="bias">Holdout Bias</option>
+                            <option value="final-correlation">Fully Trained Correlation</option>
+                            <option value="final-mae">Fully Trained MAE</option>
+                            <option value="final-rmse">Fully Trained RMSE</option>
+                            <option value="final-bias">Fully Trained Bias</option>
+                        </select>
+                        <label class="compact-label" for="reliability-layer-select">Layer</label>
+                        <select id="reliability-layer-select" class="map-select">
+                            <option value="tavg" selected>TAVG</option>
+                            <option value="tmin">TMIN</option>
+                            <option value="tmax">TMAX</option>
+                        </select>
+                        <label class="map-toggle">
+                            <input id="reliability-station-toggle" type="checkbox" checked />
+                            Show Stations
+                        </label>
+                        <span id="reliability-layer-status" class="map-status">Loading reliability surface...</span>
+                    </div>
+
+                    <div id="reliability-legend" class="map-legend quality-legend" aria-label="Reliability map legend"></div>
+                </div>
+            </section>
+
+            <section class="results" id="reliability-results">
+                <div class="card">
+                    <h2>Reliability Inspector</h2>
+                    <p class="placeholder">
+                        Load the reliability layer, then click the map to inspect the nearest masked grid cell.
+                    </p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [["\\(", "\\)"]],
+                displayMath: [["\\[", "\\]"]]
+            },
+            svg: {
+                fontCache: "global"
+            }
+        };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script type="module" src="/static/js/main.js?v=station-detail-cleanup-v1"></script>
+</body>
+</html>

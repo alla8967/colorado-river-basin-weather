@@ -1,0 +1,67 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+
+.env
+.env.*
+!.env.example
+
+.venv/
+venv/
+env/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Build outputs
+station_engine_api
+station_engine_api_test
+validate_prediction_similarity
+C++_Weather_Station_Proxy_Engine/basin_test
+NOAA_Inventory_Sort/noaa_inventory_sort
+Station_Engine_Server/station_engine_server
+station-proxy-backend/test_engine
+
+# Large/generated NOAA data products
+NOAA_Inventory_Sort/NOAA_GHCN_ByYear/
+NOAA_Inventory_Sort/*_daily_app_ready.csv
+NOAA_Inventory_Sort/*_daily_recent_long_format.csv
+
+# Local test/build scratch
+build/
+tmp/
+*.tmp
+*.log
+*.out
+*.err
+slurm-*.out
+weather_reconstruction_model/cache/
+weather_reconstruction_model/outputs/
+weather_reconstruction_model/model_runs/
+weather_reconstruction_artifacts/
+alpine_outputs/
+model_runs/
+
+# Generated model/data artifacts
+*.sqlite
+*.sqlite3
+*.db
+*.pkl
+*.joblib
+*.parquet
+*.npy
+*.npz
+
+# Local DEM downloads and derived terrain rasters
+Raw_DEM/*.tif
+Raw_DEM/*.tiff
+Raw_DEM/*.part
+terrain_data/raw_dem/
+terrain_data/processed/
+
+# Generated frontend/model handoff data
+station-proxy-backend/assets/confidence-points.json
