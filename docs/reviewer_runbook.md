@@ -14,9 +14,9 @@ The local app combines:
 - a browser frontend,
 - Python research scripts for temperature reconstruction and model-run artifacts.
 
-The public source tree is intended to be reviewable without committing bulky
-generated data. Full local app/model runs still require regenerated or locally
-supplied NOAA, DEM, and model-run artifacts.
+This cleanup branch is local-only. It should not be synced to Alpine until the
+active or pending Alpine station-holdout jobs are finished and a new sync is
+intentional.
 
 ## Review Path
 
@@ -38,9 +38,9 @@ behavior behind named helpers. The most important helper boundaries are:
 - backend app responsibilities are split across `engine_client.py`,
   `confidence_service.py`, `model_run_service.py`, `settings.py`, and
   `api_models.py`;
-- frontend behavior is split under `web_app/station-proxy-backend/static/js/`;
-- research-script reuse lives in `ml_reconstruction/weather_reconstruction_model/scripts/common/`
-  and `ml_reconstruction/weather_reconstruction_model/scripts/pipeline/`;
+- frontend behavior is split under `station-proxy-backend/static/js/`;
+- research-script reuse lives in `weather_reconstruction_model/scripts/common/`
+  and `weather_reconstruction_model/scripts/pipeline/`;
 - model-run manifests, feature selection, reporting HTML helpers, CSV/JSON
   utilities, training-data prep, station-holdout filtering, general-table row
   construction, and confidence support now have shared helper coverage.
@@ -56,7 +56,6 @@ depends on external NOAA/model artifacts and Alpine run context.
 From the project root:
 
 ```bash
-cd /path/to/colorado-river-basin-weather
 make setup
 ```
 
@@ -100,7 +99,7 @@ make check
 
 This command runs:
 
-- JavaScript syntax checks for `web_app/station-proxy-backend/static/js/*.js`,
+- JavaScript syntax checks for `station-proxy-backend/static/js/*.js`,
 - Python compile checks for the FastAPI backend and app-shell smoke test,
 - the local app-shell smoke test,
 - the fixture-backed C++ station engine test,
@@ -154,12 +153,12 @@ available once the backend reports that the persistent C++ engine is running.
 Source and app code:
 
 ```text
-web_app/station-proxy-backend/
-web_app/station-proxy-backend/static/js/
-cpp_scoring_engine/C++_Weather_Station_Proxy_Engine/
-cpp_scoring_engine/Station_Engine_Server/
-ml_reconstruction/weather_reconstruction_model/scripts/
-ml_reconstruction/remote_jobs/
+station-proxy-backend/
+station-proxy-backend/static/js/
+C++_Weather_Station_Proxy_Engine/
+Station_Engine_Server/
+weather_reconstruction_model/scripts/
+remote_jobs/
 ```
 
 Small test fixtures:
@@ -171,12 +170,12 @@ tests/fixtures/
 Generated or bulky outputs:
 
 ```text
-ml_reconstruction/NOAA_Inventory_Sort/NOAA_GHCN_ByYear/
-ml_reconstruction/weather_reconstruction_model/cache/
-ml_reconstruction/weather_reconstruction_model/outputs/
-ml_reconstruction/weather_reconstruction_model/model_runs/
-ml_reconstruction/weather_reconstruction_artifacts/
-ml_reconstruction/terrain_data/processed/
+NOAA_Inventory_Sort/NOAA_GHCN_ByYear/
+weather_reconstruction_model/cache/
+weather_reconstruction_model/outputs/
+weather_reconstruction_model/model_runs/
+weather_reconstruction_artifacts/
+terrain_data/processed/
 Raw_DEM/
 ```
 
@@ -202,8 +201,8 @@ shelves in place.
 Active or pending station-holdout jobs may be using the copied code under:
 
 ```text
-/scratch/alpine/$USER/crb_weather_runs/current/ml_reconstruction/weather_reconstruction_model/scripts
-/scratch/alpine/$USER/crb_weather_runs/current/ml_reconstruction/remote_jobs
+/scratch/alpine/$USER/crb_weather_runs/current/weather_reconstruction_model/scripts
+/scratch/alpine/$USER/crb_weather_runs/current/remote_jobs
 ```
 
 Do not rsync, sync, rename, or reorganize that Alpine scratch copy while those

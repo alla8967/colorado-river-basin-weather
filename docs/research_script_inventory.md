@@ -1,6 +1,6 @@
 # Research Script Inventory
 
-This inventory gives reviewers a map of `ml_reconstruction/weather_reconstruction_model/scripts`
+This inventory gives reviewers a map of `weather_reconstruction_model/scripts`
 without requiring them to inspect every script first.
 
 ## Shared Modules

@@ -33,8 +33,8 @@ py-modules = []
 addopts = "-q"
 testpaths = [
     "tests",
-    "ml_reconstruction/weather_reconstruction_model/scripts/tests",
+    "weather_reconstruction_model/scripts/tests",
 ]
 pythonpath = [
-    "ml_reconstruction/weather_reconstruction_model/scripts",
+    "weather_reconstruction_model/scripts",
 ]

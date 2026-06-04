@@ -11,8 +11,8 @@ For the human-facing cleanup policy and conservative local cleanup command, see
 The repository intentionally tracks only small or source-like CSV files:
 
 ```text
-ml_reconstruction/NOAA_Inventory_Sort/hub_station_candidates.csv
-ml_reconstruction/NOAA_Inventory_Sort/target_station_candidates.csv
+NOAA_Inventory_Sort/hub_station_candidates.csv
+NOAA_Inventory_Sort/target_station_candidates.csv
 tests/fixtures/hub_daily_app_ready.csv
 tests/fixtures/target_daily_app_ready.csv
 ```
@@ -31,18 +31,19 @@ These categories are ignored and should remain out of source commits:
   `.venv/`, `venv/`, `env/`, `*.egg-info/`, `.pytest_cache/`,
   `.mypy_cache/`, `.ruff_cache/`.
 - compiled C++ binaries: `station_engine_api`, `station_engine_api_test`,
-  `validate_prediction_similarity`, `cpp_scoring_engine/Station_Engine_Server/station_engine_server`.
-- generated NOAA/app-ready data: `ml_reconstruction/NOAA_Inventory_Sort/NOAA_GHCN_ByYear/`,
-  `ml_reconstruction/NOAA_Inventory_Sort/ghcnd-inventory.txt`,
-  `ml_reconstruction/NOAA_Inventory_Sort/ghcnd-stations.txt`,
-  `ml_reconstruction/NOAA_Inventory_Sort/*_daily_app_ready.csv`,
-  `ml_reconstruction/NOAA_Inventory_Sort/*_daily_recent_long_format.csv`.
+  `validate_prediction_similarity`, `Station_Engine_Server/station_engine_server`.
+- generated NOAA/app-ready data: `NOAA_Inventory_Sort/NOAA_GHCN_ByYear/`,
+  `NOAA_Inventory_Sort/*_daily_app_ready.csv`,
+  `NOAA_Inventory_Sort/*_daily_recent_long_format.csv`.
 - model caches, model runs, reports, and training outputs:
-  `ml_reconstruction/weather_reconstruction_model/cache/`,
-  `ml_reconstruction/weather_reconstruction_model/outputs/`,
-  `ml_reconstruction/weather_reconstruction_model/model_runs/`.
+  `weather_reconstruction_model/cache/`,
+  `weather_reconstruction_model/outputs/`,
+  `weather_reconstruction_model/model_runs/`.
+- local Alpine and exported Paloma model shelves:
+  `alpine_outputs/`,
+  `model_runs/`.
 - local DEM downloads and terrain rasters: `Raw_DEM/*.tif`,
-  `ml_reconstruction/terrain_data/raw_dem/`, `ml_reconstruction/terrain_data/processed/`.
+  `terrain_data/raw_dem/`, `terrain_data/processed/`.
 - serialized model/data artifacts: `*.sqlite`, `*.sqlite3`, `*.db`, `*.pkl`,
   `*.joblib`, `*.parquet`, `*.npy`, `*.npz`.
 - local Slurm/log output: `*.log`, `*.out`, `*.err`, `slurm-*.out`.

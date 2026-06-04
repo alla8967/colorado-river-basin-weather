@@ -21,17 +21,15 @@ htmlcov/
 station_engine_api
 station_engine_api_test
 validate_prediction_similarity
-cpp_scoring_engine/C++_Weather_Station_Proxy_Engine/basin_test
-ml_reconstruction/NOAA_Inventory_Sort/noaa_inventory_sort
-cpp_scoring_engine/Station_Engine_Server/station_engine_server
-web_app/station-proxy-backend/test_engine
+C++_Weather_Station_Proxy_Engine/basin_test
+NOAA_Inventory_Sort/noaa_inventory_sort
+Station_Engine_Server/station_engine_server
+station-proxy-backend/test_engine
 
 # Large/generated NOAA data products
-ml_reconstruction/NOAA_Inventory_Sort/NOAA_GHCN_ByYear/
-ml_reconstruction/NOAA_Inventory_Sort/ghcnd-inventory.txt
-ml_reconstruction/NOAA_Inventory_Sort/ghcnd-stations.txt
-ml_reconstruction/NOAA_Inventory_Sort/*_daily_app_ready.csv
-ml_reconstruction/NOAA_Inventory_Sort/*_daily_recent_long_format.csv
+NOAA_Inventory_Sort/NOAA_GHCN_ByYear/
+NOAA_Inventory_Sort/*_daily_app_ready.csv
+NOAA_Inventory_Sort/*_daily_recent_long_format.csv
 
 # Local test/build scratch
 build/
@@ -41,10 +39,12 @@ tmp/
 *.out
 *.err
 slurm-*.out
-ml_reconstruction/weather_reconstruction_model/cache/
-ml_reconstruction/weather_reconstruction_model/outputs/
-ml_reconstruction/weather_reconstruction_model/model_runs/
-ml_reconstruction/weather_reconstruction_artifacts/
+weather_reconstruction_model/cache/
+weather_reconstruction_model/outputs/
+weather_reconstruction_model/model_runs/
+weather_reconstruction_artifacts/
+alpine_outputs/
+model_runs/
 
 # Generated model/data artifacts
 *.sqlite
@@ -60,8 +60,8 @@ ml_reconstruction/weather_reconstruction_artifacts/
 Raw_DEM/*.tif
 Raw_DEM/*.tiff
 Raw_DEM/*.part
-ml_reconstruction/terrain_data/raw_dem/
-ml_reconstruction/terrain_data/processed/
+terrain_data/raw_dem/
+terrain_data/processed/
 
 # Generated frontend/model handoff data
-web_app/station-proxy-backend/assets/confidence-points.json
+station-proxy-backend/assets/confidence-points.json
