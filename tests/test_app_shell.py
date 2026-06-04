@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
-BACKEND_DIR = PROJECT_DIR / "web_app/station-proxy-backend"
+BACKEND_DIR = PROJECT_DIR / "station-proxy-backend"
 STATIC_REF_RE = re.compile(r"""["'](?P<path>/(?:static|assets)/[^"']+)["']""")
 JS_IMPORT_RE = re.compile(r"""import\s+(?:[^"']+\s+from\s+)?["'](?P<path>\./[^"']+)["']""")
 
@@ -35,13 +35,20 @@ def test_app_shell_serves_html_and_static_assets():
 
     assert html_path == BACKEND_DIR / "index.html"
     assert "/static/styles.css" in html
-    assert 'type="module" src="/static/js/main.js"' in html
+    assert 'type="module" src="/static/js/main.js' in html
+    assert 'id="reliability-map-mode-select"' in html
+    assert "<option value=\"mae\">Holdout MAE</option>" in html
+    assert "<option value=\"rmse\">Holdout RMSE</option>" in html
+    assert "<option value=\"bias\">Holdout Bias</option>" in html
+    assert "Show Stations" in html
 
     styles = (BACKEND_DIR / "static" / "styles.css").read_text()
     main_js = (BACKEND_DIR / "static" / "js" / "main.js").read_text()
 
     assert "engine-status" in styles
+    assert "mode-description" in styles
     assert "fetchEngineStatus" in main_js
+    assert "initializeReliabilityMap" in main_js
 
 
 def test_frontend_asset_graph_points_to_existing_files():
@@ -65,7 +72,8 @@ def test_frontend_asset_graph_points_to_existing_files():
     for js_file in sorted((BACKEND_DIR / "static" / "js").glob("*.js")):
         source = js_file.read_text()
         for match in JS_IMPORT_RE.finditer(source):
-            imported_path = (js_file.parent / match.group("path")).resolve()
+            import_path = match.group("path").split("?", 1)[0].split("#", 1)[0]
+            imported_path = (js_file.parent / import_path).resolve()
             if not imported_path.exists():
                 missing_modules.append(f"{js_file.name} -> {match.group('path')}")
 
@@ -82,6 +90,12 @@ def test_openapi_exposes_expected_app_routes():
         "/test",
         "/model-runs/current",
         "/model-runs/current/confidence-grid",
+        "/model-runs/reliability/summary",
+        "/model-runs/reliability/surface",
+        "/model-runs/reliability/surface.png",
+        "/model-runs/reliability/station-overlay.png",
+        "/model-runs/reliability/sample",
+        "/model-runs/reliability/station",
         "/run-engine",
         "/analyze-location",
         "/analyze-confidence",

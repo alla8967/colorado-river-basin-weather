@@ -1,13 +1,13 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -O2 -DNDEBUG -I"cpp_scoring_engine/C++_Weather_Station_Proxy_Engine"
+CXXFLAGS = -std=c++17 -O2 -DNDEBUG -I"C++_Weather_Station_Proxy_Engine"
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
 UVICORN ?= $(PYTHON) -m uvicorn
 PYCACHE_PREFIX ?= /tmp/crb_pycache
 
-ENGINE_DIR = cpp_scoring_engine/C++_Weather_Station_Proxy_Engine
-SERVER_DIR = cpp_scoring_engine/Station_Engine_Server
-BACKEND_DIR = web_app/station-proxy-backend
+ENGINE_DIR = C++_Weather_Station_Proxy_Engine
+SERVER_DIR = Station_Engine_Server
+BACKEND_DIR = station-proxy-backend
 
 SERVER_TARGET = $(SERVER_DIR)/station_engine_server
 API_TARGET = station_engine_api
@@ -22,7 +22,7 @@ COMPILED_OUTPUTS = \
 	$(VALIDATE_PREDICTION_TARGET) \
 	$(ENGINE_DIR)/basin_test \
 	$(ENGINE_DIR)/station_engine_api \
-	ml_reconstruction/NOAA_Inventory_Sort/noaa_inventory_sort \
+	NOAA_Inventory_Sort/noaa_inventory_sort \
 	$(BACKEND_DIR)/test_engine
 
 LOCAL_CACHE_DIRS = \
@@ -36,7 +36,10 @@ PYTHON_COMPILE_FILES = \
 	$(BACKEND_DIR)/api_models.py \
 	$(BACKEND_DIR)/confidence_service.py \
 	$(BACKEND_DIR)/model_run_service.py \
-	tests/test_app_shell.py
+	$(BACKEND_DIR)/reliability_service.py \
+	weather_reconstruction_model/scripts/evaluate_final_model_station_metrics.py \
+	tests/test_app_shell.py \
+	tests/test_reliability_backend.py
 
 COMMON_ENGINE_SOURCES = \
 	$(ENGINE_DIR)/STATION_PROXY_ENGINE.cpp \
@@ -64,7 +67,7 @@ VALIDATE_PREDICTION_SOURCES = \
 	$(ENGINE_DIR)/similarity_scores.cpp \
 	$(ENGINE_DIR)/station_dataset.cpp
 
-.PHONY: all setup setup-backend setup-model server api validate-prediction check check-js check-python-compile test test-engine test-app-shell test-python run run-api run-backend doctor clean clean-local-artifacts
+.PHONY: all setup setup-backend setup-model server api validate-prediction check check-js check-python-compile test test-engine test-app-shell test-reliability-backend test-python run run-api run-backend doctor clean clean-local-artifacts
 
 all: server api
 
@@ -86,7 +89,7 @@ api:
 validate-prediction:
 	$(CXX) $(CXXFLAGS) $(VALIDATE_PREDICTION_SOURCES) -o "$(VALIDATE_PREDICTION_TARGET)"
 
-check: check-js check-python-compile test-app-shell test-engine validate-prediction
+check: check-js check-python-compile test-app-shell test-reliability-backend test-engine validate-prediction
 
 check-js:
 	@for file in $(FRONTEND_JS_FILES); do \
@@ -96,7 +99,7 @@ check-js:
 check-python-compile:
 	PYTHONPYCACHEPREFIX="$(PYCACHE_PREFIX)" $(PYTHON) -m py_compile $(PYTHON_COMPILE_FILES)
 
-test: test-engine test-app-shell test-python
+test: test-engine test-app-shell test-reliability-backend test-python
 
 test-engine:
 	$(PYTHON) tests/test_engine_fixture.py
@@ -104,8 +107,11 @@ test-engine:
 test-app-shell:
 	$(PYTHON) tests/test_app_shell.py
 
+test-reliability-backend:
+	$(PYTHON) tests/test_reliability_backend.py
+
 test-python:
-	$(PYTHON) -m pytest ml_reconstruction/weather_reconstruction_model/scripts/tests
+	$(PYTHON) -m pytest weather_reconstruction_model/scripts/tests
 
 run: server
 	cd $(SERVER_DIR) && ./station_engine_server
@@ -117,8 +123,8 @@ run-backend: server
 	cd $(BACKEND_DIR) && $(UVICORN) main:app --reload
 
 doctor:
-	$(PYTHON) ml_reconstruction/weather_reconstruction_model/scripts/audit_project_readiness.py
-	$(PYTHON) ml_reconstruction/weather_reconstruction_model/scripts/check_remote_environment.py
+	$(PYTHON) weather_reconstruction_model/scripts/audit_project_readiness.py
+	$(PYTHON) weather_reconstruction_model/scripts/check_remote_environment.py
 
 clean:
 	rm -f $(COMPILED_OUTPUTS)
