@@ -18,8 +18,8 @@
       "lonMax": -101.661406
     },
     "sourceFiles": [
-      "/Users/alexanderlangley-valey/Desktop/Colorado River Basin Project/NOAA_Inventory_Sort/hub_station_candidates.csv",
-      "/Users/alexanderlangley-valey/Desktop/Colorado River Basin Project/NOAA_Inventory_Sort/target_station_candidates.csv"
+      "NOAA_Inventory_Sort/hub_station_candidates.csv",
+      "NOAA_Inventory_Sort/target_station_candidates.csv"
     ]
   },
   "geometry": {

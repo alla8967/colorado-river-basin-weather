@@ -56,7 +56,6 @@ depends on external NOAA/model artifacts and Alpine run context.
 From the project root:
 
 ```bash
-cd "/Users/alexanderlangley-valey/Desktop/Colorado River Basin Project"
 make setup
 ```
 

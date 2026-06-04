@@ -343,7 +343,7 @@ correlation >= 0.985
 Run commands from the main project folder:
 
 ```bash
-cd "/Users/alexanderlangley-valey/Desktop/Colorado River Basin Project"
+cd colorado-river-basin-weather
 ```
 
 Use the project virtual environment when available:
@@ -1286,7 +1286,7 @@ Does terrain context measurably improve reconstruction accuracy?
 Run scripts from the project root unless you have a specific reason not to:
 
 ```bash
-cd "/Users/alexanderlangley-valey/Desktop/Colorado River Basin Project"
+cd colorado-river-basin-weather
 ```
 
 Most reconstruction scripts use only the Python standard library. The DEM

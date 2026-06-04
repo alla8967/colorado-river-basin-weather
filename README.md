@@ -86,7 +86,7 @@ The first startup can take a while because the C++ engine loads large NOAA CSV f
 For most code reviews, start here:
 
 ```bash
-cd "/Users/alexanderlangley-valey/Desktop/Colorado River Basin Project"
+cd colorado-river-basin-weather
 make check
 ```
 
@@ -662,7 +662,6 @@ make clean-local-artifacts
 From the project root:
 
 ```bash
-cd "/Users/alexanderlangley-valey/Desktop/Colorado River Basin Project"
 make all
 ```
 
