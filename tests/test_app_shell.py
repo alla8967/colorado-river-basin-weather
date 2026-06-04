@@ -37,6 +37,8 @@ def test_app_shell_serves_html_and_static_assets():
     assert "/static/styles.css" in html
     assert 'type="module" src="/static/js/main.js' in html
     assert 'id="reliability-map-mode-select"' in html
+    assert "<option value=\"mae\">Holdout MAE</option>" in html
+    assert "<option value=\"rmse\">Holdout RMSE</option>" in html
     assert "<option value=\"bias\">Holdout Bias</option>" in html
     assert "Show Stations" in html
 

@@ -1,6 +1,6 @@
 import { fetchEngineStatus, fetchLocationAnalysis } from "./api.js";
 import { initializeConfidenceMap, initializeMap, refreshConfidenceMapSize, refreshMapSize } from "./maps.js";
-import { bindReliabilityControls, initializeReliabilityMap, refreshReliabilityMapSize } from "./reliability.js?v=station-detail-cleanup-v1";
+import { bindReliabilityControls, initializeReliabilityMap, refreshReliabilityMapSize } from "./reliability.js?v=holdout-error-maps-v1";
 import { renderResults } from "./results.js";
 import { elements, state } from "./state.js";
 

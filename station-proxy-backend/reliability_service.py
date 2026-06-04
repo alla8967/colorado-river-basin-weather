@@ -94,6 +94,8 @@ class ReliabilitySurfaceService:
         payload["stationOverlayUrls"] = {
             "bias": f"/model-runs/reliability/station-overlay.png?layer={normalized_layer}&mode=bias",
             "correlation": f"/model-runs/reliability/station-overlay.png?layer={normalized_layer}&mode=correlation",
+            "mae": f"/model-runs/reliability/station-overlay.png?layer={normalized_layer}&mode=mae",
+            "rmse": f"/model-runs/reliability/station-overlay.png?layer={normalized_layer}&mode=rmse",
             "final-correlation": (
                 f"/model-runs/reliability/station-overlay.png?layer={normalized_layer}"
                 "&mode=final-correlation"
@@ -311,6 +313,8 @@ class ReliabilitySurfaceService:
         allowed_modes = {
             "bias",
             "correlation",
+            "mae",
+            "rmse",
             "final-correlation",
             "final-mae",
             "final-rmse",
@@ -318,8 +322,8 @@ class ReliabilitySurfaceService:
         }
         if normalized not in allowed_modes:
             raise self.validation_error(
-                "Station overlay mode must be one of: bias, correlation, final-correlation, "
-                "final-mae, final-rmse, final-bias."
+                "Station overlay mode must be one of: bias, correlation, mae, rmse, "
+                "final-correlation, final-mae, final-rmse, final-bias."
             )
         return normalized
 
@@ -401,6 +405,8 @@ class ReliabilitySurfaceService:
         value_fields = {
             "bias": "holdoutBiasF",
             "correlation": "observedCorrelation",
+            "mae": "observedMaeF",
+            "rmse": "observedRmseF",
             "final-correlation": "finalModelCorrelation",
             "final-mae": "finalModelMaeF",
             "final-rmse": "finalModelRmseF",
@@ -463,9 +469,9 @@ class ReliabilitySurfaceService:
             return self.bias_overlay_color(value)
         if mode in {"correlation", "final-correlation"}:
             return self.correlation_overlay_color(value)
-        if mode == "final-mae":
+        if mode in {"mae", "final-mae"}:
             return self.mae_overlay_color(value)
-        if mode == "final-rmse":
+        if mode in {"rmse", "final-rmse"}:
             return self.rmse_overlay_color(value)
         return self.correlation_overlay_color(value)
 

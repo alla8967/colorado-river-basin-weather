@@ -324,6 +324,8 @@ def test_reliability_backend_routes_return_fixture_artifacts() -> None:
         image = backend.reliability_surface_image("overall")
         bias_overlay = backend.reliability_station_overlay_image("overall", "bias")
         correlation_overlay = backend.reliability_station_overlay_image("overall", "correlation")
+        mae_overlay = backend.reliability_station_overlay_image("overall", "mae")
+        rmse_overlay = backend.reliability_station_overlay_image("overall", "rmse")
         final_correlation_overlay = backend.reliability_station_overlay_image("overall", "final-correlation")
         final_mae_overlay = backend.reliability_station_overlay_image("overall", "final-mae")
         final_rmse_overlay = backend.reliability_station_overlay_image("overall", "final-rmse")
@@ -362,6 +364,8 @@ def test_reliability_backend_routes_return_fixture_artifacts() -> None:
     assert Path(image.path).name == "reliability_surface_overall.png"
     assert Path(bias_overlay.path).name == "reliability_station_overlay_overall_bias.png"
     assert Path(correlation_overlay.path).name == "reliability_station_overlay_overall_correlation.png"
+    assert Path(mae_overlay.path).name == "reliability_station_overlay_overall_mae.png"
+    assert Path(rmse_overlay.path).name == "reliability_station_overlay_overall_rmse.png"
     assert Path(final_correlation_overlay.path).name == (
         "reliability_station_overlay_overall_final-correlation.png"
     )

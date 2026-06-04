@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-    <link rel="stylesheet" href="/static/styles.css?v=station-detail-cleanup-v1" />
+    <link rel="stylesheet" href="/static/styles.css?v=holdout-error-maps-v1" />
 </head>
 <body>
     <header>
@@ -433,6 +433,8 @@
                         <select id="reliability-map-mode-select" class="map-select">
                             <option value="quality" selected>Overall</option>
                             <option value="correlation">Holdout Correlation</option>
+                            <option value="mae">Holdout MAE</option>
+                            <option value="rmse">Holdout RMSE</option>
                             <option value="bias">Holdout Bias</option>
                             <option value="final-correlation">Fully Trained Correlation</option>
                             <option value="final-mae">Fully Trained MAE</option>
@@ -480,6 +482,6 @@
         };
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-    <script type="module" src="/static/js/main.js?v=station-detail-cleanup-v1"></script>
+    <script type="module" src="/static/js/main.js?v=holdout-error-maps-v1"></script>
 </body>
 </html>

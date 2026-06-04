@@ -34,6 +34,30 @@ const RELIABILITY_MAP_MODES = {
         help: "Overall combines station-holdout correlation, MAE, and RMSE. Green means the daily reconstruction was strong; red means the station failed one or more quality thresholds. Click the raster for a grid cell or a station point for station detail.",
         legendNote: "Overall quality uses all three holdout metrics together: correlation, MAE, and RMSE."
     },
+    correlation: {
+        label: "Station Holdout Correlation",
+        rasterOpacity: 0.68,
+        help: "Holdout Correlation shows only daily timing/shape agreement. High correlation is green, low correlation is red; this view intentionally ignores MAE, RMSE, and bias.",
+        legendNote: "Correlation is plotted alone: green is high agreement, red is low agreement."
+    },
+    mae: {
+        label: "Station Holdout MAE",
+        rasterOpacity: 0.68,
+        help: "Holdout MAE shows mean absolute reconstruction error when each station was withheld. Green means lower daily error and red means higher daily error.",
+        legendNote: "Holdout MAE is plotted alone: green is low average absolute error, red is high average absolute error."
+    },
+    rmse: {
+        label: "Station Holdout RMSE",
+        rasterOpacity: 0.68,
+        help: "Holdout RMSE shows root mean squared reconstruction error when each station was withheld. Green means lower daily error; red highlights stations with larger misses and outlier-sensitive error.",
+        legendNote: "Holdout RMSE is plotted alone: green is low squared-error magnitude, red is high squared-error magnitude."
+    },
+    bias: {
+        label: "Station Holdout Bias",
+        rasterOpacity: 0.68,
+        help: "Holdout Bias shows whether the reconstruction was generally hot, cold, or just right. Bias is actual minus predicted: red means the model predicted too hot, green means near unbiased, and blue means the model predicted too cold.",
+        legendNote: "Bias = actual - predicted. Negative values mean the model was too hot; positive values mean it was too cold."
+    },
     "final-correlation": {
         label: "Fully Trained Model Correlation",
         rasterOpacity: 0.68,
@@ -57,18 +81,6 @@ const RELIABILITY_MAP_MODES = {
         rasterOpacity: 0.68,
         help: "Fully Trained Bias shows whether the final Paloma model was generally hot, cold, or just right at each station. Bias is actual minus predicted: red means the model predicted too hot, green means near unbiased, and blue means the model predicted too cold.",
         legendNote: "Final-model bias = actual - predicted. Negative values mean too hot; positive values mean too cold."
-    },
-    bias: {
-        label: "Station Holdout Bias",
-        rasterOpacity: 0.68,
-        help: "Holdout Bias shows whether the reconstruction was generally hot, cold, or just right. Bias is actual minus predicted: red means the model predicted too hot, green means near unbiased, and blue means the model predicted too cold.",
-        legendNote: "Bias = actual - predicted. Negative values mean the model was too hot; positive values mean it was too cold."
-    },
-    correlation: {
-        label: "Station Holdout Correlation",
-        rasterOpacity: 0.68,
-        help: "Holdout Correlation shows only daily timing/shape agreement. High correlation is green, low correlation is red; this view intentionally ignores MAE, RMSE, and bias.",
-        legendNote: "Correlation is plotted alone: green is high agreement, red is low agreement."
     }
 };
 
@@ -80,6 +92,41 @@ const RELIABILITY_LEGENDS = {
         ["quality-weak", "Weak: r >= 0.80, MAE <= 4.0 F, RMSE <= 5.0 F"],
         ["quality-poor", "Poor: below weak thresholds"],
         ["quality-unknown", "Unknown: insufficient metrics"]
+    ],
+    correlation: [
+        ["correlation-excellent", "Green, excellent: r >= 0.995"],
+        ["correlation-very-strong", "Green-teal, very strong: r >= 0.990"],
+        ["correlation-strong", "Light green, strong: r >= 0.980"],
+        ["correlation-moderate", "Yellow, moderate: r >= 0.950"],
+        ["correlation-weak", "Orange, weak: r >= 0.900"],
+        ["correlation-poor", "Red, low: r < 0.900"],
+        ["correlation-unknown", "Unknown: no correlation metric"]
+    ],
+    mae: [
+        ["error-excellent", "Green, very low error: MAE <= 1.25 F"],
+        ["error-strong", "Green-teal, low error: MAE <= 2.0 F"],
+        ["error-acceptable", "Yellow, moderate error: MAE <= 2.5 F"],
+        ["error-weak", "Orange, high error: MAE <= 4.0 F"],
+        ["error-poor", "Red, very high error: MAE > 4.0 F"],
+        ["error-unknown", "Unknown: no holdout MAE metric"]
+    ],
+    rmse: [
+        ["error-excellent", "Green, very low error: RMSE <= 2.0 F"],
+        ["error-strong", "Green-teal, low error: RMSE <= 3.0 F"],
+        ["error-acceptable", "Yellow, moderate error: RMSE <= 3.5 F"],
+        ["error-weak", "Orange, high error: RMSE <= 5.0 F"],
+        ["error-poor", "Red, very high error: RMSE > 5.0 F"],
+        ["error-unknown", "Unknown: no holdout RMSE metric"]
+    ],
+    bias: [
+        ["bias-very-warm", "Hot model, very strong: bias <= -4 F"],
+        ["bias-warm", "Hot model: -4 to -2 F"],
+        ["bias-slight-warm", "Slightly hot model: -2 to -1 F"],
+        ["bias-neutral", "Just right / near zero: -1 to +1 F"],
+        ["bias-slight-cool", "Slightly cold model: +1 to +2 F"],
+        ["bias-cool", "Cold model: +2 to +4 F"],
+        ["bias-very-cool", "Cold model, very strong: bias >= +4 F"],
+        ["bias-unknown", "Unknown: no bias metric"]
     ],
     "final-correlation": [
         ["correlation-excellent", "Green, excellent: r >= 0.995"],
@@ -115,25 +162,6 @@ const RELIABILITY_LEGENDS = {
         ["bias-cool", "Cold model: +2 to +4 F"],
         ["bias-very-cool", "Cold model, very strong: bias >= +4 F"],
         ["bias-unknown", "Missing: no final-model metric row"]
-    ],
-    bias: [
-        ["bias-very-warm", "Hot model, very strong: bias <= -4 F"],
-        ["bias-warm", "Hot model: -4 to -2 F"],
-        ["bias-slight-warm", "Slightly hot model: -2 to -1 F"],
-        ["bias-neutral", "Just right / near zero: -1 to +1 F"],
-        ["bias-slight-cool", "Slightly cold model: +1 to +2 F"],
-        ["bias-cool", "Cold model: +2 to +4 F"],
-        ["bias-very-cool", "Cold model, very strong: bias >= +4 F"],
-        ["bias-unknown", "Unknown: no bias metric"]
-    ],
-    correlation: [
-        ["correlation-excellent", "Green, excellent: r >= 0.995"],
-        ["correlation-very-strong", "Green-teal, very strong: r >= 0.990"],
-        ["correlation-strong", "Light green, strong: r >= 0.980"],
-        ["correlation-moderate", "Yellow, moderate: r >= 0.950"],
-        ["correlation-weak", "Orange, weak: r >= 0.900"],
-        ["correlation-poor", "Red, low: r < 0.900"],
-        ["correlation-unknown", "Unknown: no correlation metric"]
     ]
 };
 
@@ -371,7 +399,12 @@ function classifyHoldoutCorrelation(
     };
 }
 
-function classifyFinalModelError(errorValue, metricName) {
+function classifyErrorMetric(
+    errorValue,
+    metricName,
+    missingLabel = "Unknown",
+    missingDescription = `No station ${metricName} metric is available.`
+) {
     const error = numericMetric(errorValue);
     const isRmse = metricName === "RMSE";
     const thresholds = isRmse
@@ -381,9 +414,9 @@ function classifyFinalModelError(errorValue, metricName) {
     if (error === null) {
         return {
             id: "unknown",
-            label: "Missing final metric",
+            label: missingLabel,
             color: "#94a3b8",
-            description: "No final-model station metric row is available."
+            description: missingDescription
         };
     }
 
@@ -430,6 +463,44 @@ function classifyFinalModelError(errorValue, metricName) {
         description: `${metricName} > ${thresholds.weak} F`
     };
 }
+
+function classifyFinalModelError(errorValue, metricName) {
+    return classifyErrorMetric(
+        errorValue,
+        metricName,
+        "Missing final metric",
+        "No final-model station metric row is available."
+    );
+}
+
+const HOLDOUT_ERROR_METRIC_CONFIGS = {
+    mae: {
+        title: "Holdout MAE Map",
+        metricLabel: "MAE",
+        field: "observedMaeF",
+        suffix: " F",
+        digits: 2,
+        classify: value => classifyErrorMetric(
+            value,
+            "MAE",
+            "Unknown",
+            "No station holdout MAE metric is available."
+        )
+    },
+    rmse: {
+        title: "Holdout RMSE Map",
+        metricLabel: "RMSE",
+        field: "observedRmseF",
+        suffix: " F",
+        digits: 2,
+        classify: value => classifyErrorMetric(
+            value,
+            "RMSE",
+            "Unknown",
+            "No station holdout RMSE metric is available."
+        )
+    }
+};
 
 const FINAL_MODEL_METRIC_CONFIGS = {
     "final-correlation": {
@@ -491,12 +562,20 @@ function finalModelMetricConfig(mode) {
     return FINAL_MODEL_METRIC_CONFIGS[mode] || null;
 }
 
+function holdoutErrorMetricConfig(mode) {
+    return HOLDOUT_ERROR_METRIC_CONFIGS[mode] || null;
+}
+
 function isFinalModelMetricMode(mode) {
     return Boolean(finalModelMetricConfig(mode));
 }
 
+function isHoldoutErrorMetricMode(mode) {
+    return Boolean(holdoutErrorMetricConfig(mode));
+}
+
 function isStationMetricOverlayMode(mode) {
-    return mode === "bias" || mode === "correlation" || isFinalModelMetricMode(mode);
+    return mode === "bias" || mode === "correlation" || isHoldoutErrorMetricMode(mode) || isFinalModelMetricMode(mode);
 }
 
 function numericStationValues(stations, valueGetter) {
@@ -672,6 +751,15 @@ function reliabilityStatusForPayload(payload) {
     }
 
     const mode = activeReliabilityMapMode();
+    const holdoutErrorConfig = holdoutErrorMetricConfig(mode);
+    if (holdoutErrorConfig) {
+        const stationCount = numericStationValues(
+            payload.holdoutStations || [],
+            station => station[holdoutErrorConfig.field]
+        ).length;
+        return `${stationCount} holdout stations with ${holdoutErrorConfig.metricLabel} plotted`;
+    }
+
     const finalConfig = finalModelMetricConfig(mode);
     if (finalConfig) {
         const stations = payload.holdoutStations || [];
@@ -701,6 +789,21 @@ function reliabilityStatusForPayload(payload) {
 
 function stationVisualization(station) {
     const mode = activeReliabilityMapMode();
+    const holdoutErrorConfig = holdoutErrorMetricConfig(mode);
+
+    if (holdoutErrorConfig) {
+        const value = numericMetric(station && station[holdoutErrorConfig.field]);
+        const bucket = holdoutErrorConfig.classify(value);
+        const valueText = value === null
+            ? "N/A"
+            : `${formatNumber(value, holdoutErrorConfig.digits)}${holdoutErrorConfig.suffix}`;
+        return {
+            className: `error-${bucket.id}`,
+            color: bucket.color,
+            title: `${station.stationId}: ${bucket.label} | holdout ${holdoutErrorConfig.metricLabel} ${valueText} | r ${formatNumber(station.observedCorrelation, 3)}`
+        };
+    }
+
     const finalConfig = finalModelMetricConfig(mode);
 
     if (finalConfig) {
@@ -1374,6 +1477,11 @@ function renderReliabilityOverview(payload) {
         return;
     }
 
+    if (isHoldoutErrorMetricMode(mode)) {
+        renderHoldoutErrorMapOverview(payload, mode);
+        return;
+    }
+
     if (mode === "bias") {
         renderBiasMapOverview(payload);
         return;
@@ -1430,6 +1538,37 @@ function renderReliabilityOverview(payload) {
                     <div class="metric-label">${isHelpfulness ? "Missing variables" : "Median holdout MAE"}</div>
                     <div class="metric-value">${isHelpfulness ? escapeHtml(missingVariables || "None") : `${formatNumber(holdoutSummary.median, 2)} F`}</div>
                 </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderHoldoutErrorMapOverview(payload, mode) {
+    const errorConfig = holdoutErrorMetricConfig(mode);
+    if (!errorConfig) {
+        renderReliabilityOverview(payload);
+        return;
+    }
+
+    const stations = payload.holdoutStations || [];
+    const values = numericStationValues(stations, station => station[errorConfig.field]);
+    const layerLabel = LAYER_LABELS[payload.layer] || payload.layer;
+    const minValue = values.length ? values[0] : null;
+    const maxValue = values.length ? values[values.length - 1] : null;
+
+    elements.reliabilityResultsContainer.innerHTML = `
+        <div class="card">
+            <h2>${escapeHtml(errorConfig.title)}</h2>
+            <p class="summary">
+                ${escapeHtml(layerLabel)} station points colored only by station-holdout ${escapeHtml(errorConfig.metricLabel)}.
+                Lower values are better; this view ignores correlation and bias so absolute reconstruction error can be inspected directly.
+            </p>
+            <div class="metric-grid">
+                ${metricOrUnavailable(`Stations with ${errorConfig.metricLabel}`, values.length, "", 0)}
+                ${metricOrUnavailable(`Median holdout ${errorConfig.metricLabel}`, median(values), errorConfig.suffix, errorConfig.digits)}
+                ${metricOrUnavailable(`Mean holdout ${errorConfig.metricLabel}`, mean(values), errorConfig.suffix, errorConfig.digits)}
+                ${metricOrUnavailable(`Lowest holdout ${errorConfig.metricLabel}`, minValue, errorConfig.suffix, errorConfig.digits)}
+                ${metricOrUnavailable(`Highest holdout ${errorConfig.metricLabel}`, maxValue, errorConfig.suffix, errorConfig.digits)}
             </div>
         </div>
     `;
