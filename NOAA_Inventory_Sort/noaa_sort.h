@@ -1,3 +1,5 @@
+// Purpose: Declares NOAA inventory filter settings and station candidate output structures.
+
 #ifndef NOAA_SORT_H
 #define NOAA_SORT_H
 

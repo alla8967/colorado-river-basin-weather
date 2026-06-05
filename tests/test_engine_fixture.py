@@ -1,3 +1,7 @@
+"""Compile and run the C++ engine against tiny fixture station CSVs.
+
+This protects the station-matching contract without requiring the full NOAA app-ready data files."""
+
 import json
 import subprocess
 from pathlib import Path

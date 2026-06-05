@@ -2,6 +2,10 @@
 
 These scripts are templates for running the weather reconstruction workflow on CU Boulder Alpine.
 
+For upload, environment, and retrieval details, see
+`../docs/remote_runs/run_manifest.md` and
+`../docs/remote_runs/transfer_checklist.md`.
+
 ## Safety Boundary
 
 Active or pending Alpine station-holdout jobs may be using the code already

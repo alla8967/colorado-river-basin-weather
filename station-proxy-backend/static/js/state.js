@@ -1,3 +1,5 @@
+// Purpose: Store shared DOM references and mutable browser state for frontend modules.
+
 export const elements = {
     analyzeButton: document.getElementById("analyze-button"),
     resultsContainer: document.getElementById("results"),

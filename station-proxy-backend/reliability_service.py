@@ -1,3 +1,7 @@
+"""Serve reliability raster images, station overlays, and map metadata to the frontend.
+
+It turns generated Paloma reliability artifacts into lightweight FastAPI responses and fallback test fixtures."""
+
 from __future__ import annotations
 
 import struct

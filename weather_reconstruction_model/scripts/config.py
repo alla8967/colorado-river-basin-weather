@@ -1,3 +1,7 @@
+"""Define shared project paths and default artifact locations for reconstruction scripts.
+
+Scripts import this module so generated inputs, outputs, caches, and model runs resolve consistently."""
+
 from pathlib import Path
 
 

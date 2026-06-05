@@ -1,3 +1,7 @@
+"""Evaluate final serialized model predictions at individual station locations.
+
+The station metrics feed final-model reliability overlays and model-run artifact summaries."""
+
 from __future__ import annotations
 
 import argparse

@@ -1,3 +1,5 @@
+// Purpose: Parses app-ready station CSV files into typed daily weather rows for the engine.
+
 #include "csv_filereader.h"
 
 #include <iostream>

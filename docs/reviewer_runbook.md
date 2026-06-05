@@ -41,6 +41,7 @@ behavior behind named helpers. The most important helper boundaries are:
 - frontend behavior is split under `station-proxy-backend/static/js/`;
 - research-script reuse lives in `weather_reconstruction_model/scripts/common/`
   and `weather_reconstruction_model/scripts/pipeline/`;
+- folder-level `README.md` files explain each major source collection;
 - model-run manifests, feature selection, reporting HTML helpers, CSV/JSON
   utilities, training-data prep, station-holdout filtering, general-table row
   construction, and confidence support now have shared helper coverage.

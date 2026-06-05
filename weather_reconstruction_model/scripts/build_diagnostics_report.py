@@ -1,3 +1,7 @@
+"""Create an HTML diagnostics report for validation predictions and residuals.
+
+Use it to inspect station failures, seasonal behavior, and error patterns after model validation."""
+
 from __future__ import annotations
 
 import argparse

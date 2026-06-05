@@ -1,3 +1,7 @@
+"""Train tree-based temperature models from generated training tables.
+
+This script powers the stronger Paloma-style random forest workflows used for model artifacts."""
+
 from pathlib import Path
 import argparse
 from time import perf_counter

@@ -1,4 +1,6 @@
 #!/bin/bash
+# Purpose: Submit Paloma training-table builds as a Slurm array across temperature variables.
+
 #SBATCH --job-name=paloma-tables
 #SBATCH --partition=amilan
 #SBATCH --qos=normal

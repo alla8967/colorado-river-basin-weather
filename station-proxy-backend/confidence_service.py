@@ -1,3 +1,7 @@
+"""Load confidence-support inputs and score candidate locations for the backend.
+
+This service bridges generated reconstruction artifacts with the browser confidence map and analysis panels."""
+
 from __future__ import annotations
 
 import threading

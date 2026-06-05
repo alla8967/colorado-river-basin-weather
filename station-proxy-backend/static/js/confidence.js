@@ -1,3 +1,5 @@
+// Purpose: Load and render the confidence-support map layer and point analysis UI.
+
 import { fetchConfidenceGrid, fetchConfidenceSupport } from "./api.js";
 import { elements, state } from "./state.js";
 import {

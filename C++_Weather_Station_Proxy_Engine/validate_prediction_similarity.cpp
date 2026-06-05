@@ -1,3 +1,5 @@
+// Purpose: Builds an independent CLI validator for scoring Python-generated prediction station files.
+
 #include "similarity_scores.h"
 #include "station_dataset.h"
 

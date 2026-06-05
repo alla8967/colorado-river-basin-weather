@@ -1,4 +1,6 @@
 #!/bin/bash
+# Purpose: Submit the medium reconstruction preset as a Slurm job after environment checks.
+
 #SBATCH --job-name=crb-medium
 #SBATCH --partition=amilan
 #SBATCH --qos=normal

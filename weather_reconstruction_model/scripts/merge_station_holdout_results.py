@@ -1,3 +1,7 @@
+"""Merge station-holdout chunk outputs into consolidated validation metrics.
+
+Run this after array jobs finish so reports and reliability surfaces can use one station-level table."""
+
 from __future__ import annotations
 
 import argparse

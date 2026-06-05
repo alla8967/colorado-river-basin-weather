@@ -1,3 +1,7 @@
+"""Provide small CSV reading, writing, and inspection helpers for scripts.
+
+Centralizing these wrappers keeps command-line entry points focused on workflow logic."""
+
 from pathlib import Path
 import csv
 from typing import Mapping, Sequence

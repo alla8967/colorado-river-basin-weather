@@ -1,3 +1,7 @@
+"""Create balanced station groups for grouped holdout validation.
+
+The groups support larger high-memory runs that validate many stations in controlled batches."""
+
 from __future__ import annotations
 
 import argparse

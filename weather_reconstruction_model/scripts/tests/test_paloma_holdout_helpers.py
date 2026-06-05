@@ -1,3 +1,7 @@
+"""Test Paloma station-holdout chunking and merge helpers.
+
+The fixtures protect array-job preparation and consolidation behavior."""
+
 from __future__ import annotations
 
 from pathlib import Path

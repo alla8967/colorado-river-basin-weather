@@ -1,3 +1,7 @@
+"""Load current model-run manifests, summaries, and confidence grids for the app.
+
+The service keeps generated model artifacts behind a small backend API surface."""
+
 from __future__ import annotations
 
 from typing import Any, Optional

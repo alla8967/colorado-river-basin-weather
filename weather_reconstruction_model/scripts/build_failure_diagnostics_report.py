@@ -1,3 +1,7 @@
+"""Build a focused report explaining weak or failed station reconstructions.
+
+The script combines metrics and metadata so poor validation cases can be reviewed systematically."""
+
 from __future__ import annotations
 
 import argparse

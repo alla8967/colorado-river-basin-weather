@@ -1,3 +1,7 @@
+"""Split station-holdout work into chunk CSVs for array jobs.
+
+This lets Alpine jobs process validation stations in parallel without hand-curating station lists."""
+
 from __future__ import annotations
 
 import argparse

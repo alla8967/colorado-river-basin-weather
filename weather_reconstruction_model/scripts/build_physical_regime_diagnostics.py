@@ -1,3 +1,7 @@
+"""Summarize physical-regime patterns behind validation performance.
+
+The report relates reconstruction quality to terrain, station spacing, and physical similarity signals."""
+
 from __future__ import annotations
 
 import argparse

@@ -1,3 +1,7 @@
+"""Orchestrate named remote reconstruction presets from one command.
+
+Alpine Slurm scripts call this runner so smoke, medium, wide, and holdout workflows share argument construction."""
+
 from __future__ import annotations
 
 import argparse

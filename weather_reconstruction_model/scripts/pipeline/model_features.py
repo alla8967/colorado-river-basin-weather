@@ -1,3 +1,7 @@
+"""Resolve feature-selection modes for general temperature models.
+
+This keeps model trainers and artifact exporters aligned on which columns belong to each configuration."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, replace

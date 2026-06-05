@@ -1,3 +1,5 @@
+// Purpose: Declares the station proxy engine API shared by command-line tools and the persistent server.
+
 #ifndef STATION_PROXY_ENGINE_H
 #define STATION_PROXY_ENGINE_H
 

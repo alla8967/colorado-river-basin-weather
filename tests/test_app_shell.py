@@ -1,3 +1,7 @@
+"""Smoke-test the HTML shell and static frontend references served by FastAPI.
+
+The test catches broken script/style links and missing reliability controls before browser testing."""
+
 import importlib.util
 import re
 import sys

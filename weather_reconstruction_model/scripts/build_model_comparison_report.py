@@ -1,3 +1,7 @@
+"""Render an HTML report comparing model validation runs.
+
+This gives reviewers a compact view of which configurations performed best across targets and variables."""
+
 from __future__ import annotations
 
 import argparse

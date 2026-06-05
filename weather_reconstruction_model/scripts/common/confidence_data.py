@@ -1,3 +1,7 @@
+"""Load and normalize the station metadata used by confidence-support scoring.
+
+The helpers turn validation, terrain, and candidate-station files into typed records for scoring scripts and the backend."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

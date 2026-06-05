@@ -1,3 +1,5 @@
+// Purpose: Wire page controls, tabs, map initialization, and location-analysis form behavior.
+
 import { fetchEngineStatus, fetchLocationAnalysis } from "./api.js";
 import { initializeConfidenceMap, initializeMap, refreshConfidenceMapSize, refreshMapSize } from "./maps.js";
 import { bindReliabilityControls, initializeReliabilityMap, refreshReliabilityMapSize } from "./reliability.js?v=holdout-error-maps-v1";

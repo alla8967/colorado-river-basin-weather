@@ -1,4 +1,6 @@
 #!/bin/bash
+# Purpose: Submit the merge step that consolidates Paloma holdout chunk outputs.
+
 #SBATCH --job-name=paloma-merge
 #SBATCH --partition=amilan
 #SBATCH --qos=normal

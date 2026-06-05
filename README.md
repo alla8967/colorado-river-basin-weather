@@ -36,6 +36,7 @@ If you are reviewing the project in Finder or a terminal, start with:
 - `docs/reviewer_runbook.md` for setup, validation, local run steps, and Alpine
   safety.
 - `docs/research_script_inventory.md` for the research/model script map.
+- folder-level `README.md` files for each major code collection.
 - `docs/artifact_quarantine_plan.md` for what can be cleaned locally and what
   should be left in place.
 - `docs/generated_artifact_audit.md` for the commit/staging policy.
@@ -119,7 +120,7 @@ active or pending station-holdout jobs are using it.
 ## High-Level Architecture
 
 ```text
-Colorado River Basin Project/
+colorado-river-basin-weather/
 ├── README.md
 ├── PROJECT_MAP.md
 ├── Makefile
@@ -127,8 +128,10 @@ Colorado River Basin Project/
 │   ├── artifact_quarantine_plan.md
 │   ├── generated_artifact_audit.md
 │   ├── research_script_inventory.md
-│   └── reviewer_runbook.md
+│   ├── reviewer_runbook.md
+│   └── remote_runs/
 ├── NOAA_Inventory_Sort/
+│   ├── README.md
 │   ├── filter_ghcn_years.py
 │   ├── ghcnd-inventory.txt
 │   ├── ghcnd-stations.txt
@@ -141,6 +144,7 @@ Colorado River Basin Project/
 │       ├── 2017.csv.gz
 │       └── ...
 ├── C++_Weather_Station_Proxy_Engine/
+│   ├── README.md
 │   ├── STATION_PROXY_ENGINE.h
 │   ├── STATION_PROXY_ENGINE.cpp
 │   ├── api_main.cpp
@@ -161,18 +165,20 @@ Colorado River Basin Project/
 │   ├── seasonal_analysis.cpp
 │   └── seasonal_analysis.h
 ├── Station_Engine_Server/
+│   ├── README.md
 │   ├── station_engine_server.cpp
 │   └── station_engine_server          (compiled, ignored)
 ├── weather_reconstruction_model/
 │   ├── README.md
 │   ├── scripts/
+│   │   ├── README.md
 │   │   ├── common/
 │   │   ├── pipeline/
-│   │   ├── tests/
-│   │   └── README.md
+│   │   └── tests/
 │   ├── model_runs/                    (generated, ignored)
 │   └── outputs/                       (generated, ignored)
 └── station-proxy-backend/
+    ├── README.md
     ├── api_models.py
     ├── confidence_service.py
     ├── engine_client.py
@@ -183,6 +189,7 @@ Colorado River Basin Project/
     └── static/
         ├── styles.css
         └── js/
+            ├── README.md
             ├── api.js
             ├── charts.js
             ├── confidence.js
@@ -203,6 +210,8 @@ Use this map when reviewing or extending the project:
 - `docs/artifact_quarantine_plan.md` explains which ignored local artifacts can be cleaned safely and which should stay in place until path assumptions are audited.
 - `docs/generated_artifact_audit.md` records what generated files are ignored and which small CSVs are intentionally tracked.
 - `docs/research_script_inventory.md` maps the research script entry points and shared helper boundaries.
+- Folder-level `README.md` files explain each major source collection before a
+  reviewer opens individual files.
 - `station-proxy-backend/` is the local web app. `main.py` wires FastAPI routes, while `engine_client.py`, `confidence_service.py`, `model_run_service.py`, `settings.py`, and `api_models.py` hold backend responsibilities.
 - `station-proxy-backend/static/` is the browser app. `index.html` is structure, `styles.css` is presentation, and `static/js/main.js` is the frontend entry point.
 - `C++_Weather_Station_Proxy_Engine/` is the reusable station matching core used by both command-line validation and the server.

@@ -1,3 +1,7 @@
+"""Summarize batches of model validation outputs into comparison tables.
+
+Use this after experiment runs to compare station-level reconstruction quality without opening each CSV by hand."""
+
 from pathlib import Path
 import argparse
 

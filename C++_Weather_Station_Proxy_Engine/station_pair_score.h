@@ -1,3 +1,5 @@
+// Purpose: Declares scoring weights, metric breakdowns, and station pair score structures.
+
 #ifndef STATION_PAIR_SCORE_H
 #define STATION_PAIR_SCORE_H
 

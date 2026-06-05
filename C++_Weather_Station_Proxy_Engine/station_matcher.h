@@ -1,3 +1,5 @@
+// Purpose: Declares station match result structures and pair-evaluation helpers.
+
 #ifndef STATION_MATCHER_H
 #define STATION_MATCHER_H
 

@@ -1,3 +1,7 @@
+"""Test confidence-support scoring components and output labels.
+
+The checks keep point scoring, component weights, and missing-data handling predictable."""
+
 from __future__ import annotations
 
 from pathlib import Path

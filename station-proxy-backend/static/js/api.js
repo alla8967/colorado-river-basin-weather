@@ -1,3 +1,5 @@
+// Purpose: Wrap backend fetch calls for engine status, analysis, confidence, reliability, and model-run data.
+
 export async function fetchEngineStatus() {
     const response = await fetch("/test");
     return response.json();

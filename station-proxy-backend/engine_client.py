@@ -1,3 +1,7 @@
+"""Manage the persistent C++ station proxy engine process used by FastAPI.
+
+The backend keeps this process alive so large NOAA station CSVs are loaded once instead of for every request."""
+
 from __future__ import annotations
 
 import json

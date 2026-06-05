@@ -1,3 +1,7 @@
+"""Convert training-table rows into model features, labels, and prediction rows.
+
+This shared layer keeps trainers consistent about scaling, variables, offsets, and output shape."""
+
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence

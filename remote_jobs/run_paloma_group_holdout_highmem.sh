@@ -1,4 +1,6 @@
 #!/bin/bash
+# Purpose: Submit high-memory grouped station-holdout validation jobs.
+
 #SBATCH --job-name=paloma-group-hm
 #SBATCH --partition=amem
 #SBATCH --qos=mem-normal

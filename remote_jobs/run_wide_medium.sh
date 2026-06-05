@@ -1,4 +1,6 @@
 #!/bin/bash
+# Purpose: Submit the medium wide reconstruction preset before larger wide runs.
+
 #SBATCH --job-name=crb-wide-med
 #SBATCH --partition=amilan
 #SBATCH --qos=normal

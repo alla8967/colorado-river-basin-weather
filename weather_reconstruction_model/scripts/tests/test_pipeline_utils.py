@@ -1,3 +1,7 @@
+"""Test station-selection pipeline helpers.
+
+The checks cover physical similarity, training eligibility, and hub scoring rules."""
+
 from pathlib import Path
 import sys
 

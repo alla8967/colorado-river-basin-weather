@@ -1,3 +1,5 @@
+// Purpose: Combines distance, elevation, correlation, and error metrics into proxy-station scores.
+
 #include "station_pair_score.h"
 #include "station_distance.h"
 #include <algorithm>

@@ -1,3 +1,5 @@
+// Purpose: Filters NOAA station inventory metadata into target and hub candidate station lists.
+
 #include "noaa_sort.h"
 
 #include <algorithm>

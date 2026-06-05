@@ -1,3 +1,7 @@
+"""Test variable-aware station-holdout chunking, training, and merging behavior.
+
+The coverage protects Paloma holdout workflows across TAVG, TMIN, and TMAX runs."""
+
 from __future__ import annotations
 
 from pathlib import Path

@@ -1,3 +1,5 @@
+# Purpose: Project build, test, run, and cleanup targets for local review workflows.
+
 CXX = g++
 CXXFLAGS = -std=c++17 -O2 -DNDEBUG -I"C++_Weather_Station_Proxy_Engine"
 PYTHON ?= python3

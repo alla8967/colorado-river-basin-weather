@@ -1,3 +1,7 @@
+"""Test shared CSV, JSON, metrics, reporting, and model-artifact helpers.
+
+This file protects common utility behavior used by many reconstruction scripts."""
+
 from pathlib import Path
 import math
 import sys

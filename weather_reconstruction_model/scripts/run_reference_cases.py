@@ -1,3 +1,7 @@
+"""Run a small set of reference locations through the app engine and model checks.
+
+Reference cases make it easier to spot regressions in representative station-proxy scenarios."""
+
 from pathlib import Path
 import argparse
 import os

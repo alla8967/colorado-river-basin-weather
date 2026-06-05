@@ -1,3 +1,7 @@
+"""Test variable-aware temperature trainer feature selection and output contracts.
+
+These checks keep model training scripts aligned with exported artifact expectations."""
+
 from __future__ import annotations
 
 from pathlib import Path

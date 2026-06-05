@@ -9,7 +9,7 @@ The goal is to make a remote run boring: copy the required inputs, run an enviro
 Run commands from the repository root:
 
 ```text
-Colorado River Basin Project/
+colorado-river-basin-weather/
 ```
 
 The root should contain:
@@ -22,7 +22,7 @@ terrain_data/
 weather_reconstruction_model/
 ```
 
-For the exact upload/exclude list, use `REMOTE_TRANSFER_CHECKLIST.md`.
+For the exact upload/exclude list, use `transfer_checklist.md`.
 
 ## Python
 

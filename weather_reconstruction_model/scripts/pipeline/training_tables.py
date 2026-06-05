@@ -1,3 +1,7 @@
+"""Build shared training-table rows and fieldnames for reconstruction models.
+
+The helpers support streaming table creation while keeping column order and feature sections stable."""
+
 from __future__ import annotations
 
 import csv

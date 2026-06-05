@@ -1,3 +1,5 @@
+// Purpose: Calculates geographic distance between station coordinates.
+
 #include "station_distance.h"
 #include <cmath>
 

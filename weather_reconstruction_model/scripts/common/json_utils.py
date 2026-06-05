@@ -1,3 +1,7 @@
+"""Write stable JSON artifacts for model-run and frontend handoff files.
+
+Using one helper keeps generated JSON formatting predictable across scripts."""
+
 from __future__ import annotations
 
 import json

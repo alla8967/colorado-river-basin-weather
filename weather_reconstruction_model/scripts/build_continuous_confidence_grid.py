@@ -1,3 +1,7 @@
+"""Interpolate station confidence evidence into a continuous map grid.
+
+This creates the gridded confidence layer used by the browser map to show spatial support between stations."""
+
 from __future__ import annotations
 
 import argparse

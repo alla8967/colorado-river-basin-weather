@@ -1,3 +1,7 @@
+"""Test SQLite weather-cache creation, querying, and variable validation.
+
+The checks keep cache-backed training workflows stable without large NOAA files."""
+
 from __future__ import annotations
 
 from pathlib import Path

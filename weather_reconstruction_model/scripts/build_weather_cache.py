@@ -1,3 +1,7 @@
+"""Create or refresh the SQLite weather cache from app-ready station CSVs.
+
+The cache avoids repeated full CSV scans during training-table and remote pipeline runs."""
+
 from __future__ import annotations
 
 import argparse

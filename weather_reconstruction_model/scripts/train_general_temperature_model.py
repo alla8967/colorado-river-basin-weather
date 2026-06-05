@@ -1,3 +1,7 @@
+"""Train general temperature reconstruction models from wide training tables.
+
+This is the main configurable trainer for multiscale, terrain, offset, and pairwise-skill feature sets."""
+
 from pathlib import Path
 import argparse
 

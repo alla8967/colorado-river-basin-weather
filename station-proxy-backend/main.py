@@ -1,3 +1,7 @@
+"""Expose the FastAPI routes and static frontend for the station proxy app.
+
+This is the local web entry point that connects browser requests to the C++ engine and model artifact services."""
+
 import atexit
 from typing import Optional
 

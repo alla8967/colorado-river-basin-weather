@@ -1,3 +1,7 @@
+"""Render an HTML audit of confidence calibration behavior for a model run.
+
+This report explains where confidence estimates match or miss station-level validation evidence."""
+
 from __future__ import annotations
 
 import argparse

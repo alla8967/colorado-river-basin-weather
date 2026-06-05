@@ -1,3 +1,5 @@
+// Purpose: Implements the high-level station proxy engine that loads station datasets and ranks candidate proxy stations.
+
 #include "STATION_PROXY_ENGINE.h"
 
 #include <algorithm>

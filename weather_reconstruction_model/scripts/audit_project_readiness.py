@@ -1,3 +1,7 @@
+"""Check whether the local workspace has the source inputs needed for review and app runs.
+
+The audit is a lightweight guardrail before staging, publishing, or handing the project to another reviewer."""
+
 from __future__ import annotations
 
 import argparse

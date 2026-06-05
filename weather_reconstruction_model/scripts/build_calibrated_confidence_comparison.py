@@ -1,3 +1,7 @@
+"""Compare calibrated confidence scores against observed validation errors.
+
+The output helps tune confidence-map scoring so frontend colors reflect expected reconstruction quality."""
+
 from __future__ import annotations
 
 import argparse

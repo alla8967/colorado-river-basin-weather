@@ -1,3 +1,7 @@
+"""Build map-ready confidence points from validation, terrain, and station metadata.
+
+The resulting JSON feeds the frontend confidence layer and location-level support analysis."""
+
 from __future__ import annotations
 
 import argparse

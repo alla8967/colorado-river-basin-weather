@@ -1,4 +1,6 @@
 #!/bin/bash
+# Purpose: Submit a short smoke-test reconstruction job to validate the Alpine environment.
+
 #SBATCH --job-name=crb-smoke
 #SBATCH --partition=amilan
 #SBATCH --qos=normal

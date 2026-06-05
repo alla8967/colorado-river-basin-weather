@@ -1,4 +1,6 @@
 #!/bin/bash
+# Purpose: Submit the full wide reconstruction preset for the largest remote experiment.
+
 #SBATCH --job-name=crb-wide-full
 #SBATCH --partition=amilan
 #SBATCH --qos=normal

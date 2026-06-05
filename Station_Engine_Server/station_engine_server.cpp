@@ -1,3 +1,5 @@
+// Purpose: Runs the station proxy engine as a persistent stdin/stdout service for FastAPI.
+
 #include <iostream>
 #include <sstream>
 #include <string>

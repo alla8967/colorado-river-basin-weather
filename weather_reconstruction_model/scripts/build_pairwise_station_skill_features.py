@@ -1,3 +1,7 @@
+"""Calculate historical pairwise skill features between target and hub stations.
+
+These features let training-table builders use past station agreement as model input without leaking test-period evidence."""
+
 from __future__ import annotations
 
 import argparse

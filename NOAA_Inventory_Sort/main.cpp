@@ -1,3 +1,5 @@
+// Purpose: Runs the C++ NOAA inventory filtering utility from the command line.
+
 
 
 #include "noaa_sort.h"

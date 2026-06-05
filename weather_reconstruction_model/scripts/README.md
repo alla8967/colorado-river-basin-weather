@@ -24,6 +24,12 @@ scripts/
 For a reviewer-oriented inventory of the entry-point scripts and shared helper
 boundaries, see `../../docs/research_script_inventory.md`.
 
+The subfolders also have local READMEs:
+
+- `common/README.md` explains general-purpose shared helpers.
+- `pipeline/README.md` explains training and station-selection helpers.
+- `tests/README.md` explains the reconstruction script test coverage.
+
 ## Entry-Point Groups
 
 - Build inputs and caches: `build_weather_cache.py`, `build_training_table.py`,

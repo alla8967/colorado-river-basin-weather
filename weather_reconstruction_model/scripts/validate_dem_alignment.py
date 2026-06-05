@@ -1,3 +1,7 @@
+"""Validate DEM tile alignment and sampled terrain metadata.
+
+Use it when rebuilding terrain products to catch coordinate or raster mismatch issues."""
+
 from pathlib import Path
 import argparse
 import csv

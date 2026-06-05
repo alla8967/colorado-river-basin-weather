@@ -3,6 +3,10 @@
 This inventory gives reviewers a map of `weather_reconstruction_model/scripts`
 without requiring them to inspect every script first.
 
+For folder-level orientation, start with
+`weather_reconstruction_model/scripts/README.md`, then use the local READMEs in
+`common/`, `pipeline/`, and `tests/`.
+
 ## Shared Modules
 
 ```text

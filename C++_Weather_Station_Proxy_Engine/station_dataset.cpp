@@ -1,3 +1,5 @@
+// Purpose: Builds station-level datasets from daily rows and supports lookup/sorting operations.
+
 #include "station_dataset.h"
 
 #include <algorithm>
