@@ -37,7 +37,9 @@ def test_fixture_engine_returns_stable_station_ranking():
     assert data["targetStationCount"] == 2
     assert data["hubStationCount"] == 3
     assert data["nearestStation"]["stationID"] == "TGT_NEAR"
+    assert data["nearestStation"]["fullObservationYears"] == 1
     assert data["bestProxyStation"]["proxyStation"]["stationID"] == "HUB_GOOD"
+    assert data["bestProxyStation"]["proxyStation"]["fullObservationYears"] == 1
     assert data["topProxyMatches"][0]["rank"] == 1
     assert data["topProxyMatches"][0]["pairedDays"] == 3
 

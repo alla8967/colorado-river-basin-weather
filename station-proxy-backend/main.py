@@ -56,7 +56,7 @@ def startup_event():
     # Launching the engine here starts the one-time NOAA data load early.
     # First startup can take a while; later requests reuse the loaded process.
     try:
-        engine_client.start()
+        engine_client.start(wait_until_ready=True)
     except Exception as error:
         print(f"[station_engine_server] Failed to start on FastAPI startup: {error}")
 
@@ -83,13 +83,16 @@ def home_index():
 
 @app.get("/test", response_model=HealthResponse)
 def test() -> HealthResponse:
+    engine_status = engine_client.status()
     return HealthResponse(
         status="ok",
         engine="Persistent C++ station matcher is connected through FastAPI",
-        engineRunning=engine_client.is_running(),
+        **engine_status,
         engineExecutable=str(settings.engine_executable),
         targetDataFile=str(settings.target_data_file),
         hubDataFile=str(settings.hub_data_file),
+        stationDataMode=settings.station_data_mode,
+        stationDataNotice=settings.station_data_notice,
         activeModelRunId=settings.active_model_run_id,
         modelRunRoot=str(settings.model_run_root),
     )

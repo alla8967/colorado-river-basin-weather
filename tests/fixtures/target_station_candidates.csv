@@ -1,0 +1,3 @@
+station_id,latitude,longitude,has_tmax,has_tmin,tmax_start,tmax_end,tmin_start,tmin_end,usable_temp_start,usable_temp_end,usable_temp_years,is_target_candidate,is_hub_candidate
+TGT_NEAR,39.75,-105.0,1,1,2025,2025,2025,2025,2025,2025,1,1,0
+TGT_FAR,38.0,-110.0,1,1,2025,2025,2025,2025,2025,2025,1,1,0

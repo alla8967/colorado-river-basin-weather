@@ -48,11 +48,39 @@ def test_app_shell_serves_html_and_static_assets():
 
     styles = (BACKEND_DIR / "static" / "styles.css").read_text()
     main_js = (BACKEND_DIR / "static" / "js" / "main.js").read_text()
+    api_js = (BACKEND_DIR / "static" / "js" / "api.js").read_text()
 
     assert "engine-status" in styles
     assert "mode-description" in styles
     assert "fetchEngineStatus" in main_js
+    assert "missing-runtime-files" in main_js
+    assert "Missing required runtime files" in main_js
+    assert "stationDataNotice" in main_js
     assert "initializeReliabilityMap" in main_js
+    assert 'fetchFirstJson("/test")' in api_js
+    assert "fetchFirstJson(`/analyze-location?${query}`)" in api_js
+    assert "http://127.0.0.1:8000" in api_js
+
+
+def test_engine_health_reports_loader_state_without_starting_engine():
+    backend = load_backend_module()
+
+    health = backend.test()
+    payload = health.model_dump() if hasattr(health, "model_dump") else health.dict()
+
+    assert payload["engineState"] in {
+        "missing-runtime-files",
+        "stopped",
+        "loading",
+        "ready",
+        "exited",
+    }
+    assert isinstance(payload["engineRunning"], bool)
+    assert isinstance(payload["engineProcessRunning"], bool)
+    assert isinstance(payload["missingFiles"], list)
+    assert payload["engineMessage"]
+    assert payload["stationDataMode"] in {"full-noaa", "configured", "demo-fixture"}
+    assert isinstance(payload["stationDataNotice"], str)
 
 
 def test_frontend_asset_graph_points_to_existing_files():

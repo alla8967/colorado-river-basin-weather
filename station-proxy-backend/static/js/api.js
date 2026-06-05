@@ -1,34 +1,21 @@
 // Purpose: Wrap backend fetch calls for engine status, analysis, confidence, reliability, and model-run data.
 
 export async function fetchEngineStatus() {
-    const response = await fetch("/test");
-    return response.json();
+    return fetchFirstJson("/test");
 }
 
 export async function fetchLocationAnalysis(latitude, longitude) {
     const query = `lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}`;
-    const response = await fetch(`/analyze-location?${query}`);
-    return response.json();
+    return fetchFirstJson(`/analyze-location?${query}`);
 }
 
 export async function fetchConfidenceGrid() {
-    const response = await fetch("/model-runs/current/confidence-grid");
-    if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-    }
-
-    return response.json();
+    return fetchFirstJson("/model-runs/current/confidence-grid");
 }
 
 export function confidenceAnalysisUrls(latitude, longitude) {
     const query = `lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}`;
-    const urls = [`/analyze-confidence?${query}`];
-
-    if (window.location.hostname === "127.0.0.1" && window.location.port !== "8000") {
-        urls.push(`http://127.0.0.1:8000/analyze-confidence?${query}`);
-    }
-
-    return urls;
+    return backendUrls(`/analyze-confidence?${query}`);
 }
 
 export async function fetchConfidenceSupport(latitude, longitude) {
@@ -56,13 +43,30 @@ export async function fetchConfidenceSupport(latitude, longitude) {
 }
 
 function backendUrls(path) {
-    const urls = [path];
+    const urls = [];
+    const localBackendOrigins = [
+        "http://127.0.0.1:8000",
+        "http://127.0.0.1:8001",
+    ];
+    const localContext = (
+        window.location.protocol === "file:" ||
+        window.location.hostname === "127.0.0.1" ||
+        window.location.hostname === "localhost"
+    );
 
-    if (window.location.hostname === "127.0.0.1" && window.location.port !== "8000") {
-        urls.push(`http://127.0.0.1:8000${path}`);
+    if (window.location.protocol !== "file:") {
+        urls.push(path);
     }
 
-    return urls;
+    if (localContext) {
+        localBackendOrigins.forEach(origin => {
+            if (window.location.origin !== origin) {
+                urls.push(`${origin}${path}`);
+            }
+        });
+    }
+
+    return Array.from(new Set(urls));
 }
 
 async function fetchFirstJson(path) {

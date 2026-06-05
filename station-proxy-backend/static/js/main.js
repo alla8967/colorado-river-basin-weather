@@ -6,6 +6,15 @@ import { bindReliabilityControls, initializeReliabilityMap, refreshReliabilityMa
 import { renderResults } from "./results.js";
 import { elements, state } from "./state.js";
 
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
 function activateTab(tabId) {
     document.querySelectorAll(".tab-panel").forEach(panel => {
         panel.classList.toggle("active", panel.id === tabId);
@@ -30,27 +39,88 @@ function activateTab(tabId) {
     refreshMapSize();
 }
 
+function missingFilesHtml(files) {
+    if (!Array.isArray(files) || files.length === 0) {
+        return "";
+    }
+
+    const rows = files.map(file => `<li><code>${escapeHtml(file)}</code></li>`).join("");
+    return `
+        <p>Missing required runtime files:</p>
+        <ul>${rows}</ul>
+    `;
+}
+
+function engineDetailsHtml(data) {
+    if (!data.engineDetails) {
+        return "";
+    }
+
+    return `<p><small>${escapeHtml(data.engineDetails)}</small></p>`;
+}
+
+function stationDataNoticeHtml(data) {
+    if (!data.stationDataNotice) {
+        return "";
+    }
+
+    return `<p><small>${escapeHtml(data.stationDataNotice)}</small></p>`;
+}
+
+function renderEngineStatus(data) {
+    const message = escapeHtml(data.engineMessage || "Station Proxy engine status is unavailable.");
+
+    if (data.engineRunning) {
+        state.engineReady = true;
+        elements.analyzeButton.disabled = false;
+        elements.engineStatus.className = "engine-status ready";
+        elements.engineStatus.innerHTML = `
+            <strong>Engine Status</strong>
+            ${message}
+            ${stationDataNoticeHtml(data)}
+        `;
+        return;
+    }
+
+    state.engineReady = false;
+    elements.analyzeButton.disabled = true;
+
+    if (data.engineState === "missing-runtime-files") {
+        elements.engineStatus.className = "engine-status offline";
+        elements.engineStatus.innerHTML = `
+            <strong>Engine Status</strong>
+            ${message}
+            ${missingFilesHtml(data.missingFiles)}
+            <p>Generate or point the backend at the app-ready NOAA files, then restart FastAPI.</p>
+            ${stationDataNoticeHtml(data)}
+            ${engineDetailsHtml(data)}
+        `;
+        return;
+    }
+
+    if (data.engineState === "exited") {
+        elements.engineStatus.className = "engine-status offline";
+        elements.engineStatus.innerHTML = `
+            <strong>Engine Status</strong>
+            ${message}
+            ${engineDetailsHtml(data)}
+        `;
+        return;
+    }
+
+    elements.engineStatus.className = "engine-status loading";
+    elements.engineStatus.innerHTML = `
+        <strong>Engine Status</strong>
+        ${message}
+        ${stationDataNoticeHtml(data)}
+        ${engineDetailsHtml(data)}
+    `;
+}
+
 async function checkEngineStatus() {
     try {
         const data = await fetchEngineStatus();
-
-        if (data.engineRunning) {
-            state.engineReady = true;
-            elements.analyzeButton.disabled = false;
-            elements.engineStatus.className = "engine-status ready";
-            elements.engineStatus.innerHTML = `
-                <strong>Engine Status</strong>
-                Ready. The persistent C++ station engine is running and loaded.
-            `;
-        } else {
-            state.engineReady = false;
-            elements.analyzeButton.disabled = true;
-            elements.engineStatus.className = "engine-status loading";
-            elements.engineStatus.innerHTML = `
-                <strong>Engine Status</strong>
-                Backend is reachable, but the C++ station engine is still starting or unavailable.
-            `;
-        }
+        renderEngineStatus(data);
     } catch (error) {
         state.engineReady = false;
         elements.analyzeButton.disabled = true;

@@ -23,9 +23,17 @@ class HealthResponse(BaseModel):
     status: str
     engine: str
     engineRunning: bool
+    engineProcessRunning: bool
+    engineState: str
+    engineMessage: str
+    engineDetails: Optional[str] = None
+    engineReturnCode: Optional[int] = None
+    missingFiles: list[str]
     engineExecutable: str
     targetDataFile: str
     hubDataFile: str
+    stationDataMode: str
+    stationDataNotice: Optional[str] = None
     activeModelRunId: str
     modelRunRoot: str
 

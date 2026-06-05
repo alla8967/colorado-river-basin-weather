@@ -1,0 +1,4 @@
+station_id,latitude,longitude,has_tmax,has_tmin,tmax_start,tmax_end,tmin_start,tmin_end,usable_temp_start,usable_temp_end,usable_temp_years,is_target_candidate,is_hub_candidate
+HUB_GOOD,39.76,-105.01,1,1,2025,2025,2025,2025,2025,2025,1,1,1
+HUB_COLD,40.5,-106.0,1,1,2025,2025,2025,2025,2025,2025,1,1,1
+HUB_DISTANT,35.0,-112.0,1,1,2025,2025,2025,2025,2025,2025,1,1,1

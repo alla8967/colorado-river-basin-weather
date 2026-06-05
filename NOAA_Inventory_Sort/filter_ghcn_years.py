@@ -4,6 +4,7 @@ This prepares the target and hub daily temperature inputs consumed by the C++ pr
 
 import csv
 import gzip
+import os
 from pathlib import Path
 
 # This script filters NOAA GHCN-Daily yearly bulk files into app-ready CSVs.
@@ -27,7 +28,14 @@ from pathlib import Path
 #   - ghcnd-stations.txt supplies elevation metadata.
 
 BASE_DIR = Path(__file__).resolve().parent
-GHCN_FOLDER = BASE_DIR / "NOAA_GHCN_ByYear"
+
+
+def env_path(name: str, default: Path) -> Path:
+    return Path(os.getenv(name, default)).expanduser().resolve()
+
+
+GHCN_YEAR_DIR_ENV = "STATION_PROXY_GHCN_YEAR_DIR"
+GHCN_FOLDER = env_path(GHCN_YEAR_DIR_ENV, BASE_DIR / "NOAA_GHCN_ByYear")
 
 STATIONS_METADATA_FILE = BASE_DIR / "ghcnd-stations.txt"
 HUB_CANDIDATE_FILE = BASE_DIR / "hub_station_candidates.csv"
@@ -212,6 +220,84 @@ def collect_daily_temperature_rows(
     return daily_values
 
 
+def collect_daily_temperature_rows_for_outputs(
+    station_metadata_by_label: dict[str, dict[str, dict[str, str]]]
+) -> dict[str, dict[tuple[str, str], dict[str, float]]]:
+    daily_values_by_label = {
+        label: {}
+        for label in station_metadata_by_label
+    }
+    labels_by_station_id: dict[str, list[str]] = {}
+
+    for label, station_metadata in station_metadata_by_label.items():
+        for station_id in station_metadata:
+            labels_by_station_id.setdefault(station_id, []).append(label)
+
+    year_files = get_available_year_files()
+
+    print("\nCollecting daily temperature data")
+    print("----------------------------------------")
+    for label, station_metadata in station_metadata_by_label.items():
+        print(f"{label.title()} station IDs loaded: {len(station_metadata)}")
+    print(f"Unique station IDs loaded: {len(labels_by_station_id)}")
+    print(f"Year files found: {len(year_files)}", flush=True)
+
+    if not year_files:
+        print("No matching .csv.gz year files were found. Nothing to filter.", flush=True)
+        return daily_values_by_label
+
+    for input_file in year_files:
+        year_rows_kept = 0
+        print(f"Reading {input_file.name}...", flush=True)
+
+        with gzip.open(input_file, "rt", newline="") as input_data:
+            reader = csv.reader(input_data)
+
+            for row in reader:
+                if len(row) < 4:
+                    continue
+
+                station_id = row[0]
+                date_text = row[1]
+                element = row[2]
+                value_text = row[3]
+
+                labels = labels_by_station_id.get(station_id)
+                if labels is None:
+                    continue
+
+                if element not in KEEP_ELEMENTS:
+                    continue
+
+                try:
+                    temperature_f = celsius_tenths_to_fahrenheit(value_text)
+                except ValueError:
+                    continue
+
+                formatted_date = format_noaa_date(date_text)
+                key = (station_id, formatted_date)
+
+                for label in labels:
+                    daily_values = daily_values_by_label[label]
+
+                    if key not in daily_values:
+                        daily_values[key] = {}
+
+                    if element == "TMAX":
+                        daily_values[key]["tmax"] = temperature_f
+                    elif element == "TMIN":
+                        daily_values[key]["tmin"] = temperature_f
+
+                year_rows_kept += 1
+
+        print(f"  TMAX/TMIN rows kept from {input_file.name}: {year_rows_kept}")
+        for label, daily_values in daily_values_by_label.items():
+            print(f"  {label.title()} station-date pairs collected so far: {len(daily_values)}")
+        print("", flush=True)
+
+    return daily_values_by_label
+
+
 def write_app_ready_csv(
     output_file: Path,
     station_metadata: dict[str, dict[str, str]],
@@ -258,7 +344,7 @@ def write_app_ready_csv(
 
     print(f"\nWrote app-ready file: {output_file.name}")
     print(f"Rows written: {rows_written}")
-    print(f"Rows skipped because TMAX or TMIN was missing: {rows_skipped_missing_pair}")
+    print(f"Rows skipped because TMAX or TMIN was missing: {rows_skipped_missing_pair}", flush=True)
 
     return rows_written
 
@@ -283,6 +369,11 @@ def main():
     print(f"Elements kept: {', '.join(sorted(KEEP_ELEMENTS))}")
 
     if not GHCN_FOLDER.exists():
+        if os.getenv(GHCN_YEAR_DIR_ENV):
+            print(f"\nConfigured GHCN yearly folder was not found: {GHCN_FOLDER}")
+            print(f"Check {GHCN_YEAR_DIR_ENV}, then run this script again.")
+            return
+
         GHCN_FOLDER.mkdir(parents=True, exist_ok=True)
         print("\nCreated NOAA_GHCN_ByYear folder.")
         print("Download yearly files like 2025.csv.gz into this folder, then run this script again.")
@@ -290,19 +381,25 @@ def main():
         return
 
     ghcnd_metadata = load_ghcnd_station_metadata(STATIONS_METADATA_FILE)
-
-    hub_rows = build_app_ready_file(
-        candidate_file=HUB_CANDIDATE_FILE,
-        output_file=HUB_OUTPUT_FILE,
-        label="hub",
-        ghcnd_metadata=ghcnd_metadata
+    hub_station_metadata = load_candidate_station_metadata(HUB_CANDIDATE_FILE, ghcnd_metadata)
+    target_station_metadata = load_candidate_station_metadata(TARGET_CANDIDATE_FILE, ghcnd_metadata)
+    daily_values_by_label = collect_daily_temperature_rows_for_outputs(
+        {
+            "hub": hub_station_metadata,
+            "target": target_station_metadata,
+        }
     )
 
-    target_rows = build_app_ready_file(
-        candidate_file=TARGET_CANDIDATE_FILE,
+    hub_rows = write_app_ready_csv(
+        output_file=HUB_OUTPUT_FILE,
+        station_metadata=hub_station_metadata,
+        daily_values=daily_values_by_label["hub"]
+    )
+
+    target_rows = write_app_ready_csv(
         output_file=TARGET_OUTPUT_FILE,
-        label="target",
-        ghcnd_metadata=ghcnd_metadata
+        station_metadata=target_station_metadata,
+        daily_values=daily_values_by_label["target"]
     )
 
     print("\nSUMMARY")
