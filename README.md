@@ -1,825 +1,498 @@
+# Colorado River Basin Weather Station Proxy And Reconstruction Toolkit
 
+This project is a full-stack NOAA weather station analysis tool with two connected
+missions.
 
-# Colorado River Basin Weather Station Proxy Finder
+The original and primary function is an interactive station-proxy finder: a user
+enters or selects a latitude/longitude, the app finds the nearest usable target
+weather station, and a C++ engine ranks long-record hub stations that can act as
+the best proxy stations for that location.
 
-This project is a full-stack NOAA weather station analysis tool with multiple functionalities. The original and primary function finds the nearest weather station to a selected location and identifies the best long-record proxy stations for that location. The secondary and much larger function prepares NOAA GHCN data and DEM data, compiles it into large training tables, and trains a forest-based temperature reconstruction model that can estimate daily station temperatures using nearby long-record stations, terrain features, and historical similarity signals.
+The secondary and much larger function is a research pipeline for temperature
+reconstruction. It prepares NOAA GHCN-Daily data and DEM-derived terrain data,
+builds large training tables, trains linear and tree-based reconstruction models,
+validates those models with station-holdout experiments, and turns the resulting
+metrics into confidence and reliability map products for the frontend.
 
-The main idea is simple:
+In short:
 
 ```text
-User enters or selects a latitude/longitude
-→ the app finds the nearest target station
-→ the C++ engine compares that station against long-record hub stations
-→ the app returns ranked proxy stations with similarity scores
+NOAA station metadata and daily observations
+DEM terrain features
+Python preprocessing and model pipelines
+C++ station matching and scoring engine
+FastAPI backend
+Browser frontend with maps, charts, reliability, and confidence views
 ```
 
-The project is built around decade-scale NOAA GHCN-Daily data and uses a hybrid architecture:
+## What This Project Does
+
+This repository contains several pieces that work together:
+
+- Interactive browser app for station-proxy analysis.
+- Persistent C++ engine for fast repeated station matching.
+- NOAA GHCN-Daily station filtering and app-ready CSV generation.
+- DEM terrain feature sampling for candidate stations.
+- SQLite weather-cache support for faster modeling workflows.
+- Linear baseline and tree-based temperature reconstruction training.
+- General training-table builders for many-station model runs.
+- Pairwise station skill features based on historical station agreement.
+- Station-holdout validation workflows for measuring reconstruction reliability.
+- Final-model artifact export and model-run manifest generation.
+- Confidence-support scoring for user-selected map points.
+- Reliability surface and station overlay generation for frontend map modes.
+- HTML diagnostic, calibration, representativeness, and comparison reports.
+- Alpine/Slurm remote job scripts for larger model runs.
+- Lightweight tests and fixtures for reviewer validation without full local data.
+
+## Why It Matters
+
+Many climate and weather workflows need a representative long-record station for
+a place with shorter, sparse, or incomplete observations. This project explores
+that problem from both sides:
+
+- a practical app that finds and explains proxy stations for a selected location,
+- a validation pipeline that asks how reliable those proxy relationships are
+  when reconstructing observed daily temperatures.
+
+The result is not just a web page. It is a small research platform that connects
+raw public weather data, physical terrain context, model validation, and an
+interactive review interface.
+
+## Current Status
+
+The repository is organized as a public, reviewable source project. The polished
+frontend lives in `station-proxy-backend/index.html` and is served by FastAPI.
+
+The source code, tests, docs, small fixtures, station metadata, and curated
+candidate station lists are tracked. Large generated artifacts are intentionally
+ignored, including app-ready NOAA daily CSVs, DEM rasters, model runs, caches,
+and generated report/output folders.
+
+That means:
+
+- `make check` works as the main reviewer validation path.
+- The app code and tests are reviewable from a fresh clone.
+- Some full runtime views require local generated NOAA/model artifacts that are
+  documented but not committed.
+
+## Main Application Workflow
 
 ```text
-Python preprocessing
-→ app-ready NOAA CSV files
-→ Python reconstruction and validation experiments
-→ reusable C++ station proxy engine
-→ persistent C++ server process
-→ FastAPI backend
-→ browser frontend
+User selects a latitude/longitude
+→ FastAPI sends coordinates to a persistent C++ engine
+→ the engine finds the nearest target station
+→ the engine ranks long-record hub stations by proxy suitability
+→ the browser renders maps, station details, metrics, and comparison charts
 ```
 
----
+The app is designed around repeated use. The expensive step is loading large
+NOAA station CSVs into memory. After startup, the persistent C++ server keeps
+that data loaded so location requests can be handled quickly.
 
-## Start Here / What To Ignore
+## Frontend Features
 
-If you are reviewing the project in Finder or a terminal, start with:
+The browser interface includes:
 
-- `PROJECT_MAP.md` for the visual map of source folders, generated artifact
-  shelves, and safe local commands.
-- `docs/reviewer_runbook.md` for setup, validation, local run steps, and Alpine
-  safety.
-- `docs/research_script_inventory.md` for the research/model script map.
-- folder-level `README.md` files for each major code collection.
-- `docs/artifact_quarantine_plan.md` for what can be cleaned locally and what
-  should be left in place.
-- `docs/generated_artifact_audit.md` for the commit/staging policy.
+- latitude/longitude analysis controls,
+- Leaflet map views,
+- nearest target station summary,
+- best proxy station summary,
+- ranked proxy match results,
+- station metadata and observation-period details,
+- daily/monthly comparison charts,
+- confidence-support map layer,
+- model-run support summaries,
+- reliability surface map modes,
+- station overlay modes for holdout and fully trained model metrics.
 
-The working folder may contain ignored generated artifacts, local virtual
-environments, compiled binaries, NOAA data products, DEM products, model runs,
-and scratch outputs beside the source. That visual clutter is expected in the
-current local workspace. Review source and docs first; do not stage generated
-data, model files, caches, local environments, compiled binaries, or Alpine run
-outputs.
+Reliability map modes include:
 
-For the main reviewer validation path, run:
+- overall holdout quality,
+- holdout correlation,
+- holdout MAE,
+- holdout RMSE,
+- holdout bias,
+- fully trained model correlation,
+- fully trained model MAE,
+- fully trained model RMSE,
+- fully trained model bias.
+
+## Backend Features
+
+The FastAPI backend lives in `station-proxy-backend/`.
+
+It serves:
+
+- the browser frontend,
+- static assets,
+- engine health checks,
+- location analysis responses,
+- confidence-support scoring,
+- current model-run summaries,
+- confidence-grid artifacts,
+- reliability surface JSON,
+- reliability raster images,
+- station overlay images,
+- clicked-grid and station-detail reliability responses.
+
+Important backend modules:
+
+- `main.py` wires the routes.
+- `engine_client.py` manages the persistent C++ engine process.
+- `confidence_service.py` exposes confidence-support scoring.
+- `model_run_service.py` reads generated model-run manifests and grids.
+- `reliability_service.py` serves reliability surfaces, overlays, and station
+  detail payloads.
+- `settings.py` centralizes paths and environment overrides.
+- `api_models.py` defines response models.
+
+## C++ Station Proxy Engine
+
+The C++ engine lives in `C++_Weather_Station_Proxy_Engine/`.
+
+It is responsible for:
+
+- loading app-ready target and hub station daily CSVs,
+- organizing station metadata and daily observations,
+- finding the nearest target station to a selected coordinate,
+- comparing the target station against candidate hub stations,
+- calculating similarity and physical-context metrics,
+- ranking proxy stations,
+- returning JSON for the backend and tests.
+
+The scoring uses signals such as:
+
+- daily temperature correlation,
+- daily mean absolute difference,
+- daily RMSE,
+- monthly temperature similarity,
+- geographic distance,
+- elevation difference,
+- number of paired observations.
+
+The same C++ code is used by:
+
+- a one-shot command-line executable,
+- the persistent stdin/stdout server used by FastAPI,
+- a prediction similarity validator for Python-generated reconstruction outputs,
+- fixture-backed local tests.
+
+## NOAA Data Preparation
+
+The data-prep lane lives in `NOAA_Inventory_Sort/`.
+
+It uses NOAA GHCN-Daily metadata files:
+
+- `ghcnd-inventory.txt`,
+- `ghcnd-stations.txt`.
+
+The preprocessing work separates stations into:
+
+- target stations, which are recent-enough stations used for location analysis
+  and validation,
+- hub stations, which are long-record stations that can act as proxy candidates.
+
+Generated app-ready daily CSVs use this shape:
+
+```csv
+station_id,station_name,latitude,longitude,elevation,date,tmax,tmin
+```
+
+The full daily files are generated artifacts and are ignored:
+
+```text
+NOAA_Inventory_Sort/target_daily_app_ready.csv
+NOAA_Inventory_Sort/hub_daily_app_ready.csv
+NOAA_Inventory_Sort/NOAA_GHCN_ByYear/
+```
+
+## Terrain And Physical Features
+
+The reconstruction pipeline can use DEM-derived terrain features to add physical
+context to station selection and model training.
+
+Terrain workflows include:
+
+- downloading DEM tiles from a manifest,
+- validating DEM alignment,
+- sampling terrain features at station locations,
+- joining terrain features into station-selection and training-table workflows.
+
+Generated terrain rasters and processed terrain tables are local artifacts and
+are intentionally not committed.
+
+## Temperature Reconstruction Pipeline
+
+The model pipeline lives in `weather_reconstruction_model/scripts/`.
+
+At a high level:
+
+```text
+station candidate metadata
+app-ready daily NOAA observations
+terrain features
+weather cache
+pairwise station skill features
+→ general training tables
+→ model training
+→ predictions
+→ station-level metrics
+→ reports, confidence products, reliability surfaces
+```
+
+The pipeline includes:
+
+- baseline one-station linear regression workflows,
+- many-station general training tables,
+- variable-aware TAVG/TMIN/TMAX workflows,
+- ridge/linear model support,
+- random forest and histogram gradient boosting model support,
+- station-holdout validation,
+- final-model station metric evaluation,
+- model-run artifact packaging.
+
+The project uses simple linear models as explainable baselines and tree-based
+models for stronger tabular reconstruction performance.
+
+## Confidence And Reliability Products
+
+The frontend reliability and confidence views are generated from model artifacts.
+
+Confidence products answer:
+
+```text
+How much support does this location have from nearby validated station evidence?
+```
+
+Reliability products answer:
+
+```text
+Where did station-holdout reconstruction perform well, poorly, or with bias?
+```
+
+Generated products can include:
+
+- confidence support points,
+- continuous confidence grids,
+- reliability raster surfaces,
+- station overlay images,
+- station-level holdout metrics,
+- fully trained final-model station metrics,
+- JSON manifests and summaries served by FastAPI.
+
+These products are generated outputs, not source files, so the code documents how
+to build and serve them while keeping bulky artifacts out of git.
+
+## Reports And Audits
+
+The research pipeline includes static report builders for:
+
+- batch validation summaries,
+- model comparisons,
+- calibration audits,
+- C++ prediction validation writeups,
+- diagnostics and failure analysis,
+- physical regime diagnostics,
+- representativeness audits,
+- offset holdout experiments,
+- Alpine run summaries.
+
+These reports help explain not just whether a model worked, but where it worked,
+where it failed, and why the failure cases may be physically meaningful.
+
+## Remote Alpine Workflows
+
+The `remote_jobs/` folder contains Slurm scripts for CU Boulder Alpine runs.
+
+Remote workflows support:
+
+- smoke tests,
+- medium and wide reconstruction runs,
+- Paloma training-table builds,
+- model export jobs,
+- station-holdout arrays,
+- grouped high-memory holdout jobs,
+- holdout result merging,
+- result retrieval.
+
+Remote run documentation lives in `docs/remote_runs/`.
+
+The local docs intentionally warn not to sync or reorganize active Alpine scratch
+copies while jobs are running.
+
+## Repository Layout
+
+```text
+colorado-river-basin-weather/
+├── README.md                         main overview
+├── PROJECT_MAP.md                    visual review map
+├── Makefile                          build, run, test, cleanup commands
+├── pyproject.toml                    Python package/dependency metadata
+├── docs/                             runbooks, audits, remote-run docs
+├── NOAA_Inventory_Sort/              NOAA metadata and data-prep tools
+├── C++_Weather_Station_Proxy_Engine/ reusable C++ station matching engine
+├── Station_Engine_Server/            persistent C++ server wrapper
+├── station-proxy-backend/            FastAPI backend and browser frontend
+├── weather_reconstruction_model/     Python modeling and validation pipeline
+├── remote_jobs/                      Alpine/Slurm orchestration scripts
+└── tests/                            lightweight local smoke tests and fixtures
+```
+
+Each major source folder has its own `README.md` with a focused explanation.
+
+## Where To Start
+
+For project orientation:
+
+- `PROJECT_MAP.md` gives a quick folder-by-folder guide.
+- `docs/reviewer_runbook.md` gives setup, validation, and local run steps.
+- `docs/research_script_inventory.md` maps the modeling scripts.
+- `docs/generated_artifact_audit.md` explains what is intentionally ignored.
+- `docs/artifact_quarantine_plan.md` explains local artifact cleanup policy.
+
+For code review:
+
+- start with `station-proxy-backend/` for the app,
+- then `C++_Weather_Station_Proxy_Engine/` for the station matching core,
+- then `weather_reconstruction_model/scripts/` for the modeling pipeline,
+- then `remote_jobs/` if reviewing Alpine execution.
+
+## Quick Validation
+
+From the project root:
 
 ```bash
 make check
 ```
 
-For the Python research-script suite, use:
+`make check` runs:
 
-```bash
-PYTHON=.venv/bin/python make test-python
-```
+- JavaScript syntax checks,
+- backend Python compile checks,
+- FastAPI app-shell smoke test,
+- reliability backend tests,
+- fixture-backed C++ engine test,
+- C++ prediction validator build.
 
----
-
-## Project Status
-
-The current version is a working local web application.
-
-The system can:
-
-- preprocess NOAA GHCN-Daily yearly bulk files,
-- generate app-ready target and hub station CSVs,
-- train and validate station-temperature reconstruction models,
-- independently score Python-generated predictions with the C++ engine,
-- sample DEM-derived terrain features for stations,
-- load decade-scale weather station data into a reusable C++ engine,
-- keep that engine running persistently so data is loaded once,
-- serve fast repeated location-analysis requests through FastAPI,
-- display results in a browser frontend.
-
-The first startup can take a while because the C++ engine loads large NOAA CSV files into memory. After startup, location requests are fast because the loaded station data is reused.
-
----
-
-## Reviewer Quick Start
-
-For most code reviews, start here:
-
-```bash
-cd colorado-river-basin-weather
-make check
-```
-
-`make check` is the practical local validation set for the web app and C++
-engine. It runs JavaScript syntax checks, backend Python compile checks, the app
-shell smoke test, the fixture-backed C++ engine test, and the prediction
-similarity validator build.
-
-To include the Python research-script pytest suite:
+To run the Python research-script test suite:
 
 ```bash
 .venv/bin/python -m pip install -e ".[dev]"
 PYTHON=.venv/bin/python make test-python
 ```
 
-For a guided human review, use:
+## Running The Local App
 
-- `PROJECT_MAP.md` for a visual top-level folder guide and what to ignore.
-- `docs/reviewer_runbook.md` for setup, validation, local run steps, and Alpine safety.
-- `docs/research_script_inventory.md` for the research/model script map.
-- `docs/artifact_quarantine_plan.md` for the local artifact cleanup policy.
-- `docs/generated_artifact_audit.md` for what should and should not be committed.
-
-Alpine safety note: local cleanup is safe, but the copied scratch code under
-`/scratch/alpine/$USER/crb_weather_runs/current` should remain frozen while
-active or pending station-holdout jobs are using it.
-
----
-
-## High-Level Architecture
-
-```text
-colorado-river-basin-weather/
-├── README.md
-├── PROJECT_MAP.md
-├── Makefile
-├── docs/
-│   ├── artifact_quarantine_plan.md
-│   ├── generated_artifact_audit.md
-│   ├── research_script_inventory.md
-│   ├── reviewer_runbook.md
-│   └── remote_runs/
-├── NOAA_Inventory_Sort/
-│   ├── README.md
-│   ├── filter_ghcn_years.py
-│   ├── ghcnd-inventory.txt
-│   ├── ghcnd-stations.txt
-│   ├── hub_station_candidates.csv
-│   ├── target_station_candidates.csv
-│   ├── hub_daily_app_ready.csv        (generated, ignored)
-│   ├── target_daily_app_ready.csv     (generated, ignored)
-│   └── NOAA_GHCN_ByYear/             (generated, ignored)
-│       ├── 2016.csv.gz
-│       ├── 2017.csv.gz
-│       └── ...
-├── C++_Weather_Station_Proxy_Engine/
-│   ├── README.md
-│   ├── STATION_PROXY_ENGINE.h
-│   ├── STATION_PROXY_ENGINE.cpp
-│   ├── api_main.cpp
-│   ├── csv_filereader.cpp
-│   ├── csv_filereader.h
-│   ├── station_dataset.cpp
-│   ├── station_dataset.h
-│   ├── station_pair_score.cpp
-│   ├── station_pair_score.h
-│   ├── similarity_scores.cpp
-│   ├── similarity_scores.h
-│   ├── station_distance.cpp
-│   ├── station_distance.h
-│   ├── station_locator.cpp
-│   ├── station_locator.h
-│   ├── station_matcher.cpp
-│   ├── station_matcher.h
-│   ├── seasonal_analysis.cpp
-│   └── seasonal_analysis.h
-├── Station_Engine_Server/
-│   ├── README.md
-│   ├── station_engine_server.cpp
-│   └── station_engine_server          (compiled, ignored)
-├── weather_reconstruction_model/
-│   ├── README.md
-│   ├── scripts/
-│   │   ├── README.md
-│   │   ├── common/
-│   │   ├── pipeline/
-│   │   └── tests/
-│   ├── model_runs/                    (generated, ignored)
-│   └── outputs/                       (generated, ignored)
-└── station-proxy-backend/
-    ├── README.md
-    ├── api_models.py
-    ├── confidence_service.py
-    ├── engine_client.py
-    ├── main.py
-    ├── model_run_service.py
-    ├── settings.py
-    ├── index.html
-    └── static/
-        ├── styles.css
-        └── js/
-            ├── README.md
-            ├── api.js
-            ├── charts.js
-            ├── confidence.js
-            ├── formatters.js
-            ├── main.js
-            ├── maps.js
-            ├── results.js
-            └── state.js
-```
-
----
-
-## Code Layout For Reviewers
-
-Use this map when reviewing or extending the project:
-
-- `docs/reviewer_runbook.md` is the shortest path for a human reviewer who wants setup, validation, local run instructions, generated-artifact boundaries, and Alpine safety notes.
-- `docs/artifact_quarantine_plan.md` explains which ignored local artifacts can be cleaned safely and which should stay in place until path assumptions are audited.
-- `docs/generated_artifact_audit.md` records what generated files are ignored and which small CSVs are intentionally tracked.
-- `docs/research_script_inventory.md` maps the research script entry points and shared helper boundaries.
-- Folder-level `README.md` files explain each major source collection before a
-  reviewer opens individual files.
-- `station-proxy-backend/` is the local web app. `main.py` wires FastAPI routes, while `engine_client.py`, `confidence_service.py`, `model_run_service.py`, `settings.py`, and `api_models.py` hold backend responsibilities.
-- `station-proxy-backend/static/` is the browser app. `index.html` is structure, `styles.css` is presentation, and `static/js/main.js` is the frontend entry point.
-- `C++_Weather_Station_Proxy_Engine/` is the reusable station matching core used by both command-line validation and the server.
-- `Station_Engine_Server/` is the persistent stdin/stdout wrapper that lets FastAPI reuse one loaded C++ process.
-- `weather_reconstruction_model/scripts/` is the research and model-building command layer. Shared logic belongs in `scripts/common/` or `scripts/pipeline/`; generated tables, reports, caches, and model files should stay out of source commits unless intentionally curated.
-- `remote_jobs/` contains Alpine Slurm launch scripts. Treat these as run orchestration, not local application code.
-
-Alpine safety note: active or pending Alpine station-holdout jobs may still be using the copied scratch code under `/scratch/alpine/$USER/crb_weather_runs/current`. Do not sync, rename, or reorganize that Alpine copy while those jobs are running.
-
----
-
-## Data Pipeline
-
-### 1. NOAA Station Inventory Filtering
-
-The project uses NOAA GHCN-Daily metadata files:
-
-- `ghcnd-inventory.txt`
-- `ghcnd-stations.txt`
-
-The inventory data is used to determine which stations have the required temperature variables and sufficient record length.
-
-The station metadata file is used to attach:
-
-- station name,
-- station ID,
-- latitude,
-- longitude,
-- elevation.
-
-The pipeline separates stations into two categories:
-
-### Target Stations
-
-Target stations are stations with enough recent data to be evaluated for a user-selected location.
-
-Example criteria used during development:
-
-```text
-minimum usable temperature history: 20 years
-required variables: TMAX and TMIN
-recent enough to include modern observations
-inside the selected geographic study bounds
-excluded from the hub station pool
-```
-
-### Hub Stations
-
-Hub stations are long-record stations that can act as proxy options.
-
-Current criteria used during development:
-
-```text
-minimum usable temperature history: 42 years
-usable temperature record starts in 1960 or earlier
-required variables: TMAX and TMIN
-recent enough to include modern observations
-inside the selected geographic study bounds
-```
-
----
-
-## App-Ready NOAA CSV Format
-
-The preprocessing script creates two major app-ready data files:
-
-```text
-NOAA_Inventory_Sort/target_daily_app_ready.csv
-NOAA_Inventory_Sort/hub_daily_app_ready.csv
-```
-
-Both files use this format:
-
-```csv
-station_id,station_name,latitude,longitude,elevation,date,tmax,tmin
-```
-
-Example row:
-
-```csv
-USC00052223,DENVER WATER DEPT,39.7294,-105.009,1592.6,2025-01-01,52.34,28.76
-```
-
-Temperatures are stored in degrees Fahrenheit.
-
-The app-ready files are generated from NOAA GHCN-Daily yearly bulk files such as:
-
-```text
-2016.csv.gz
-2017.csv.gz
-2018.csv.gz
-...
-2025.csv.gz
-```
-
-These files are stored in:
-
-```text
-NOAA_Inventory_Sort/NOAA_GHCN_ByYear/
-```
-
----
-
-## C++ Engine
-
-The reusable C++ core is implemented in:
-
-```text
-C++_Weather_Station_Proxy_Engine/STATION_PROXY_ENGINE.h
-C++_Weather_Station_Proxy_Engine/STATION_PROXY_ENGINE.cpp
-```
-
-The main reusable class is:
-
-```cpp
-StationProxyEngine
-```
-
-This class owns the loaded station data and exposes methods such as:
-
-```cpp
-bool load(const std::string& target_file, const std::string& hub_file);
-std::string analyze_location_json(double latitude, double longitude) const;
-bool is_loaded() const;
-int target_station_count() const;
-int hub_station_count() const;
-```
-
-The purpose of this class is to keep the core analysis logic out of `main()` files.
-
-This allows the same engine to be reused by:
-
-- the one-shot command-line executable,
-- the persistent C++ server,
-- the prediction similarity validator,
-- future Python bindings,
-- future HTTP or cloud service wrappers.
-
-The prediction validator is a small C++ executable that independently scores
-Python-generated reconstruction results against actual station observations.
-It is documented in:
-
-```text
-weather_reconstruction_model/README.md
-```
-
----
-
-## Weather Reconstruction Research Workflow
-
-The `weather_reconstruction_model/` folder is the research side of the project.
-It tests whether target station temperatures can be reconstructed from selected
-long-record hub stations.
-
-The core flow is:
-
-```text
-target station + candidate hubs
-→ select eligible nearby hubs
-→ build shared-date training table
-→ train linear regression model
-→ export predictions
-→ independently validate predicted vs actual temperatures
-→ summarize station-level success and failure cases
-```
-
-The Python research code is now split into:
-
-```text
-scripts/common/     low-level reusable helpers
-scripts/pipeline/   shared station-selection and training-table logic
-scripts/tests/      lightweight unit tests for common and pipeline code
-```
-
-This separation matters because the same hub-selection and shared-date rules are
-used by both one-station validation and batch validation.
-
-For details, see:
-
-```text
-weather_reconstruction_model/README.md
-```
-
----
-
-## Station Matching Workflow
-
-For each requested latitude/longitude, the engine:
-
-1. finds the nearest target station,
-2. compares that target station against hub stations,
-3. calculates similarity metrics,
-4. ranks proxy station candidates,
-5. returns JSON to the backend/frontend.
-
-The scoring system currently uses temperature similarity and geography/elevation context.
-
-Core comparison metrics include:
-
-- daily average temperature correlation,
-- daily mean absolute difference,
-- daily RMSE,
-- monthly correlation,
-- monthly mean absolute difference,
-- monthly RMSE,
-- geographic distance,
-- elevation difference,
-- number of paired observations.
-
-The result is returned as JSON with fields such as:
-
-```json
-{
-  "status": "ok",
-  "message": "Location analysis complete",
-  "targetStationCount": 808,
-  "hubStationCount": 438,
-  "selectedLocation": {
-    "latitude": 39.75,
-    "longitude": -105.0
-  },
-  "nearestStation": {
-    "stationID": "USC00052223",
-    "stationName": "DENVER WATER DEPT"
-  },
-  "bestProxyStation": {...},
-  "topProxyMatches": [...]
-}
-```
-
----
-
-## Persistent C++ Server
-
-The persistent server lives in:
-
-```text
-Station_Engine_Server/station_engine_server.cpp
-```
-
-It is intentionally a thin wrapper around `StationProxyEngine`.
-
-The server does this:
-
-```text
-start process
-→ load target and hub station CSVs once
-→ wait for coordinate requests over stdin
-→ return one JSON response per request over stdout
-```
-
-This avoids reloading the large NOAA CSV files for every website request.
-
-The communication protocol is simple:
-
-Input:
-
-```text
-39.75 -105.0
-```
-
-Output:
-
-```json
-{"status":"ok","message":"Location analysis complete",...}
-```
-
-Important rule:
-
-```text
-stdout = JSON only
-stderr = logs and diagnostics
-```
-
-This prevents FastAPI from accidentally parsing debug output as JSON.
-
----
-
-## FastAPI Backend
-
-The FastAPI backend lives in:
-
-```text
-station-proxy-backend/main.py
-```
-
-FastAPI starts the persistent C++ server once using:
-
-```python
-subprocess.Popen(...)
-```
-
-Then each `/analyze-location` request sends latitude/longitude to the C++ process through stdin and reads one JSON response line from stdout.
-
-Key routes:
-
-```text
-GET /
-GET /test
-GET /run-engine
-GET /analyze-location?lat=39.75&lon=-105.0
-```
-
-The `/test` route reports whether the persistent C++ engine is running.
-
----
-
-## Frontend
-
-The frontend files live in:
-
-```text
-station-proxy-backend/index.html
-station-proxy-backend/static/styles.css
-station-proxy-backend/static/js/main.js
-station-proxy-backend/static/js/api.js
-station-proxy-backend/static/js/charts.js
-station-proxy-backend/static/js/confidence.js
-station-proxy-backend/static/js/formatters.js
-station-proxy-backend/static/js/maps.js
-station-proxy-backend/static/js/results.js
-station-proxy-backend/static/js/state.js
-```
-
-The split keeps the review surface predictable:
-
-- `index.html` defines the page structure and data panels,
-- `static/styles.css` owns the page layout and visual styling,
-- `static/js/api.js` owns browser-to-backend requests,
-- `static/js/maps.js` owns Leaflet setup and map overlays,
-- `static/js/charts.js` owns SVG comparison charts,
-- `static/js/confidence.js` owns model-support layer rendering,
-- `static/js/results.js` owns analysis result cards and tables,
-- `static/js/formatters.js` owns display helpers,
-- `static/js/state.js` owns shared DOM references and browser state,
-- `static/js/main.js` wires startup, tabs, engine status, and user events.
-
-The interface provides:
-
-- latitude and longitude inputs,
-- an Analyze Location button,
-- an engine status panel,
-- nearest station display,
-- best proxy station display,
-- top proxy match results.
-
-The frontend checks the backend status through:
-
-```text
-http://127.0.0.1:8000/test
-```
-
-The Analyze button is disabled until the backend reports that the engine is running.
-
----
-
-## Build System
-
-The project uses a root-level Makefile and `pyproject.toml`.
-
-Install the local Python dependencies into your active environment:
+Install dependencies into your active Python environment:
 
 ```bash
-make setup
+make setup-backend
 ```
 
-Build both the persistent server and one-shot API executable:
-
-```bash
-make all
-```
-
-Build only the persistent server:
+Build the persistent C++ server:
 
 ```bash
 make server
 ```
 
-Build only the one-shot API executable:
-
-```bash
-make api
-```
-
-Run the fixture-backed C++ engine test:
-
-```bash
-make test-engine
-```
-
-Run the practical reviewer validation set:
-
-```bash
-make check
-```
-
-Run the local FastAPI app-shell smoke test:
-
-```bash
-make test-app-shell
-```
-
-Run the Python model-pipeline tests after `make setup`:
-
-```bash
-make test-python
-```
-
-Run both test groups:
-
-```bash
-make test
-```
-
-Run the persistent server manually:
-
-```bash
-make run
-```
-
-Run the one-shot API test:
-
-```bash
-make run-api
-```
-
-Run the FastAPI backend from the project root:
+Start FastAPI:
 
 ```bash
 make run-backend
 ```
 
-Audit local readiness and expected data/artifact paths:
-
-```bash
-make doctor
-```
-
-Clean compiled outputs:
-
-```bash
-make clean
-```
-
-Clean only rebuildable local compiled/test byproducts:
-
-```bash
-make clean-local-artifacts
-```
-
----
-
-## Running the Project Locally
-
-### 1. Build the C++ executables
-
-From the project root:
-
-```bash
-make all
-```
-
-### 2. Start FastAPI
-
-```bash
-make run-backend
-```
-
-The first startup may take a while because the persistent C++ server loads large NOAA station CSVs into memory.
-
-Wait for the server logs to show:
+Then open:
 
 ```text
-READY
-```
-
-The backend derives project paths from its own location by default. These environment variables can override the defaults when running from a different layout or with test data:
-
-```bash
-STATION_PROXY_PROJECT_DIR
-STATION_PROXY_ENGINE_SERVER_DIR
-STATION_PROXY_ENGINE_EXECUTABLE
-STATION_PROXY_TARGET_FILE
-STATION_PROXY_HUB_FILE
-```
-
-See `.env.example` for the full set of backend, confidence, and model-run path
-overrides.
-
-### 3. Open the frontend
-
-```bash
 http://127.0.0.1:8000/
 ```
 
-Once the engine status turns green, run an analysis.
+The first startup can be slow because the C++ engine loads large station CSVs
+into memory. After that, repeated location requests are fast.
 
----
-
-## Manual Testing
-
-### Test the one-shot executable
+## Common Commands
 
 ```bash
-make run-api
+make check                 # main reviewer validation set
+make test-python           # Python research-script pytest suite
+make server                # build persistent C++ server
+make api                   # build one-shot C++ API executable
+make run-backend           # run FastAPI app
+make run-api               # run one-shot coordinate analysis
+make doctor                # audit local readiness and expected artifacts
+make clean                 # remove compiled outputs
+make clean-local-artifacts # remove conservative rebuildable byproducts
 ```
 
-Expected result:
+## Artifact Policy
 
-```json
-{"status":"ok",...}
-```
+This repo intentionally does not commit large generated data or local runtime
+artifacts.
 
-### Run the fixture test
+Ignored examples include:
 
-```bash
-make test
-```
+- app-ready NOAA daily CSVs,
+- yearly NOAA bulk files,
+- DEM rasters,
+- processed terrain products,
+- SQLite weather caches,
+- generated training tables,
+- model runs,
+- model files,
+- reports,
+- compiled C++ binaries,
+- local virtual environments.
 
-This builds a temporary one-shot executable and runs it against small CSV fixtures in `tests/fixtures/`.
+Small fixtures and curated metadata are tracked when they help review or testing.
 
-### Test the persistent server manually
+## Environment Overrides
 
-```bash
-make run
-```
+The backend works with the default repo layout, but `.env.example` documents
+optional path overrides for:
 
-Wait for:
+- project root,
+- C++ engine executable,
+- target and hub daily CSVs,
+- confidence support inputs,
+- model-run roots,
+- active model-run IDs.
 
-```text
-READY
-```
+Use these when running against alternate artifact locations.
 
-Then type:
+## Engineering Highlights
 
-```text
-39.75 -105.0
-```
+This project demonstrates:
 
-The server should return one JSON response.
+- full-stack app development with FastAPI and browser JavaScript,
+- C++ engine design for reusable, performance-sensitive station scoring,
+- process orchestration between Python/FastAPI and a persistent C++ service,
+- NOAA data preparation and metadata filtering,
+- geospatial station selection,
+- DEM-derived terrain feature integration,
+- model training and validation workflow design,
+- reliability and confidence visualization pipelines,
+- remote Slurm workflow management,
+- source/artifact boundary discipline,
+- practical test coverage for a mixed Python/C++/frontend project.
 
-Try another coordinate without restarting:
+## Known Constraints
 
-```text
-39.0639 -108.5506
-```
+- Full app runtime depends on generated NOAA/model artifacts that are too large
+  or too local to commit.
+- Some modeling reports document active research workflows rather than polished
+  package APIs.
+- Alpine scratch copies should remain frozen while active jobs are running.
+- The project is optimized for local review and research iteration, not hosted
+  production deployment yet.
 
-To stop the persistent server:
+## Project Summary
 
-```text
-shutdown
-```
+The project began as a station proxy finder and grew into a broader weather
+reconstruction toolkit. The polished app lets a reviewer inspect station matches
+interactively. The modeling pipeline explains how those matches can be validated,
+where they are reliable, and where the physical evidence is weaker.
 
----
-
-## Current Performance Model
-
-The project currently uses this performance model:
-
-```text
-slow startup once
-→ station data remains loaded in memory
-→ repeated location requests are fast
-```
-
-This replaced the original slower model:
-
-```text
-website request
-→ launch C++ executable
-→ reload giant CSV files
-→ analyze one location
-→ exit
-```
-
-The persistent server design makes the website feel interactive after startup.
-
----
-
-## Future Improvements
-
-Possible next steps:
-
-- add a clickable map using Leaflet,
-- improve frontend result explanations,
-- join DEM terrain features into the general reconstruction model,
-- compare terrain-aware and non-terrain general model performance,
-- add technical documentation for the scoring system,
-- add a fast loader that skips monthly/seasonal calculations when not needed,
-- create a binary cache or SQLite database to reduce startup time,
-- expose `StationProxyEngine` directly to Python using pybind11,
-- replace stdin/stdout communication with a more standard C++ binding or service interface,
-- add automated tests for station loading and scoring,
-- add deployment instructions.
-
----
-
-## Why This Project Matters
-
-This project is not just a webpage. It combines:
-
-- real NOAA climate/weather data,
-- custom preprocessing,
-- C++ data parsing and scoring,
-- geographic nearest-station lookup,
-- time-series similarity analysis,
-- FastAPI backend integration,
-- browser-based frontend display,
-- persistent in-memory engine architecture.
-
-The result is a working technical tool for identifying representative long-record weather stations for locations with shorter or less complete station histories.
+Together, the app, C++ engine, Python pipeline, reports, and remote workflows
+show a complete path from raw public weather data to an interactive analytical
+tool.
