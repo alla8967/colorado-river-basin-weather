@@ -2,7 +2,7 @@
 
 # Colorado River Basin Weather Station Proxy Finder
 
-This project is a full-stack NOAA weather station analysis tool that finds the nearest weather station to a selected location and identifies the best long-record proxy stations for that location.
+This project is a full-stack NOAA weather station analysis tool with multiple functionalities. The original and primary function finds the nearest weather station to a selected location and identifies the best long-record proxy stations for that location. The secondary and much larger function prepares NOAA GHCN data and DEM data, compiles it into large training tables, and trains a forest-based temperature reconstruction model that can estimate daily station temperatures using nearby long-record stations, terrain features, and historical similarity signals.
 
 The main idea is simple:
 
