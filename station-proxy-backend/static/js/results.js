@@ -1,3 +1,5 @@
+// Purpose: Render the main analysis results, proxy station rankings, cards, and comparison charts.
+
 import { attachChartSelectInteractions, renderDailyComparisonChart, renderLowCorrelationExample, renderMonthlyComparisonChart } from "./charts.js";
 import { highlightProxyRank, plotAnalysisStations } from "./maps.js";
 import { elements, state } from "./state.js";

@@ -1,3 +1,7 @@
+"""Package validation outputs into a structured model-run artifact folder.
+
+The generated manifests and summaries are consumed by the FastAPI backend and browser model-support views."""
+
 from __future__ import annotations
 
 import argparse

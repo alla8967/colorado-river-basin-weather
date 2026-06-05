@@ -1,3 +1,7 @@
+"""Compare Python reconstruction predictions with independent C++ similarity scoring.
+
+This cross-check protects the boundary between research outputs and the app engine."""
+
 from __future__ import annotations
 
 import argparse

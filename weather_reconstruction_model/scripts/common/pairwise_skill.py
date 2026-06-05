@@ -1,3 +1,7 @@
+"""Calculate station-pair skill metrics used as training features.
+
+The shared implementation prevents training-table builders and tests from drifting on pairwise evidence definitions."""
+
 from __future__ import annotations
 
 import math

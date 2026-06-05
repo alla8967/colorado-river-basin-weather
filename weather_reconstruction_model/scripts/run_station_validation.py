@@ -1,3 +1,7 @@
+"""Run one station validation scenario through training and prediction scripts.
+
+This is a lower-level helper for targeted debugging outside the larger batch runner."""
+
 from pathlib import Path
 import argparse
 import os

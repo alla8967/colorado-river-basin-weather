@@ -1,3 +1,5 @@
+// Purpose: Provides a one-shot CLI wrapper for querying proxy stations from latitude/longitude inputs.
+
 #include <iostream>
 #include <iomanip>
 #include <string>

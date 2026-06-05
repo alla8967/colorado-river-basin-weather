@@ -1,3 +1,7 @@
+"""Provide tolerant numeric conversion helpers for CSV-heavy scripts.
+
+These functions keep malformed or missing generated values from scattering try/except blocks across entry points."""
+
 from typing import Optional
 
 

@@ -1,3 +1,5 @@
+// Purpose: Render SVG charts for station comparison metrics in the results panel.
+
 import { state } from "./state.js";
 import { formatNumber, matchTerms } from "./formatters.js";
 

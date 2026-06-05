@@ -1,3 +1,5 @@
+// Purpose: Declares distance helpers used by station lookup and physical scoring.
+
 #ifndef STATION_DISTANCE_H
 #define STATION_DISTANCE_H
 

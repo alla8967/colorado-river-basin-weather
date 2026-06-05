@@ -1,3 +1,7 @@
+"""Test shared training-data and station-holdout helper functions.
+
+The coverage protects feature/label extraction and leakage-prevention filters."""
+
 from __future__ import annotations
 
 from pathlib import Path

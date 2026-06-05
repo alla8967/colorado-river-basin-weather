@@ -1,3 +1,7 @@
+"""Select physically suitable hub and neighbor stations for training rows.
+
+The scoring combines distance, elevation, terrain, and optional pairwise skill evidence."""
+
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass

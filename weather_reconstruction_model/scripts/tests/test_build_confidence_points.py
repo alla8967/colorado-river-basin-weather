@@ -1,3 +1,7 @@
+"""Test the confidence-point builder with temporary fixture inputs.
+
+The coverage verifies generated JSON shape without requiring local model artifacts."""
+
 from __future__ import annotations
 
 from pathlib import Path

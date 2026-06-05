@@ -1,3 +1,5 @@
+// Purpose: Declares nearest-station lookup helpers for the engine API.
+
 #ifndef STATION_LOCATOR_H
 #define STATION_LOCATOR_H
 

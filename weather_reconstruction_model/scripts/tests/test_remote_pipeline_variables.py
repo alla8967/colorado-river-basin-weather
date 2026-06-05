@@ -1,3 +1,7 @@
+"""Test remote pipeline command construction for temperature variables and presets.
+
+This prevents Slurm wrappers from drifting away from the Python runner contract."""
+
 from __future__ import annotations
 
 from pathlib import Path

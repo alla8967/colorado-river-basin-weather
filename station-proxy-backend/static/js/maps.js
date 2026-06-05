@@ -1,3 +1,5 @@
+// Purpose: Manage Leaflet maps, station markers, selected points, and proxy highlighting.
+
 import { analyzeConfidencePoint, loadConfidencePoints } from "./confidence.js";
 import { state } from "./state.js";
 import {

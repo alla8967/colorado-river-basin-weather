@@ -1,4 +1,6 @@
 #!/bin/bash
+# Purpose: Submit high-memory Paloma station-holdout chunk jobs as a Slurm array.
+
 #SBATCH --job-name=paloma-holdout-hm
 #SBATCH --partition=amem
 #SBATCH --qos=mem-normal

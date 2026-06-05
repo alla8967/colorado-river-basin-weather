@@ -1,3 +1,7 @@
+"""Test variable-aware general training-table construction.
+
+The coverage protects Paloma table columns, terrain fields, neighbor sections, and pairwise-skill features."""
+
 from __future__ import annotations
 
 from pathlib import Path

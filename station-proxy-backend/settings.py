@@ -1,3 +1,7 @@
+"""Centralize backend paths and environment-variable overrides.
+
+This lets the app run with the default repo layout while still supporting alternate local artifact locations."""
+
 from __future__ import annotations
 
 import os

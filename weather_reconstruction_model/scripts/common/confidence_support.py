@@ -1,3 +1,7 @@
+"""Calculate confidence-support scores from nearby station evidence and terrain context.
+
+This shared logic keeps CLI scoring, grid building, and backend analysis consistent."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

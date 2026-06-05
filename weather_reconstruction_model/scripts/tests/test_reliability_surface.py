@@ -1,3 +1,7 @@
+"""Test reliability-surface generation with temporary fixture model runs.
+
+The coverage verifies map payloads, station overlays, and CLI behavior without real Alpine outputs."""
+
 from __future__ import annotations
 
 from pathlib import Path

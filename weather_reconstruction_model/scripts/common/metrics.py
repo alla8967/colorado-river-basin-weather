@@ -1,3 +1,7 @@
+"""Compute shared validation metrics for reconstruction experiments.
+
+The module keeps MAE, RMSE, correlation, and paired-value checks consistent across reports and trainers."""
+
 import math
 from typing import Sequence
 

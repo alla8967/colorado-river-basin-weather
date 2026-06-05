@@ -1,3 +1,7 @@
+"""Create a GeoJSON boundary around the stations used for reliability mapping.
+
+The boundary keeps map surfaces constrained to the data-supported domain."""
+
 from __future__ import annotations
 
 import argparse

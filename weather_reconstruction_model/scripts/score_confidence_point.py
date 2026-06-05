@@ -1,3 +1,7 @@
+"""Score one latitude/longitude against confidence-support evidence.
+
+Use this CLI to inspect the same confidence logic that the backend exposes to the browser."""
+
 from __future__ import annotations
 
 import argparse

@@ -1,3 +1,5 @@
+// Purpose: Evaluates one target/candidate station pair and packages the match result.
+
 #include "station_matcher.h"
 #include "similarity_scores.h"
 #include "station_distance.h"

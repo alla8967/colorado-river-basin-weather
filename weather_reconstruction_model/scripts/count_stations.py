@@ -1,3 +1,7 @@
+"""Count and summarize candidate stations and daily observations.
+
+Use this as a quick data sanity check before building training tables or running model experiments."""
+
 import csv
 import sys
 

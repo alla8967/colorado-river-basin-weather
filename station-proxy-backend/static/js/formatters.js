@@ -1,3 +1,5 @@
+// Purpose: Collect display formatting, numeric, station, and map-label helpers for the frontend.
+
 export function stationHasCoordinates(station) {
     return station &&
            station.latitude !== null &&

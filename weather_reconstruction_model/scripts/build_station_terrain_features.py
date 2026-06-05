@@ -1,3 +1,7 @@
+"""Sample DEM-derived terrain features for candidate stations.
+
+These features support physically informed station selection and temperature reconstruction models."""
+
 from pathlib import Path
 import argparse
 import csv

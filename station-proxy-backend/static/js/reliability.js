@@ -1,3 +1,5 @@
+// Purpose: Render reliability surfaces, station overlays, legends, and map-specific detail panels.
+
 import {
     fetchReliabilitySample,
     fetchReliabilityStationDetails,

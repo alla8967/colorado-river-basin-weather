@@ -1,3 +1,7 @@
+"""Build frontend-ready reliability surfaces and station overlays for a model run.
+
+These artifacts power the reliability map modes served by the FastAPI backend."""
+
 from __future__ import annotations
 
 import argparse

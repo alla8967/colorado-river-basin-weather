@@ -1,3 +1,7 @@
+"""Build wide training tables for general temperature reconstruction models.
+
+It assembles target, hub, terrain, offset, and optional pairwise-skill features into model-ready CSV rows."""
+
 from pathlib import Path
 import argparse
 

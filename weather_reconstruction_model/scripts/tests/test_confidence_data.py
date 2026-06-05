@@ -1,3 +1,7 @@
+"""Test loading and validation of confidence-support input records.
+
+The fixtures cover station metadata, terrain features, and validation metrics used by scoring."""
+
 from __future__ import annotations
 
 from pathlib import Path

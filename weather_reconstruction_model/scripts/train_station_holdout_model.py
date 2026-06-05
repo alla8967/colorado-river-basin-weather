@@ -1,3 +1,7 @@
+"""Train and validate models while holding out selected stations.
+
+This workflow estimates how well the model reconstructs stations with no direct training evidence."""
+
 from __future__ import annotations
 
 import argparse

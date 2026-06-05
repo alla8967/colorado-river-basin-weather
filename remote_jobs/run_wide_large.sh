@@ -1,4 +1,6 @@
 #!/bin/bash
+# Purpose: Submit the large wide reconstruction preset for scale-up validation.
+
 #SBATCH --job-name=crb-wide-large
 #SBATCH --partition=amilan
 #SBATCH --qos=normal

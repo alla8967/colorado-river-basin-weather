@@ -1,3 +1,5 @@
+// Purpose: Keeps an exploratory C++ entry point for testing lower-level station scoring pieces.
+
 #include <iostream>
 #include <iomanip>
 #include <vector>

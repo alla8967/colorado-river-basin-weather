@@ -1,4 +1,6 @@
 #!/bin/bash
+# Purpose: Submit final station-metric evaluation for exported Paloma model artifacts.
+
 #SBATCH --job-name=paloma-final-metrics
 #SBATCH --partition=amem
 #SBATCH --qos=mem-normal

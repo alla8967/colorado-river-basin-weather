@@ -1,3 +1,5 @@
+// Purpose: Declares station metadata, daily rows, and dataset containers used throughout the engine.
+
 #ifndef STATION_DATASET_H
 #define STATION_DATASET_H
 

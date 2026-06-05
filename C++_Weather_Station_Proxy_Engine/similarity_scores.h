@@ -1,3 +1,5 @@
+// Purpose: Declares station similarity metrics shared by matchers, validators, and tests.
+
 #ifndef SIMILARITY_SCORES_H
 #define SIMILARITY_SCORES_H
 

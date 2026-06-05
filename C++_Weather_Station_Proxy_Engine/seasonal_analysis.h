@@ -1,3 +1,5 @@
+// Purpose: Declares seasonal summary structures and aggregation helpers.
+
 #ifndef SEASONAL_ANALYSIS_H
 #define SEASONAL_ANALYSIS_H
 

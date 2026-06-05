@@ -1,3 +1,7 @@
+"""Audit how representative station evidence is across the model domain.
+
+The report helps explain where confidence is strong, sparse, or physically risky."""
+
 from __future__ import annotations
 
 import argparse

@@ -1,3 +1,7 @@
+"""Exercise reliability backend routes with generated temporary fixture artifacts.
+
+The tests verify surface payloads, station overlays, and error handling without depending on local model runs."""
+
 from __future__ import annotations
 
 import importlib.util

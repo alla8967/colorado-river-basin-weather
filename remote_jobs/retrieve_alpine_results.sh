@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Purpose: Archive Alpine run outputs on the remote system and sync the snapshot back locally.
+
 set -euo pipefail
 
 REMOTE_USER="${REMOTE_USER:-alla8967}"
@@ -11,7 +13,7 @@ REMOTE_SCRATCH="/scratch/alpine/$REMOTE_USER/crb_weather_runs/current"
 REMOTE_SNAPSHOT="$REMOTE_PROJECT/$SNAPSHOT_NAME"
 
 if [[ ! -d "$LOCAL_ROOT/weather_reconstruction_model" ]]; then
-  echo "Run this from the Colorado River Basin Project root, or set LOCAL_ROOT." >&2
+  echo "Run this from the repository root, or set LOCAL_ROOT." >&2
   exit 1
 fi
 

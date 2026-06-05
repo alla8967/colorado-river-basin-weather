@@ -1,3 +1,7 @@
+"""Create a report for offset-feature holdout experiments.
+
+It helps evaluate whether terrain and station offsets improve reconstruction reliability."""
+
 from __future__ import annotations
 
 import argparse

@@ -1,3 +1,7 @@
+"""Filter training rows for station-holdout validation workflows.
+
+These helpers remove rows that would leak the held-out station through target or neighbor features."""
+
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence

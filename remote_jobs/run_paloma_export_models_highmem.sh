@@ -1,4 +1,6 @@
 #!/bin/bash
+# Purpose: Submit high-memory Paloma final model export jobs for larger variable runs.
+
 #SBATCH --job-name=paloma-export-hm
 #SBATCH --partition=amem
 #SBATCH --qos=mem-normal

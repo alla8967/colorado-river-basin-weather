@@ -1,3 +1,7 @@
+"""Provide small HTML rendering helpers for static diagnostic reports.
+
+The goal is consistent escaping, tables, and metric cards without introducing a full template system."""
+
 from __future__ import annotations
 
 import html

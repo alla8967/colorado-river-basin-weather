@@ -1,3 +1,7 @@
+"""Filter NOAA GHCN-Daily yearly bulk files into app-ready station CSVs.
+
+This prepares the target and hub daily temperature inputs consumed by the C++ proxy engine and FastAPI app."""
+
 import csv
 import gzip
 from pathlib import Path

@@ -1,3 +1,5 @@
+// Purpose: Declares CSV row structures and parsing helpers used by the C++ engine.
+
 #ifndef CSV_FILEREADER_H
 #define CSV_FILEREADER_H
 

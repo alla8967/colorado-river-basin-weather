@@ -1,3 +1,7 @@
+"""Provide geographic helper functions shared by station-selection scripts.
+
+The current core helper computes great-circle distance between station coordinates."""
+
 import math
 
 

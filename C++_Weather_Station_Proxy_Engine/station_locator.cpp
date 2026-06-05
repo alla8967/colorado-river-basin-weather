@@ -1,3 +1,5 @@
+// Purpose: Finds the nearest target station to a requested latitude/longitude.
+
 #include "station_locator.h"
 #include "station_distance.h"
 

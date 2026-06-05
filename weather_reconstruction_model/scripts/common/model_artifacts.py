@@ -1,3 +1,7 @@
+"""Build reusable manifest and schema payloads for model-run artifacts.
+
+These helpers keep exported validation and production model folders self-describing."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

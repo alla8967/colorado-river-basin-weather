@@ -1,3 +1,7 @@
+"""Resolve, load, and validate generated model-run artifact folders.
+
+Both backend services and reporting scripts use these helpers to read model-run outputs consistently."""
+
 from __future__ import annotations
 
 import json

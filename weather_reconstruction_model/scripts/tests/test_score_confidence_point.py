@@ -1,3 +1,7 @@
+"""Test the single-point confidence scoring CLI.
+
+The checks verify JSON output and error behavior using temporary support inputs."""
+
 from __future__ import annotations
 
 from pathlib import Path

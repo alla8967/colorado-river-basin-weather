@@ -1,3 +1,5 @@
+// Purpose: Groups daily weather records into seasonal summaries used by similarity scoring.
+
 #include "csv_filereader.h"
 #include "seasonal_analysis.h"
 #include <iostream>

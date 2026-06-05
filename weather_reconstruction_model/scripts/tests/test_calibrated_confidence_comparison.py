@@ -1,3 +1,7 @@
+"""Test calibrated confidence scoring helpers and physical risk labels.
+
+These checks keep confidence-map calibration behavior stable across refactors."""
+
 from pathlib import Path
 import sys
 

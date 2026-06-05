@@ -1,3 +1,7 @@
+"""Build reliability-grid, station-overlay, and boundary payloads from model metrics.
+
+This is the shared generation logic behind the CLI reliability builder and FastAPI map service."""
+
 from __future__ import annotations
 
 import json

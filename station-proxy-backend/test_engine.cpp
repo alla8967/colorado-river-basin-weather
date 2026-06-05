@@ -1,3 +1,5 @@
+// Purpose: Provides a tiny mock engine executable for backend error-path and integration tests.
+
 #include <iostream>
 #include <string>
 

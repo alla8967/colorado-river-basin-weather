@@ -1,3 +1,7 @@
+"""Download DEM tiles listed in a manifest for terrain-feature generation.
+
+This is only needed when rebuilding local terrain rasters rather than using processed terrain artifacts."""
+
 from pathlib import Path
 import argparse
 import re

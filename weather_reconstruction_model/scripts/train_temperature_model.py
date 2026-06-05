@@ -1,3 +1,7 @@
+"""Train the original baseline regression model for station temperature reconstruction.
+
+It remains useful as a simpler comparison point for newer tree/general model workflows."""
+
 from pathlib import Path
 import argparse
 import csv

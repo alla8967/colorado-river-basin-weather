@@ -1,4 +1,6 @@
 #!/bin/bash
+# Purpose: Submit standard-memory Paloma final model export jobs across temperature variables.
+
 #SBATCH --job-name=paloma-export
 #SBATCH --partition=amilan
 #SBATCH --qos=normal

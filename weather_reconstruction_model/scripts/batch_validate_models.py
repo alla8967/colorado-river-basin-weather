@@ -1,3 +1,7 @@
+"""Run station-validation experiments across many targets and write aggregate metrics.
+
+This script is the baseline batch evaluator for comparing reconstruction model choices."""
+
 from pathlib import Path
 import argparse
 import csv

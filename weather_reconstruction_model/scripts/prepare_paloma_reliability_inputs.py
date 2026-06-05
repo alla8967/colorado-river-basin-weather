@@ -1,3 +1,7 @@
+"""Prepare Paloma model-run metrics for reliability-surface generation.
+
+The script normalizes station metrics and writes metadata consumed by the reliability builder."""
+
 from __future__ import annotations
 
 import argparse

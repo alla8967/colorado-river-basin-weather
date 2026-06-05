@@ -1,3 +1,7 @@
+"""Define the JSON response models shared by the FastAPI backend routes.
+
+Keeping these shapes in one module makes frontend/backend contracts easier to review and test."""
+
 from __future__ import annotations
 
 from typing import Any, Optional, Union

@@ -1,3 +1,7 @@
+"""Validate that an Alpine or remote workspace has required inputs and packages.
+
+Run this before long jobs to catch missing data, cache, disk, or dependency problems early."""
+
 from __future__ import annotations
 
 import argparse

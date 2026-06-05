@@ -27,8 +27,8 @@ Required source code and scripts:
 ```text
 Makefile
 README.md
-REMOTE_RUN_MANIFEST.md
-REMOTE_TRANSFER_CHECKLIST.md
+docs/remote_runs/run_manifest.md
+docs/remote_runs/transfer_checklist.md
 C++_Weather_Station_Proxy_Engine/
 Station_Engine_Server/
 station-proxy-backend/
@@ -106,7 +106,7 @@ rsync -av \
   --exclude "weather_reconstruction_model/outputs/" \
   --exclude "Raw_DEM/" \
   --exclude "NOAA_Inventory_Sort/NOAA_GHCN_ByYear/" \
-  "Colorado River Basin Project/" \
+  "colorado-river-basin-weather/" \
   YOUR_IDENTIKEY@login.rc.colorado.edu:/projects/YOUR_IDENTIKEY/crb_weather_project/
 ```
 
@@ -124,7 +124,7 @@ If it did not arrive, transfer it explicitly:
 
 ```bash
 rsync -av \
-  "Colorado River Basin Project/weather_reconstruction_model/cache/weather_data.sqlite" \
+  "colorado-river-basin-weather/weather_reconstruction_model/cache/weather_data.sqlite" \
   YOUR_IDENTIKEY@login.rc.colorado.edu:/projects/YOUR_IDENTIKEY/crb_weather_project/weather_reconstruction_model/cache/
 ```
 
@@ -188,7 +188,7 @@ After jobs finish, copy outputs back from scratch or projects:
 ```bash
 rsync -av \
   YOUR_IDENTIKEY@login.rc.colorado.edu:/scratch/alpine/YOUR_IDENTIKEY/crb_weather_runs/current/weather_reconstruction_model/outputs/ \
-  "Colorado River Basin Project/weather_reconstruction_model/outputs/"
+  "colorado-river-basin-weather/weather_reconstruction_model/outputs/"
 ```
 
 For large result folders, prefer pulling only the specific report/prediction files you need.

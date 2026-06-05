@@ -1,3 +1,7 @@
+"""Generate a report comparing Python predictions against independent C++ scoring.
+
+The report documents whether the app engine agrees with reconstruction outputs produced by Python scripts."""
+
 from __future__ import annotations
 
 import argparse

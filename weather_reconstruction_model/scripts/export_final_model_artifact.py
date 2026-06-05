@@ -1,3 +1,7 @@
+"""Train/export a final model artifact and write its manifest metadata.
+
+This packages the production-style model state used by downstream reports and frontend summaries."""
+
 from __future__ import annotations
 
 import argparse

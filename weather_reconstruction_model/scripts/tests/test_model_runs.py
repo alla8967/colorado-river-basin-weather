@@ -1,3 +1,7 @@
+"""Test model-run artifact loading and required-file validation.
+
+These checks protect backend/report consumers from malformed generated run folders."""
+
 from pathlib import Path
 import json
 import sys

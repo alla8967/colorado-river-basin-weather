@@ -1,3 +1,5 @@
+// Purpose: Computes correlation, error, and combined similarity metrics between station time series.
+
 #include "similarity_scores.h"
 #include <iostream>
 #include <vector>

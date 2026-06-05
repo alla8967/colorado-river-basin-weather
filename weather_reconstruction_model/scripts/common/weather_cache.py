@@ -1,3 +1,7 @@
+"""Create and query the SQLite cache of station daily weather observations.
+
+The cache speeds repeated training-table and validation workflows over large app-ready CSVs."""
+
 from __future__ import annotations
 
 import csv

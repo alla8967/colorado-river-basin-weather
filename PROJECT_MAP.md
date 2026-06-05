@@ -13,6 +13,9 @@ that may be physically present in the working folder.
 5. Use `docs/artifact_quarantine_plan.md` before moving, deleting, or staging
    generated outputs.
 
+Each major source folder also has a local `README.md` that explains the purpose
+of that collection before you open individual files.
+
 ## Top-Level Map
 
 | Path | Role | Review note |
@@ -21,7 +24,7 @@ that may be physically present in the working folder.
 | `PROJECT_MAP.md` | Visual navigation guide. | Use this when the folder looks noisy. |
 | `Makefile` | Build, test, run, and cleanup entry points. | `make check` is the main reviewer command. |
 | `pyproject.toml` | Python package/dependency metadata. | Dev/model extras live here. |
-| `docs/` | Human-facing runbooks, inventories, and artifact policy. | Review this before diving into scripts. |
+| `docs/` | Human-facing runbooks, inventories, artifact policy, and remote-run docs. | Review this before diving into scripts. |
 | `station-proxy-backend/` | FastAPI backend and browser frontend. | Local web app lives here. |
 | `C++_Weather_Station_Proxy_Engine/` | Reusable C++ station matching engine. | Core station similarity logic. |
 | `Station_Engine_Server/` | Persistent C++ server wrapper. | Keeps large NOAA data loaded for FastAPI. |
@@ -61,6 +64,11 @@ The project has four main lanes:
 - Data-prep lane: `NOAA_Inventory_Sort/`.
 - Research/model lane: `weather_reconstruction_model/scripts/`.
 - Remote-run lane: `remote_jobs/`.
+
+The repository root is intentionally kept small: project overview, map, build
+metadata, and environment examples stay at the top level; detailed runbooks live
+under `docs/`, and folder-specific explanations live beside the code they
+describe.
 
 The cleanup work is intentionally improving boundaries inside those lanes
 without doing a risky top-level reshuffle.

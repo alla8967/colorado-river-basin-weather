@@ -1,3 +1,7 @@
+"""Test pairwise station skill calculations and formatted feature rows.
+
+The coverage keeps historical skill features stable for training-table builders."""
+
 from pathlib import Path
 import sys
 
