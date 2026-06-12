@@ -822,6 +822,29 @@ Hist gradient boosting engineered:  about 2.25 F
 So engineered terrain relationships are useful, but the random forest remains
 the strongest model in the current experiments.
 
+The broad Paloma TAVG grouped holdout is the current large validation evidence:
+
+```text
+source: alpine_outputs/paloma/paloma_v1_tavg_station_holdout_master.csv
+stations: 739
+test rows: 416,892
+mean station MAE: about 2.68 F
+median station MAE: about 2.49 F
+p90 station MAE: about 4.00 F
+strict passes: 52 / 739
+```
+
+Before claiming model lift, compare it against simple hub baselines on the same
+held-out prediction rows:
+
+```bash
+.venv/bin/python weather_reconstruction_model/scripts/build_holdout_baseline_comparison.py
+```
+
+That report computes nearest-hub and IDW-hub baselines from hub daily data,
+excludes every station in the held-out group from candidate hubs, and fails by
+default if the baseline cannot score every model prediction row.
+
 The general table builder can also add nearby non-hub target stations as extra
 temperature witnesses. This is useful for the machine-learning path because the
 model is no longer restricted to only long-record proxy hubs:

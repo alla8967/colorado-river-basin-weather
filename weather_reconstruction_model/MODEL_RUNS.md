@@ -4,13 +4,38 @@ This contract gives each trained reconstruction model a stable folder shape so
 calibration, confidence grids, backend endpoints, and frontend maps can all read
 the same evidence without knowing which script produced it.
 
-The first model run to adapt should be:
+The current broad station-holdout evidence source is:
+
+```text
+alpine_outputs/paloma/paloma_v1_tavg_station_holdout_master.csv
+```
+
+That Paloma TAVG grouped holdout covers:
+
+```text
+validation stations: 739
+test rows: 416,892
+mean station MAE: about 2.68 F
+median station MAE: about 2.49 F
+p90 station MAE: about 4.00 F
+strict passes: 52 / 739
+```
+
+Use `build_holdout_baseline_comparison.py` before making lift claims. Its
+nearest-hub and IDW-hub baselines are evaluated on the exact model prediction
+rows and fail by default if any baseline row is missing.
+
+The older model-run contract example below remains useful history and schema
+documentation. It should not be confused with the broader Paloma evidence above.
+
+The first historical model run adapted to this contract was:
 
 ```text
 option_c_limit97_5_hubs_10_target_neighbors_multiscale_terrain_offset_terrain_standard_random_forest
 ```
 
-Current evidence for that run comes from out-of-sample station validation:
+Historical evidence for that run came from an earlier out-of-sample station
+validation subset:
 
 ```text
 validation stations: 86

@@ -40,6 +40,7 @@ PYTHON_COMPILE_FILES = \
 	$(BACKEND_DIR)/model_run_service.py \
 	$(BACKEND_DIR)/reliability_service.py \
 	weather_reconstruction_model/scripts/evaluate_final_model_station_metrics.py \
+	weather_reconstruction_model/scripts/build_holdout_baseline_comparison.py \
 	tests/test_app_shell.py \
 	tests/test_reliability_backend.py
 

@@ -49,6 +49,7 @@ The subfolders also have local READMEs:
   `build_alpine_run_summary.py`, `build_diagnostics_report.py`,
   `build_failure_diagnostics_report.py`,
   `build_model_comparison_report.py`, `build_calibration_audit_report.py`,
+  `build_holdout_baseline_comparison.py`,
   `build_physical_regime_diagnostics.py`,
   `build_representativeness_audit_report.py`,
   `audit_project_readiness.py`, `check_remote_environment.py`.
