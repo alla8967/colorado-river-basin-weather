@@ -18,7 +18,8 @@ from api_models import (
 # settings configures imports for weather_reconstruction_model/scripts.
 from settings import settings
 from confidence_service import ConfidenceService
-from engine_client import EngineClient, EngineClientConfig
+from engine_adapter import build_engine_client
+from engine_client import EngineClientConfig
 from model_run_service import ModelRunService
 from reliability_service import ReliabilitySurfaceService
 
@@ -35,13 +36,14 @@ app.add_middleware(
 app.mount("/assets", StaticFiles(directory=settings.backend_dir / "assets"), name="assets")
 app.mount("/static", StaticFiles(directory=settings.backend_dir / "static"), name="static")
 
-engine_client = EngineClient(
+engine_client = build_engine_client(
     EngineClientConfig(
         executable=settings.engine_executable,
         server_dir=settings.engine_server_dir,
         target_data_file=settings.target_data_file,
         hub_data_file=settings.hub_data_file,
-    )
+    ),
+    settings.engine_mode,
 )
 confidence_service = ConfidenceService(settings)
 model_run_service = ModelRunService(settings)
@@ -93,6 +95,7 @@ def test() -> HealthResponse:
         hubDataFile=str(settings.hub_data_file),
         stationDataMode=settings.station_data_mode,
         stationDataNotice=settings.station_data_notice,
+        engineMode=settings.engine_mode,
         activeModelRunId=settings.active_model_run_id,
         modelRunRoot=str(settings.model_run_root),
     )

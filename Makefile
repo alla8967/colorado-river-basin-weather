@@ -19,6 +19,10 @@ API_TARGET = station_engine_api
 TEST_API_TARGET = station_engine_api_test
 VALIDATE_PREDICTION_TARGET = validate_prediction_similarity
 ENGINE_UNIT_TEST_TARGET = $(ENGINE_DIR)/engine_unit_tests
+PYTHON_EXTENSION_SUFFIX = $(shell $(PYTHON) -c "import sysconfig; print(sysconfig.get_config_var('EXT_SUFFIX') or '.so')")
+PYBIND11_INCLUDES = $(shell $(PYTHON) -m pybind11 --includes 2>/dev/null)
+PYTHON_LDFLAGS = $(shell $(PYTHON)-config --ldflags 2>/dev/null)
+NATIVE_ENGINE_TARGET = $(BACKEND_DIR)/_station_proxy_engine$(PYTHON_EXTENSION_SUFFIX)
 FRONTEND_JS_FILES = $(wildcard $(BACKEND_DIR)/static/js/*.js)
 
 COMPILED_OUTPUTS = \
@@ -27,6 +31,7 @@ COMPILED_OUTPUTS = \
 	$(TEST_API_TARGET) \
 	$(VALIDATE_PREDICTION_TARGET) \
 	$(ENGINE_UNIT_TEST_TARGET) \
+	$(NATIVE_ENGINE_TARGET) \
 	$(ENGINE_DIR)/basin_test \
 	$(ENGINE_DIR)/station_engine_api \
 	NOAA_Inventory_Sort/noaa_inventory_sort \
@@ -40,6 +45,8 @@ PYTHON_COMPILE_FILES = \
 	$(BACKEND_DIR)/main.py \
 	$(BACKEND_DIR)/settings.py \
 	$(BACKEND_DIR)/engine_client.py \
+	$(BACKEND_DIR)/engine_adapter.py \
+	$(BACKEND_DIR)/native_engine_client.py \
 	$(BACKEND_DIR)/api_models.py \
 	$(BACKEND_DIR)/confidence_service.py \
 	$(BACKEND_DIR)/model_run_service.py \
@@ -47,6 +54,8 @@ PYTHON_COMPILE_FILES = \
 	weather_reconstruction_model/scripts/evaluate_final_model_station_metrics.py \
 	weather_reconstruction_model/scripts/build_holdout_baseline_comparison.py \
 	tests/test_app_shell.py \
+	tests/test_engine_adapter.py \
+	tests/test_native_engine_parity.py \
 	tests/test_reliability_backend.py
 
 COMMON_ENGINE_SOURCES = \
@@ -83,7 +92,11 @@ ENGINE_UNIT_TEST_SOURCES = \
 	$(ENGINE_DIR)/station_distance.cpp \
 	$(ENGINE_DIR)/station_pair_score.cpp
 
-.PHONY: all setup setup-backend setup-model server api validate-prediction check check-js check-python-compile test test-engine test-cpp-unit test-app-shell test-reliability-backend test-python bootstrap-fixture run run-api run-backend run-backend-fixture doctor clean clean-local-artifacts
+NATIVE_ENGINE_SOURCES = \
+	$(ENGINE_DIR)/python_bindings.cpp \
+	$(COMMON_ENGINE_SOURCES)
+
+.PHONY: all setup setup-backend setup-model server api native-engine validate-prediction check check-js check-python-compile test test-engine test-cpp-unit test-app-shell test-engine-adapter test-native-parity test-reliability-backend test-python bootstrap-fixture run run-api run-backend run-backend-fixture doctor clean clean-local-artifacts
 
 all: server api
 
@@ -102,10 +115,14 @@ server:
 api:
 	$(CXX) $(CXXFLAGS) $(API_SOURCES) -o "$(API_TARGET)"
 
+native-engine:
+	@test -n "$(PYBIND11_INCLUDES)" || (echo "pybind11 is not installed. Run: $(PIP) install -e \".[native]\"" && exit 1)
+	$(CXX) $(CXXFLAGS) -shared -fPIC $(PYBIND11_INCLUDES) $(NATIVE_ENGINE_SOURCES) -o "$(NATIVE_ENGINE_TARGET)" $(PYTHON_LDFLAGS)
+
 validate-prediction:
 	$(CXX) $(CXXFLAGS) $(VALIDATE_PREDICTION_SOURCES) -o "$(VALIDATE_PREDICTION_TARGET)"
 
-check: check-js check-python-compile test-app-shell test-reliability-backend test-engine test-cpp-unit validate-prediction
+check: check-js check-python-compile test-app-shell test-engine-adapter test-native-parity test-reliability-backend test-engine test-cpp-unit validate-prediction
 
 check-js:
 	@for file in $(FRONTEND_JS_FILES); do \
@@ -115,7 +132,7 @@ check-js:
 check-python-compile:
 	PYTHONPYCACHEPREFIX="$(PYCACHE_PREFIX)" $(PYTHON) -m py_compile $(PYTHON_COMPILE_FILES)
 
-test: test-engine test-cpp-unit test-app-shell test-reliability-backend test-python
+test: test-engine test-cpp-unit test-app-shell test-engine-adapter test-native-parity test-reliability-backend test-python
 
 test-engine:
 	$(PYTHON) tests/test_engine_fixture.py
@@ -127,13 +144,19 @@ test-cpp-unit:
 test-app-shell:
 	$(PYTHON) tests/test_app_shell.py
 
+test-engine-adapter:
+	$(PYTHON) tests/test_engine_adapter.py
+
+test-native-parity: server
+	$(PYTHON) tests/test_native_engine_parity.py
+
 test-reliability-backend:
 	$(PYTHON) tests/test_reliability_backend.py
 
 test-python:
 	$(PYTHON) -m pytest weather_reconstruction_model/scripts/tests
 
-bootstrap-fixture: server test-engine test-cpp-unit check-python-compile test-app-shell test-reliability-backend
+bootstrap-fixture: server test-engine test-cpp-unit check-python-compile test-app-shell test-engine-adapter test-native-parity test-reliability-backend
 	@echo "Fixture bootstrap passed."
 	@echo "Run the fixture app with: make run-backend-fixture"
 

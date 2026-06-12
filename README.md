@@ -71,6 +71,17 @@ The fixture path builds the persistent C++ server, runs the fixture engine smoke
 test, compiles backend Python entry points, and starts FastAPI against the tiny
 tracked station files.
 
+The Python backend still defaults to the persistent subprocess engine. An
+optional pybind11 extension can be built with:
+
+```bash
+.venv/bin/python -m pip install -e ".[native]"
+make native-engine PYTHON=.venv/bin/python
+```
+
+Set `STATION_PROXY_ENGINE_MODE=auto` to use that extension when available while
+falling back to the subprocess engine on clean machines.
+
 ---
 
 ## Project Status

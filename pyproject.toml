@@ -25,6 +25,9 @@ terrain = [
 dev = [
     "pytest>=8.0",
 ]
+native = [
+    "pybind11>=2.12",
+]
 
 [tool.setuptools]
 py-modules = []

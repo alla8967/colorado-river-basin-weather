@@ -34,6 +34,7 @@ class HealthResponse(BaseModel):
     hubDataFile: str
     stationDataMode: str
     stationDataNotice: Optional[str] = None
+    engineMode: str
     activeModelRunId: str
     modelRunRoot: str
 

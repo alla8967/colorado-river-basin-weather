@@ -38,6 +38,7 @@ class BackendSettings:
     model_run_root: Path
     active_model_run_id: str
     reliability_model_run_id: str
+    engine_mode: str
 
 
 def env_path(name: str, default: Path) -> Path:
@@ -129,6 +130,7 @@ def load_settings() -> BackendSettings:
             "STATION_PROXY_RELIABILITY_MODEL_RUN_ID",
             "paloma_v1_reliability",
         ),
+        engine_mode=os.getenv("STATION_PROXY_ENGINE_MODE", "process"),
     )
 
 
