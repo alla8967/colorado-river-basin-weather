@@ -206,15 +206,15 @@ vector<StationPairScore> calculate_all_station_pair_scores(
         return scores;
     }
 
-    int possible_pairs = (stations.size() * (stations.size() - 1)) / 2;
+    size_t possible_pairs = (stations.size() * (stations.size() - 1)) / 2;
     scores.reserve(possible_pairs);
 
     const double MAX_CANDIDATE_DISTANCE_KM = 300.0;
     const double MAX_CANDIDATE_ELEVATION_DIFFERENCE_M = 1500.0;
     const int MIN_PAIRED_DAYS = 365;
 
-    for (int i = 0; i < stations.size(); i++) {
-        for (int j = i + 1; j < stations.size(); j++) {
+    for (size_t i = 0; i < stations.size(); i++) {
+        for (size_t j = i + 1; j < stations.size(); j++) {
             StationPairScore score = calculate_station_pair_score(stations[i], stations[j]);
 
             if (score.score == 0.0) {
@@ -255,7 +255,7 @@ StationPairScore find_best_match(
     const double MAX_CANDIDATE_ELEVATION_DIFFERENCE_M = 1500.0;
     const int MIN_PAIRED_DAYS = 365;
 
-    for (int i = 0; i < dataset_pool.size(); i++) {
+    for (size_t i = 0; i < dataset_pool.size(); i++) {
         if (dataset_pool[i].metadata.stationID == target.metadata.stationID) {
             continue;
         }

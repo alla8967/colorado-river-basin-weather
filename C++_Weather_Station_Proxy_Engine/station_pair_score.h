@@ -33,6 +33,12 @@ struct StationPairScore {
     int paired_months;
 };
 
+double calculate_correlation_score(double correlation);
+double calculate_MAD_score(double mad);
+double calculate_RMSE_score(double rmse);
+double calculate_distance_score(double distance_km);
+double calculate_elevation_score(double elevation_difference_m);
+
 StationPairScore calculate_station_pair_score(
     const StationDataset& station_a,
     const StationDataset& station_b,

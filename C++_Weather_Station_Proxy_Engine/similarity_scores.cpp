@@ -81,7 +81,7 @@ double calculate_daily_correlation(const vector<double>& x, const vector<double>
     double sum_x = 0;
     double sum_y = 0;
 
-    for (int i = 0; i < x.size(); i++) {
+    for (size_t i = 0; i < x.size(); i++) {
         sum_x += x[i];
         sum_y += y[i];
     }
@@ -93,7 +93,7 @@ double calculate_daily_correlation(const vector<double>& x, const vector<double>
     double sum_x_squared_diff = 0;
     double sum_y_squared_diff = 0;
 
-    for (int i = 0; i < x.size(); i++) {
+    for (size_t i = 0; i < x.size(); i++) {
         double x_diff = x[i] - mean_x;
         double y_diff = y[i] - mean_y;
 
@@ -128,8 +128,8 @@ CorrelationResult calculate_pcc_daily(const StationDataset& station_a, const Sta
     vector<double> paired_values_a;
     vector<double> paired_values_b;
 
-    int i = 0;
-    int j = 0;
+    size_t i = 0;
+    size_t j = 0;
 
     while (i < input_a.size() && j < input_b.size()) {
         int date_comparison = compare_daily_dates(input_a[i], input_b[j]);
@@ -204,8 +204,8 @@ SimilarityResult calculate_daily_tavg_similarity(const StationDataset& station_a
     vector<double> paired_values_a;
     vector<double> paired_values_b;
 
-    int i = 0;
-    int j = 0;
+    size_t i = 0;
+    size_t j = 0;
 
     while (i < input_a.size() && j < input_b.size()) {
         int date_comparison = compare_daily_dates(input_a[i], input_b[j]);
@@ -288,7 +288,7 @@ double calculate_mean_absolute_difference(const vector<double>& x, const vector<
 
     double sum_absolute_difference = 0;
 
-    for (int i = 0; i < x.size(); i++) {
+    for (size_t i = 0; i < x.size(); i++) {
         sum_absolute_difference += fabs(x[i] - y[i]);
     }
 
@@ -302,7 +302,7 @@ double calculate_rmse(const vector<double>& x, const vector<double>& y) {
 
     double sum_squared_error = 0;
 
-    for (int i = 0; i < x.size(); i++) {
+    for (size_t i = 0; i < x.size(); i++) {
         double difference = x[i] - y[i];
         sum_squared_error += difference * difference;
     }
@@ -327,8 +327,8 @@ CorrelationResult calculate_pcc_monthly(const StationDataset& station_a, const S
     vector<double> paired_values_a;
     vector<double> paired_values_b;
 
-    int i = 0;
-    int j = 0;
+    size_t i = 0;
+    size_t j = 0;
 
     while (i < input_a.size() && j < input_b.size()) {
         int date_comparison = compare_monthly_dates(input_a[i], input_b[j]);
@@ -393,8 +393,8 @@ SimilarityResult calculate_monthly_tavg_similarity(const StationDataset& station
     vector<double> paired_values_a;
     vector<double> paired_values_b;
 
-    int i = 0;
-    int j = 0;
+    size_t i = 0;
+    size_t j = 0;
 
     while (i < input_a.size() && j < input_b.size()) {
         int date_comparison = compare_monthly_dates(input_a[i], input_b[j]);

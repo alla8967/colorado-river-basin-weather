@@ -1,7 +1,7 @@
 # Purpose: Project build, test, run, and cleanup targets for local review workflows.
 
 CXX = g++
-CXXFLAGS = -std=c++17 -O2 -DNDEBUG -I"C++_Weather_Station_Proxy_Engine"
+CXXFLAGS = -std=c++17 -O2 -DNDEBUG -Wall -Wextra -I"C++_Weather_Station_Proxy_Engine"
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
 UVICORN ?= $(PYTHON) -m uvicorn
@@ -18,6 +18,7 @@ SERVER_TARGET = $(SERVER_DIR)/station_engine_server
 API_TARGET = station_engine_api
 TEST_API_TARGET = station_engine_api_test
 VALIDATE_PREDICTION_TARGET = validate_prediction_similarity
+ENGINE_UNIT_TEST_TARGET = $(ENGINE_DIR)/engine_unit_tests
 FRONTEND_JS_FILES = $(wildcard $(BACKEND_DIR)/static/js/*.js)
 
 COMPILED_OUTPUTS = \
@@ -25,6 +26,7 @@ COMPILED_OUTPUTS = \
 	$(API_TARGET) \
 	$(TEST_API_TARGET) \
 	$(VALIDATE_PREDICTION_TARGET) \
+	$(ENGINE_UNIT_TEST_TARGET) \
 	$(ENGINE_DIR)/basin_test \
 	$(ENGINE_DIR)/station_engine_api \
 	NOAA_Inventory_Sort/noaa_inventory_sort \
@@ -73,7 +75,15 @@ VALIDATE_PREDICTION_SOURCES = \
 	$(ENGINE_DIR)/similarity_scores.cpp \
 	$(ENGINE_DIR)/station_dataset.cpp
 
-.PHONY: all setup setup-backend setup-model server api validate-prediction check check-js check-python-compile test test-engine test-app-shell test-reliability-backend test-python bootstrap-fixture run run-api run-backend run-backend-fixture doctor clean clean-local-artifacts
+ENGINE_UNIT_TEST_SOURCES = \
+	$(ENGINE_DIR)/engine_unit_tests.cpp \
+	$(ENGINE_DIR)/csv_filereader.cpp \
+	$(ENGINE_DIR)/seasonal_analysis.cpp \
+	$(ENGINE_DIR)/similarity_scores.cpp \
+	$(ENGINE_DIR)/station_distance.cpp \
+	$(ENGINE_DIR)/station_pair_score.cpp
+
+.PHONY: all setup setup-backend setup-model server api validate-prediction check check-js check-python-compile test test-engine test-cpp-unit test-app-shell test-reliability-backend test-python bootstrap-fixture run run-api run-backend run-backend-fixture doctor clean clean-local-artifacts
 
 all: server api
 
@@ -95,7 +105,7 @@ api:
 validate-prediction:
 	$(CXX) $(CXXFLAGS) $(VALIDATE_PREDICTION_SOURCES) -o "$(VALIDATE_PREDICTION_TARGET)"
 
-check: check-js check-python-compile test-app-shell test-reliability-backend test-engine validate-prediction
+check: check-js check-python-compile test-app-shell test-reliability-backend test-engine test-cpp-unit validate-prediction
 
 check-js:
 	@for file in $(FRONTEND_JS_FILES); do \
@@ -105,10 +115,14 @@ check-js:
 check-python-compile:
 	PYTHONPYCACHEPREFIX="$(PYCACHE_PREFIX)" $(PYTHON) -m py_compile $(PYTHON_COMPILE_FILES)
 
-test: test-engine test-app-shell test-reliability-backend test-python
+test: test-engine test-cpp-unit test-app-shell test-reliability-backend test-python
 
 test-engine:
 	$(PYTHON) tests/test_engine_fixture.py
+
+test-cpp-unit:
+	$(CXX) $(CXXFLAGS) $(ENGINE_UNIT_TEST_SOURCES) -o "$(ENGINE_UNIT_TEST_TARGET)"
+	"./$(ENGINE_UNIT_TEST_TARGET)"
 
 test-app-shell:
 	$(PYTHON) tests/test_app_shell.py
@@ -119,7 +133,7 @@ test-reliability-backend:
 test-python:
 	$(PYTHON) -m pytest weather_reconstruction_model/scripts/tests
 
-bootstrap-fixture: server test-engine check-python-compile test-app-shell test-reliability-backend
+bootstrap-fixture: server test-engine test-cpp-unit check-python-compile test-app-shell test-reliability-backend
 	@echo "Fixture bootstrap passed."
 	@echo "Run the fixture app with: make run-backend-fixture"
 

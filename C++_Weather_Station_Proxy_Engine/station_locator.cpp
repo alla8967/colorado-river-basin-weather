@@ -20,7 +20,7 @@ const StationDataset* find_nearest_station(
     double min_dist = numeric_limits<double>::max();
     const StationDataset* nearest_station = nullptr;
 
-    for (int i = 0; i < stations.size(); i++) {
+    for (size_t i = 0; i < stations.size(); i++) {
         if (stations[i] == nullptr) {
             continue;
         }

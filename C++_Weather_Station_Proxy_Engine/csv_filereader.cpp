@@ -180,7 +180,7 @@ vector<string> parse_data(const string& input) {
     string value = "";
     bool inside_quotes = false;
 
-    for (int i = 0; i < input.size(); i++) {
+    for (size_t i = 0; i < input.size(); i++) {
         char current_char = input[i];
 
         if (current_char == '"') {
@@ -433,7 +433,7 @@ vector<DailyData> create_daily_dataset(const vector<string>& lines) {
     vector<DailyData> dataset;
     dataset.reserve(lines.size());
 
-    for (int i = 1; i < lines.size(); i++) {
+    for (size_t i = 1; i < lines.size(); i++) {
         vector<string> values = parse_data(lines[i]);
         DailyData day = stoDD(values);
 
@@ -461,7 +461,7 @@ vector<DailyData> create_app_ready_temperature_dataset(const vector<string>& lin
     vector<DailyData> dataset;
     dataset.reserve(lines.size());
 
-    for (int i = 1; i < lines.size(); i++) {
+    for (size_t i = 1; i < lines.size(); i++) {
         DailyData day = stoDD_app_ready_temperature_line(lines[i]);
 
         if (day.valid) {
@@ -505,12 +505,7 @@ vector<DailyData> sort_daily_dataset(vector<DailyData> input) {
 //___________________________________________________________
 /*
 
-Fucking leap year helper function because I
-guess I needed that for some stupid reason.
-Could we not have invented a better calendar
-somehow cause it makes this whole data
-analysis thing super fucking awkward for no
-reason.
+Leap-year helper used by monthly rollups to calculate calendar-day coverage.
 
 */
 
@@ -521,9 +516,7 @@ bool isLeapYear(int year) {
 //___________________________________________________________
 /*
 
-This bullshit too. Fucking kills me that it
-has to be done but my program is now more
-robust because of it.
+Return the calendar-day count for a month, including leap-year February.
 
 */
 
@@ -586,7 +579,7 @@ vector<MonthlyData> create_monthly_dataset(const vector<DailyData>& input) {
 
     MonthlyData temp_md;
 
-    for (int i = 0; i < input.size(); i++) {
+    for (size_t i = 0; i < input.size(); i++) {
 
         if (input[i].month != current_month || input[i].year != current_year) {
 
@@ -736,7 +729,7 @@ void export_monthly_dataset(string output_file, const vector<MonthlyData>& input
          << "\"MISSING_SNOW\""
          << endl;
 
-    for (int i = 0; i < input.size(); i++) {
+    for (size_t i = 0; i < input.size(); i++) {
         file
             << "\"" << input[i].year << "\","
             << "\"" << input[i].month << "\","

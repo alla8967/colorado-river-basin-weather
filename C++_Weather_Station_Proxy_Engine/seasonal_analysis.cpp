@@ -85,7 +85,7 @@ vector<SeasonalData> compute_seasonal_data(const vector<MonthlyData>& input) {
 
     SeasonalData temp_sd;
 
-    for (int i = 0; i < input.size(); i++) {
+    for (size_t i = 0; i < input.size(); i++) {
 
         string row_season = getSeason(input[i].month);
         int row_season_year = getSeasonYear(input[i].month, input[i].year);
