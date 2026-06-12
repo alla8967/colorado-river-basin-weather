@@ -25,6 +25,20 @@ Use `build_holdout_baseline_comparison.py` before making lift claims. Its
 nearest-hub and IDW-hub baselines are evaluated on the exact model prediction
 rows and fail by default if any baseline row is missing.
 
+Row-locked baseline comparison results (run 2026-06-11, all 739 stations,
+416,892 rows, 0 missing baseline rows; artifacts in
+`weather_reconstruction_model/outputs/reports/comparisons/`):
+
+```text
+mean station MAE:  model 2.68 F | IDW (5 hubs) 4.99 F | nearest hub 5.58 F
+model beats IDW at 588 / 739 stations (80%)
+model beats nearest hub at 631 / 739 stations (85%)
+strict passes: model 52 | IDW 9 | nearest hub 8
+```
+
+Note: the local comparison run had no terrain feature file, so relief/slope
+segment bands report "unknown"; elevation bands are populated.
+
 The older model-run contract example below remains useful history and schema
 documentation. It should not be confused with the broader Paloma evidence above.
 

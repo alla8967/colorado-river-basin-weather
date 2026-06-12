@@ -10,10 +10,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-DEFAULT_MODEL_RUN_ID = (
-    "option_c_limit97_5_hubs_10_target_neighbors_multiscale_terrain_"
-    "offset_terrain_standard_random_forest"
-)
+# Current evidence source (broad Paloma grouped station holdout). The older
+# option_c_limit97_5_* run is superseded history; point
+# STATION_PROXY_ACTIVE_MODEL_RUN_ID at it only for archival comparisons.
+DEFAULT_MODEL_RUN_ID = "paloma_v1_tavg"
 
 
 @dataclass(frozen=True)
