@@ -35,7 +35,8 @@ struct StationPairScore {
 
 StationPairScore calculate_station_pair_score(
     const StationDataset& station_a,
-    const StationDataset& station_b
+    const StationDataset& station_b,
+    bool include_monthly = true
 );
 
 vector<StationPairScore> calculate_all_station_pair_scores(

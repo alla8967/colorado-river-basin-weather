@@ -9,10 +9,10 @@
 
 using namespace std;
 
-StationDataset find_nearest_station(
+const StationDataset* find_nearest_station(
     double latitude,
     double longitude,
-    const vector<StationDataset>& stations
+    const vector<const StationDataset*>& stations
 );
 
 #endif

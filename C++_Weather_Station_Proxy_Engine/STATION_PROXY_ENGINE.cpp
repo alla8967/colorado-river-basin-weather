@@ -8,6 +8,7 @@
 #include <map>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "station_dataset.h"
@@ -124,39 +125,16 @@ void StationProxyEngine::write_station_json(
 }
 
 bool StationProxyEngine::is_hub_station_id(const string& station_id) const {
-    for (const StationDataset& station : hub_stations) {
-        if (station.metadata.stationID == station_id) {
-            return true;
-        }
-    }
-
-    return false;
+    return hub_station_by_id.find(station_id) != hub_station_by_id.end();
 }
 
 bool StationProxyEngine::is_target_station_id(const string& station_id) const {
-    for (const StationDataset& station : target_stations) {
-        if (station.metadata.stationID == station_id) {
-            return true;
-        }
-    }
-
-    return false;
+    return target_station_by_id.find(station_id) != target_station_by_id.end();
 }
 
 const StationDataset* StationProxyEngine::find_station_by_id(const string& station_id) const {
-    for (const StationDataset& station : target_stations) {
-        if (station.metadata.stationID == station_id) {
-            return &station;
-        }
-    }
-
-    for (const StationDataset& station : hub_stations) {
-        if (station.metadata.stationID == station_id) {
-            return &station;
-        }
-    }
-
-    return nullptr;
+    auto station = station_by_id.find(station_id);
+    return station == station_by_id.end() ? nullptr : station->second;
 }
 
 void StationProxyEngine::write_pair_score_json(
@@ -255,7 +233,8 @@ vector<StationPairScore> StationProxyEngine::find_ranked_proxy_matches_local(
 
         StationPairScore score = calculate_station_pair_score(
             target_station,
-            candidate_station
+            candidate_station,
+            false
         );
 
         if (score.score == 0.0) {
@@ -284,20 +263,44 @@ vector<StationPairScore> StationProxyEngine::find_ranked_proxy_matches_local(
     return scores;
 }
 
-StationDataset StationProxyEngine::with_derived_summaries(
-    const StationDataset& station
+void StationProxyEngine::precompute_derived_summaries(
+    vector<StationDataset>& stations
 ) const {
-    StationDataset output = station;
+    for (StationDataset& station : stations) {
+        if (station.monthly.empty() && !station.daily.empty()) {
+            station.monthly = create_monthly_dataset(station.daily);
+        }
 
-    if (output.monthly.empty() && !output.daily.empty()) {
-        output.monthly = create_monthly_dataset(output.daily);
+        if (station.seasonal.empty() && !station.monthly.empty()) {
+            station.seasonal = compute_seasonal_data(station.monthly);
+        }
+    }
+}
+
+void StationProxyEngine::rebuild_station_indexes() {
+    target_station_by_id.clear();
+    hub_station_by_id.clear();
+    station_by_id.clear();
+    all_station_pointers.clear();
+
+    target_station_by_id.reserve(target_stations.size());
+    hub_station_by_id.reserve(hub_stations.size());
+    station_by_id.reserve(target_stations.size() + hub_stations.size());
+    all_station_pointers.reserve(target_stations.size() + hub_stations.size());
+
+    for (const StationDataset& station : target_stations) {
+        target_station_by_id[station.metadata.stationID] = &station;
+        station_by_id[station.metadata.stationID] = &station;
+        all_station_pointers.push_back(&station);
     }
 
-    if (output.seasonal.empty() && !output.monthly.empty()) {
-        output.seasonal = compute_seasonal_data(output.monthly);
+    for (const StationDataset& station : hub_stations) {
+        hub_station_by_id[station.metadata.stationID] = &station;
+        if (station_by_id.find(station.metadata.stationID) == station_by_id.end()) {
+            station_by_id[station.metadata.stationID] = &station;
+        }
+        all_station_pointers.push_back(&station);
     }
-
-    return output;
 }
 
 string parent_directory(const string& input_file) {
@@ -384,11 +387,9 @@ void StationProxyEngine::add_monthly_metrics_to_score(
     const StationDataset& target_station,
     const StationDataset& proxy_station
 ) const {
-    StationDataset target_with_monthly = with_derived_summaries(target_station);
-    StationDataset proxy_with_monthly = with_derived_summaries(proxy_station);
     SimilarityResult monthly_similarity = calculate_monthly_tavg_similarity(
-        target_with_monthly,
-        proxy_with_monthly
+        target_station,
+        proxy_station
     );
 
     score.monthly_correlation = monthly_similarity.correlation;
@@ -561,10 +562,14 @@ bool StationProxyEngine::load(
 
     target_stations.clear();
     hub_stations.clear();
+    rebuild_station_indexes();
 
     target_stations = load_app_ready_temperature_station_datasets(target_input_file);
     hub_stations = load_app_ready_temperature_station_datasets(hub_input_file);
     enrich_station_metadata_from_candidates();
+    precompute_derived_summaries(target_stations);
+    precompute_derived_summaries(hub_stations);
+    rebuild_station_indexes();
 
     loaded = !target_stations.empty() && !hub_stations.empty();
 
@@ -615,24 +620,25 @@ string StationProxyEngine::analyze_location_json(
         return out.str();
     }
 
-    vector<StationDataset> nearest_station_pool = target_stations;
-    nearest_station_pool.insert(
-        nearest_station_pool.end(),
-        hub_stations.begin(),
-        hub_stations.end()
-    );
-
-    StationDataset nearest_station = find_nearest_station(
+    const StationDataset* nearest_station = find_nearest_station(
         latitude,
         longitude,
-        nearest_station_pool
+        all_station_pointers
     );
-    StationDataset nearest_station_with_summaries = with_derived_summaries(nearest_station);
-    bool nearest_station_is_hub = is_hub_station_id(nearest_station.metadata.stationID);
+
+    if (nearest_station == nullptr) {
+        out << "{";
+        write_json_string_field(out, "status", "error", true);
+        write_json_string_field(out, "message", "No nearest station found", false);
+        out << "}";
+        return out.str();
+    }
+
+    bool nearest_station_is_hub = is_hub_station_id(nearest_station->metadata.stationID);
     string match_mode = nearest_station_is_hub ? "hub_to_hub" : "target_to_hub";
 
     vector<StationPairScore> ranked_matches = find_ranked_proxy_matches_local(
-        nearest_station,
+        *nearest_station,
         hub_stations
     );
     vector<StationPairScore> top_matches = ranked_matches;
@@ -646,7 +652,7 @@ string StationProxyEngine::analyze_location_json(
             if (proxy_station.metadata.stationID == score.stationID_b) {
                 add_monthly_metrics_to_score(
                     score,
-                    nearest_station_with_summaries,
+                    *nearest_station,
                     proxy_station
                 );
                 break;
@@ -654,33 +660,23 @@ string StationProxyEngine::analyze_location_json(
         }
     }
 
-    StationDataset best_proxy_with_summaries;
-    bool has_best_proxy_with_summaries = false;
+    const StationDataset* best_proxy = nullptr;
     StationPairScore low_correlation_score;
-    StationDataset low_correlation_proxy_with_summaries;
-    bool has_low_correlation_example = false;
-    vector<pair<StationPairScore, StationDataset>> high_correlation_options;
-    vector<pair<StationPairScore, StationDataset>> low_correlation_options;
+    const StationDataset* low_correlation_proxy = nullptr;
+    vector<pair<StationPairScore, const StationDataset*>> high_correlation_options;
+    vector<pair<StationPairScore, const StationDataset*>> low_correlation_options;
 
     if (!top_matches.empty()) {
-        for (const StationDataset& proxy_station : hub_stations) {
-            if (proxy_station.metadata.stationID == top_matches[0].stationID_b) {
-                best_proxy_with_summaries = with_derived_summaries(proxy_station);
-                has_best_proxy_with_summaries = true;
-                break;
-            }
-        }
+        best_proxy = find_station_by_id(top_matches[0].stationID_b);
     }
 
     for (const StationPairScore& score : top_matches) {
-        for (const StationDataset& proxy_station : hub_stations) {
-            if (proxy_station.metadata.stationID == score.stationID_b) {
-                high_correlation_options.push_back({
-                    score,
-                    with_derived_summaries(proxy_station)
-                });
-                break;
-            }
+        const StationDataset* proxy_station = find_station_by_id(score.stationID_b);
+        if (proxy_station != nullptr) {
+            high_correlation_options.push_back({
+                score,
+                proxy_station
+            });
         }
     }
 
@@ -693,13 +689,7 @@ string StationProxyEngine::analyze_location_json(
             }
         );
 
-        for (const StationDataset& proxy_station : hub_stations) {
-            if (proxy_station.metadata.stationID == low_correlation_score.stationID_b) {
-                low_correlation_proxy_with_summaries = with_derived_summaries(proxy_station);
-                has_low_correlation_example = true;
-                break;
-            }
-        }
+        low_correlation_proxy = find_station_by_id(low_correlation_score.stationID_b);
 
         vector<StationPairScore> low_ranked_matches = ranked_matches;
         sort(
@@ -715,14 +705,12 @@ string StationProxyEngine::analyze_location_json(
                 break;
             }
 
-            for (const StationDataset& proxy_station : hub_stations) {
-                if (proxy_station.metadata.stationID == score.stationID_b) {
-                    low_correlation_options.push_back({
-                        score,
-                        with_derived_summaries(proxy_station)
-                    });
-                    break;
-                }
+            const StationDataset* proxy_station = find_station_by_id(score.stationID_b);
+            if (proxy_station != nullptr) {
+                low_correlation_options.push_back({
+                    score,
+                    proxy_station
+                });
             }
         }
     }
@@ -750,7 +738,7 @@ string StationProxyEngine::analyze_location_json(
     out << "},";
 
     out << "\"nearestStation\":";
-    write_station_json(out, nearest_station_with_summaries);
+    write_station_json(out, *nearest_station);
     out << ",";
 
     out << "\"bestProxyStation\":";
@@ -772,11 +760,11 @@ string StationProxyEngine::analyze_location_json(
     out << "]";
 
     out << ",\"bestProxyMonthlyComparison\":";
-    if (has_best_proxy_with_summaries) {
+    if (best_proxy != nullptr) {
         write_monthly_comparison_json(
             out,
-            nearest_station_with_summaries,
-            best_proxy_with_summaries,
+            *nearest_station,
+            *best_proxy,
             12
         );
     } else {
@@ -784,11 +772,11 @@ string StationProxyEngine::analyze_location_json(
     }
 
     out << ",\"bestProxyDailyComparison\":";
-    if (has_best_proxy_with_summaries) {
+    if (best_proxy != nullptr) {
         write_daily_comparison_json(
             out,
-            nearest_station_with_summaries,
-            best_proxy_with_summaries,
+            *nearest_station,
+            *best_proxy,
             365
         );
     } else {
@@ -796,15 +784,15 @@ string StationProxyEngine::analyze_location_json(
     }
 
     out << ",\"lowCorrelationExample\":";
-    if (has_low_correlation_example) {
+    if (low_correlation_proxy != nullptr) {
         out << "{";
         out << "\"match\":";
         write_pair_score_json(out, low_correlation_score, 0);
         out << ",\"dailyComparison\":";
         write_daily_comparison_json(
             out,
-            nearest_station_with_summaries,
-            low_correlation_proxy_with_summaries,
+            *nearest_station,
+            *low_correlation_proxy,
             365
         );
         out << "}";
@@ -821,8 +809,8 @@ string StationProxyEngine::analyze_location_json(
         write_daily_comparison_option_json(
             out,
             high_correlation_options[i].first,
-            nearest_station_with_summaries,
-            high_correlation_options[i].second,
+            *nearest_station,
+            *high_correlation_options[i].second,
             i + 1,
             365
         );
@@ -838,8 +826,8 @@ string StationProxyEngine::analyze_location_json(
         write_daily_comparison_option_json(
             out,
             low_correlation_options[i].first,
-            nearest_station_with_summaries,
-            low_correlation_options[i].second,
+            *nearest_station,
+            *low_correlation_options[i].second,
             i + 1,
             365
         );

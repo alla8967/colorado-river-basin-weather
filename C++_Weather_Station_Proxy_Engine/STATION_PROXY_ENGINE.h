@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <unordered_map>
 
 #include "station_dataset.h"
 #include "station_pair_score.h"
@@ -33,6 +34,10 @@ class StationProxyEngine {
 private:
     vector<StationDataset> target_stations;
     vector<StationDataset> hub_stations;
+    vector<const StationDataset*> all_station_pointers;
+    unordered_map<string, const StationDataset*> target_station_by_id;
+    unordered_map<string, const StationDataset*> hub_station_by_id;
+    unordered_map<string, const StationDataset*> station_by_id;
 
     string target_input_file;
     string hub_input_file;
@@ -79,6 +84,10 @@ private:
 
     const StationDataset* find_station_by_id(const string& station_id) const;
 
+    void precompute_derived_summaries(vector<StationDataset>& stations) const;
+
+    void rebuild_station_indexes();
+
     void write_pair_score_json(
         ostringstream& out,
         const StationPairScore& score,
@@ -95,8 +104,6 @@ private:
         const StationDataset& target_station,
         const vector<StationDataset>& candidate_stations
     ) const;
-
-    StationDataset with_derived_summaries(const StationDataset& station) const;
 
     void enrich_station_metadata_from_candidates();
 

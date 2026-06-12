@@ -8,32 +8,35 @@
 
 using namespace std;
 
-StationDataset find_nearest_station(
+const StationDataset* find_nearest_station(
     double latitude,
     double longitude,
-    const vector<StationDataset>& stations
+    const vector<const StationDataset*>& stations
 ) {
-    StationDataset output;
-
     if (stations.size() == 0) {
-        return output;
+        return nullptr;
     }
 
     double min_dist = numeric_limits<double>::max();
+    const StationDataset* nearest_station = nullptr;
 
     for (int i = 0; i < stations.size(); i++) {
+        if (stations[i] == nullptr) {
+            continue;
+        }
+
         double temp_dist = calculate_haversine_distance_km(
             latitude,
             longitude,
-            stations[i].metadata.latitude,
-            stations[i].metadata.longitude
+            stations[i]->metadata.latitude,
+            stations[i]->metadata.longitude
         );
 
         if (temp_dist < min_dist) {
             min_dist = temp_dist;
-            output = stations[i];
+            nearest_station = stations[i];
         }
     }
 
-    return output;
+    return nearest_station;
 }

@@ -114,7 +114,8 @@ double calculate_elevation_score(double elevation_difference_m) {
 
 StationPairScore calculate_station_pair_score(
     const StationDataset& station_a,
-    const StationDataset& station_b
+    const StationDataset& station_b,
+    bool include_monthly
 ) {
     double daily_correlation_score;
     double daily_MAD_score;
@@ -130,7 +131,7 @@ StationPairScore calculate_station_pair_score(
 
 
     result_daily = calculate_daily_tavg_similarity(station_a, station_b);
-    if (!station_a.monthly.empty() && !station_b.monthly.empty()) {
+    if (include_monthly && !station_a.monthly.empty() && !station_b.monthly.empty()) {
         result_monthly = calculate_monthly_tavg_similarity(station_a, station_b);
     } else {
         result_monthly.correlation = MISSING;
