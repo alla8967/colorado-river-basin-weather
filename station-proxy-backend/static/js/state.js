@@ -11,7 +11,8 @@ export const elements = {
     reliabilityMapModeSelect: document.getElementById("reliability-map-mode-select"),
     reliabilityMapHelp: document.getElementById("reliability-map-help"),
     reliabilityLegend: document.getElementById("reliability-legend"),
-    tabButtons: document.querySelectorAll("[data-tab-target]")
+    tabButtons: document.querySelectorAll("[data-tab-target]"),
+    presetButtons: document.querySelectorAll("[data-preset-lat][data-preset-lon]")
 };
 
 export const state = {

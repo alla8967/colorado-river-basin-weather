@@ -166,8 +166,19 @@ async function analyzeLocation() {
     }
 }
 
+function analyzePresetLocation(button) {
+    document.getElementById("latitude").value = button.dataset.presetLat;
+    document.getElementById("longitude").value = button.dataset.presetLon;
+    analyzeLocation();
+}
+
 function bindEvents() {
     elements.analyzeButton.addEventListener("click", analyzeLocation);
+    elements.presetButtons.forEach(button => {
+        button.addEventListener("click", function() {
+            analyzePresetLocation(this);
+        });
+    });
     bindReliabilityControls();
     elements.tabButtons.forEach(button => {
         button.addEventListener("click", function() {

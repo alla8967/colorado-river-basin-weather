@@ -5,6 +5,7 @@ CXXFLAGS = -std=c++17 -O2 -DNDEBUG -Wall -Wextra -I"C++_Weather_Station_Proxy_En
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
 UVICORN ?= $(PYTHON) -m uvicorn
+PYTHON_CMD = $(if $(findstring /,$(PYTHON)),$(abspath $(PYTHON)),$(PYTHON))
 PYCACHE_PREFIX ?= /tmp/crb_pycache
 
 ENGINE_DIR = C++_Weather_Station_Proxy_Engine
@@ -13,6 +14,8 @@ BACKEND_DIR = station-proxy-backend
 PROJECT_ABS = $(abspath .)
 FIXTURE_TARGET_FILE = $(PROJECT_ABS)/tests/fixtures/target_daily_app_ready.csv
 FIXTURE_HUB_FILE = $(PROJECT_ABS)/tests/fixtures/hub_daily_app_ready.csv
+DEMO_VENV = $(PROJECT_ABS)/.venv
+DEMO_PYTHON = $(DEMO_VENV)/bin/python
 
 SERVER_TARGET = $(SERVER_DIR)/station_engine_server
 API_TARGET = station_engine_api
@@ -96,7 +99,7 @@ NATIVE_ENGINE_SOURCES = \
 	$(ENGINE_DIR)/python_bindings.cpp \
 	$(COMMON_ENGINE_SOURCES)
 
-.PHONY: all setup setup-backend setup-model server api native-engine validate-prediction check check-js check-python-compile test test-engine test-cpp-unit test-app-shell test-engine-adapter test-native-parity test-reliability-backend test-python bootstrap-fixture run run-api run-backend run-backend-fixture doctor clean clean-local-artifacts
+.PHONY: all setup setup-backend setup-model server api native-engine validate-prediction check check-js check-python-compile test test-engine test-cpp-unit test-app-shell test-engine-adapter test-native-parity test-reliability-backend test-python bootstrap-fixture demo run run-api run-backend run-backend-fixture doctor clean clean-local-artifacts
 
 all: server api
 
@@ -160,6 +163,16 @@ bootstrap-fixture: server test-engine test-cpp-unit check-python-compile test-ap
 	@echo "Fixture bootstrap passed."
 	@echo "Run the fixture app with: make run-backend-fixture"
 
+demo:
+	@test -x "$(DEMO_PYTHON)" || python3 -m venv "$(DEMO_VENV)"
+	"$(DEMO_PYTHON)" -m pip install -e ".[dev]"
+	$(MAKE) server PYTHON="$(DEMO_PYTHON)"
+	@echo "open http://127.0.0.1:8000"
+	cd "$(BACKEND_DIR)" && \
+	STATION_PROXY_TARGET_FILE="$(FIXTURE_TARGET_FILE)" \
+	STATION_PROXY_HUB_FILE="$(FIXTURE_HUB_FILE)" \
+	"$(DEMO_PYTHON)" -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
+
 run: server
 	cd $(SERVER_DIR) && ./station_engine_server
 
@@ -167,13 +180,13 @@ run-api: api
 	./$(API_TARGET) 39.75 -105.0
 
 run-backend: server
-	cd $(BACKEND_DIR) && $(UVICORN) main:app --reload
+	cd "$(BACKEND_DIR)" && "$(PYTHON_CMD)" -m uvicorn main:app --reload
 
 run-backend-fixture: server
-	cd $(BACKEND_DIR) && \
+	cd "$(BACKEND_DIR)" && \
 	STATION_PROXY_TARGET_FILE="$(FIXTURE_TARGET_FILE)" \
 	STATION_PROXY_HUB_FILE="$(FIXTURE_HUB_FILE)" \
-	$(UVICORN) main:app --reload
+	"$(PYTHON_CMD)" -m uvicorn main:app --reload
 
 doctor:
 	$(PYTHON) weather_reconstruction_model/scripts/audit_project_readiness.py

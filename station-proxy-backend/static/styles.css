@@ -136,6 +136,26 @@ button:disabled {
     cursor: not-allowed;
 }
 
+.preset-locations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 14px 0 16px 0;
+}
+
+.preset-button {
+    width: auto;
+    margin: 0;
+    padding: 9px 12px;
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.preset-button:hover {
+    background: #dbeafe;
+}
+
 .results {
     display: grid;
     gap: 20px;
