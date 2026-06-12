@@ -203,9 +203,7 @@ vector<string> parse_data(const string& input) {
 //___________________________________________________________
 /*
 
-I'm popping a little helper function in
-here so that it can auto-detect missing
-values in the following function.
+Parse legacy numeric CSV fields and return MISSING for empty values.
 
 */
 
@@ -477,12 +475,7 @@ vector<DailyData> create_app_ready_temperature_dataset(const vector<string>& lin
 //___________________________________________________________
 /*
 
-This function utilizes something new that I have
-not used before! It is called a lambda function,
-and it was reccomended to me by chatGPT for this
-particular sorting function. I was gonna make my
-own bubble sorting algorithm, but this seems much
-simpler and less time consuming.
+Sort daily rows chronologically by year, month, and day.
 
 */
 
