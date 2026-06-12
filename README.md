@@ -192,7 +192,6 @@ colorado-river-basin-weather/
             ├── README.md
             ├── api.js
             ├── charts.js
-            ├── confidence.js
             ├── formatters.js
             ├── main.js
             ├── maps.js
@@ -529,7 +528,6 @@ station-proxy-backend/static/styles.css
 station-proxy-backend/static/js/main.js
 station-proxy-backend/static/js/api.js
 station-proxy-backend/static/js/charts.js
-station-proxy-backend/static/js/confidence.js
 station-proxy-backend/static/js/formatters.js
 station-proxy-backend/static/js/maps.js
 station-proxy-backend/static/js/results.js
@@ -543,7 +541,6 @@ The split keeps the review surface predictable:
 - `static/js/api.js` owns browser-to-backend requests,
 - `static/js/maps.js` owns Leaflet setup and map overlays,
 - `static/js/charts.js` owns SVG comparison charts,
-- `static/js/confidence.js` owns model-support layer rendering,
 - `static/js/results.js` owns analysis result cards and tables,
 - `static/js/formatters.js` owns display helpers,
 - `static/js/state.js` owns shared DOM references and browser state,

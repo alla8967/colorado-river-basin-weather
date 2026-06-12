@@ -1,7 +1,7 @@
 // Purpose: Wire page controls, tabs, map initialization, and location-analysis form behavior.
 
 import { fetchEngineStatus, fetchLocationAnalysis } from "./api.js";
-import { initializeConfidenceMap, initializeMap, refreshConfidenceMapSize, refreshMapSize } from "./maps.js";
+import { initializeMap, refreshMapSize } from "./maps.js";
 import { bindReliabilityControls, initializeReliabilityMap, refreshReliabilityMapSize } from "./reliability.js?v=holdout-error-maps-v1";
 import { renderResults } from "./results.js";
 import { elements, state } from "./state.js";
@@ -23,12 +23,6 @@ function activateTab(tabId) {
     elements.tabButtons.forEach(button => {
         button.classList.toggle("active", button.dataset.tabTarget === tabId);
     });
-
-    if (tabId === "model-support-tab") {
-        initializeConfidenceMap();
-        setTimeout(refreshConfidenceMapSize, 100);
-        return;
-    }
 
     if (tabId === "model-reliability-tab") {
         initializeReliabilityMap();

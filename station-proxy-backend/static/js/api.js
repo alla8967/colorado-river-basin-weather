@@ -9,39 +9,6 @@ export async function fetchLocationAnalysis(latitude, longitude) {
     return fetchFirstJson(`/analyze-location?${query}`);
 }
 
-export async function fetchConfidenceGrid() {
-    return fetchFirstJson("/model-runs/current/confidence-grid");
-}
-
-export function confidenceAnalysisUrls(latitude, longitude) {
-    const query = `lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}`;
-    return backendUrls(`/analyze-confidence?${query}`);
-}
-
-export async function fetchConfidenceSupport(latitude, longitude) {
-    let lastError = null;
-
-    for (const url of confidenceAnalysisUrls(latitude, longitude)) {
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const data = await response.json();
-            if (data && typeof data === "object" && url.startsWith("http://")) {
-                data.__apiBaseUrl = new URL(url).origin;
-            }
-
-            return data;
-        } catch (error) {
-            lastError = error;
-        }
-    }
-
-    throw lastError;
-}
-
 function backendUrls(path) {
     const urls = [];
     const localBackendOrigins = [

@@ -623,7 +623,6 @@ tbody tr.active-row {
 }
 
 #map,
-#confidence-map,
 #reliability-map {
     height: 62vh;
     width: 100%;
@@ -783,31 +782,6 @@ tbody tr.active-row {
 .legend-dot.proxy {
     color: #dc2626;
     background: #f87171;
-}
-
-.legend-dot.confidence-very-high {
-    color: #15803d;
-    background: #22c55e;
-}
-
-.legend-dot.confidence-high {
-    color: #0f766e;
-    background: #2dd4bf;
-}
-
-.legend-dot.confidence-moderate {
-    color: #ca8a04;
-    background: #facc15;
-}
-
-.legend-dot.confidence-low {
-    color: #c2410c;
-    background: #fb923c;
-}
-
-.legend-dot.confidence-very-low {
-    color: #b91c1c;
-    background: #ef4444;
 }
 
 .legend-dot.reliability-very-high {
@@ -1422,7 +1396,6 @@ details.method-card[open] summary {
     }
 
     #map,
-    #confidence-map,
     #reliability-map,
     .leaflet-container {
         height: 420px !important;

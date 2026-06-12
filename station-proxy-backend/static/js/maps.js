@@ -1,6 +1,5 @@
 // Purpose: Manage Leaflet maps, station markers, selected points, and proxy highlighting.
 
-import { analyzeConfidencePoint, loadConfidencePoints } from "./confidence.js";
 import { state } from "./state.js";
 import {
     formatNumber,
@@ -24,14 +23,6 @@ export function refreshMapSize() {
     }
 
     state.map.invalidateSize(true);
-}
-
-export function refreshConfidenceMapSize() {
-    if (!state.confidenceMap) {
-        return;
-    }
-
-    state.confidenceMap.invalidateSize(true);
 }
 
 export function addStationCircleMarker(station, options) {
@@ -219,79 +210,6 @@ export function initializeMap() {
     setTimeout(refreshMapSize, 2000);
 
     window.addEventListener("resize", refreshMapSize);
-}
-
-export function fitConfidenceMapToPayload(payload) {
-    if (!state.confidenceMap || !payload || !payload.bounds) {
-        return;
-    }
-
-    const bounds = payload.bounds;
-    const southWest = [Number(bounds.latMin), Number(bounds.lonMin)];
-    const northEast = [Number(bounds.latMax), Number(bounds.lonMax)];
-
-    if (southWest.some(value => Number.isNaN(value)) ||
-        northEast.some(value => Number.isNaN(value))) {
-        return;
-    }
-
-    state.confidenceMap.fitBounds([southWest, northEast], {
-        padding: [20, 20],
-        maxZoom: 6
-    });
-}
-
-export function initializeConfidenceMap() {
-    if (state.confidenceMap || typeof L === "undefined") {
-        refreshConfidenceMapSize();
-        return;
-    }
-
-    const mapElement = document.getElementById("confidence-map");
-    mapElement.style.height = "62vh";
-    mapElement.style.width = "100%";
-
-    state.confidenceMap = L.map("confidence-map", {
-        scrollWheelZoom: true,
-        zoomControl: true,
-        preferCanvas: true
-    });
-
-    const tileLayer = L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
-        {
-            maxZoom: 18,
-            attribution: "Tiles &copy; Esri &mdash; Source: Esri, USGS, NOAA"
-        }
-    );
-
-    tileLayer.on("tileerror", function(error) {
-        console.warn("A confidence map tile failed to load:", error);
-    });
-
-    tileLayer.addTo(state.confidenceMap);
-    state.confidenceMap.createPane("confidencePane");
-    state.confidenceMap.getPane("confidencePane").style.zIndex = 360;
-    state.confidenceMap.getPane("confidencePane").style.pointerEvents = "auto";
-    state.confidenceMap.createPane("confidenceSelectionPane");
-    state.confidenceMap.getPane("confidenceSelectionPane").style.zIndex = 390;
-    state.confidenceMap.getPane("confidenceSelectionPane").style.pointerEvents = "auto";
-    state.confidencePointLayer = L.layerGroup().addTo(state.confidenceMap);
-    state.confidenceMap.setView([39.5, -107.0], 6);
-
-    state.confidenceMap.on("click", function(event) {
-        analyzeConfidencePoint(event.latlng.lat, event.latlng.lng);
-    });
-
-    loadConfidencePoints().then(payload => {
-        fitConfidenceMapToPayload(payload);
-        refreshConfidenceMapSize();
-    });
-
-    requestAnimationFrame(refreshConfidenceMapSize);
-    setTimeout(refreshConfidenceMapSize, 100);
-    setTimeout(refreshConfidenceMapSize, 500);
-    window.addEventListener("resize", refreshConfidenceMapSize);
 }
 
 export function highlightProxyRank(rank) {

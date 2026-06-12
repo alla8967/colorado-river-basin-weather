@@ -45,6 +45,9 @@ def test_app_shell_serves_html_and_static_assets():
     assert "<option value=\"rmse\">Holdout RMSE</option>" in html
     assert "<option value=\"bias\">Holdout Bias</option>" in html
     assert "Show Stations" in html
+    assert "Model Support" not in html
+    assert "model-support-tab" not in html
+    assert "confidence-map" not in html
 
     styles = (BACKEND_DIR / "static" / "styles.css").read_text()
     main_js = (BACKEND_DIR / "static" / "js" / "main.js").read_text()
@@ -57,6 +60,7 @@ def test_app_shell_serves_html_and_static_assets():
     assert "Missing required runtime files" in main_js
     assert "stationDataNotice" in main_js
     assert "initializeReliabilityMap" in main_js
+    assert "initializeConfidenceMap" not in main_js
     assert 'fetchFirstJson("/test")' in api_js
     assert "fetchFirstJson(`/analyze-location?${query}`)" in api_js
     assert "http://127.0.0.1:8000" in api_js
