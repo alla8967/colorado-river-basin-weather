@@ -120,7 +120,13 @@ Do not retrain models, refresh holdout validation, or stage generated NOAA/model
 
 ## Limitations
 
-This is a basin-scoped research and local-demo project, not a packaged production weather service. The holdout evidence is strong for the current Colorado River Basin station corpus, while full external benchmark comparisons and artifact packaging remain future work.
+This is a basin-scoped research and local-demo project, not a packaged production weather service. The holdout evidence is strong for the current Colorado River Basin station corpus, with these boundaries:
+
+- The app and model evidence are scoped to Colorado River Basin / in-basin use.
+- PRISM and Daymet comparisons have not been run yet.
+- Strict-pass criteria are still mostly unmet: 52 model passes out of 739 held-out stations.
+- The production final-model fit served by the app is distinct from the grouped holdout evidence summarized above.
+- Full NOAA data products, DEM products, model runs, and serialized model artifacts are not bundled with the public repo.
 
 ## Reviewer/Runbook Links
 
