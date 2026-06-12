@@ -28,6 +28,9 @@ dev = [
 native = [
     "pybind11>=2.12",
 ]
+viz = [
+    "matplotlib>=3.8",
+]
 
 [tool.setuptools]
 py-modules = []

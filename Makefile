@@ -56,6 +56,7 @@ PYTHON_COMPILE_FILES = \
 	$(BACKEND_DIR)/reliability_service.py \
 	weather_reconstruction_model/scripts/evaluate_final_model_station_metrics.py \
 	weather_reconstruction_model/scripts/build_holdout_baseline_comparison.py \
+	weather_reconstruction_model/scripts/build_portfolio_figure.py \
 	tests/test_app_shell.py \
 	tests/test_engine_adapter.py \
 	tests/test_native_engine_parity.py \
