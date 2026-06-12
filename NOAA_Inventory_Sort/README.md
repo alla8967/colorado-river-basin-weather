@@ -26,3 +26,27 @@ candidate lists document which stations were selected.
 Generated files such as `*_daily_app_ready.csv` and `NOAA_GHCN_ByYear/` are
 ignored because they can be large and are local runtime artifacts.
 
+## Full NOAA Data Path
+
+The fixture app does not need the full NOAA files. For a full local run, place
+GHCN-Daily yearly bulk CSVs under:
+
+```text
+NOAA_Inventory_Sort/NOAA_GHCN_ByYear/
+```
+
+NOAA publishes those files as yearly `.csv.gz` archives, for example:
+
+```text
+https://www.ncei.noaa.gov/pub/data/ghcn/daily/by_year/2026.csv.gz
+```
+
+After the yearly files are present, build the app-ready target and hub CSVs:
+
+```bash
+STATION_PROXY_GHCN_YEAR_DIR=NOAA_Inventory_Sort/NOAA_GHCN_ByYear \
+  .venv/bin/python NOAA_Inventory_Sort/filter_ghcn_years.py
+```
+
+That command writes `target_daily_app_ready.csv` and `hub_daily_app_ready.csv`
+beside this README. Those outputs stay ignored by git.

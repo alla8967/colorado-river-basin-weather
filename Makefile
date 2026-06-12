@@ -10,6 +10,9 @@ PYCACHE_PREFIX ?= /tmp/crb_pycache
 ENGINE_DIR = C++_Weather_Station_Proxy_Engine
 SERVER_DIR = Station_Engine_Server
 BACKEND_DIR = station-proxy-backend
+PROJECT_ABS = $(abspath .)
+FIXTURE_TARGET_FILE = $(PROJECT_ABS)/tests/fixtures/target_daily_app_ready.csv
+FIXTURE_HUB_FILE = $(PROJECT_ABS)/tests/fixtures/hub_daily_app_ready.csv
 
 SERVER_TARGET = $(SERVER_DIR)/station_engine_server
 API_TARGET = station_engine_api
@@ -70,7 +73,7 @@ VALIDATE_PREDICTION_SOURCES = \
 	$(ENGINE_DIR)/similarity_scores.cpp \
 	$(ENGINE_DIR)/station_dataset.cpp
 
-.PHONY: all setup setup-backend setup-model server api validate-prediction check check-js check-python-compile test test-engine test-app-shell test-reliability-backend test-python run run-api run-backend doctor clean clean-local-artifacts
+.PHONY: all setup setup-backend setup-model server api validate-prediction check check-js check-python-compile test test-engine test-app-shell test-reliability-backend test-python bootstrap-fixture run run-api run-backend run-backend-fixture doctor clean clean-local-artifacts
 
 all: server api
 
@@ -116,6 +119,10 @@ test-reliability-backend:
 test-python:
 	$(PYTHON) -m pytest weather_reconstruction_model/scripts/tests
 
+bootstrap-fixture: server test-engine check-python-compile test-app-shell test-reliability-backend
+	@echo "Fixture bootstrap passed."
+	@echo "Run the fixture app with: make run-backend-fixture"
+
 run: server
 	cd $(SERVER_DIR) && ./station_engine_server
 
@@ -124,6 +131,12 @@ run-api: api
 
 run-backend: server
 	cd $(BACKEND_DIR) && $(UVICORN) main:app --reload
+
+run-backend-fixture: server
+	cd $(BACKEND_DIR) && \
+	STATION_PROXY_TARGET_FILE="$(FIXTURE_TARGET_FILE)" \
+	STATION_PROXY_HUB_FILE="$(FIXTURE_HUB_FILE)" \
+	$(UVICORN) main:app --reload
 
 doctor:
 	$(PYTHON) weather_reconstruction_model/scripts/audit_project_readiness.py

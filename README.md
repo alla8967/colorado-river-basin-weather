@@ -60,6 +60,17 @@ For the Python research-script suite, use:
 PYTHON=.venv/bin/python make test-python
 ```
 
+For a fixture-first app bootstrap that works without full NOAA data:
+
+```bash
+make bootstrap-fixture
+make run-backend-fixture
+```
+
+The fixture path builds the persistent C++ server, runs the fixture engine smoke
+test, compiles backend Python entry points, and starts FastAPI against the tiny
+tracked station files.
+
 ---
 
 ## Project Status

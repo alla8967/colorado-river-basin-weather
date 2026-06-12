@@ -31,6 +31,15 @@ make run-backend
 
 Then open `http://127.0.0.1:8000/`.
 
+For a clean fixture-only run that does not require the full NOAA CSVs:
+
+```bash
+make bootstrap-fixture
+make run-backend-fixture
+```
+
+The fixture app uses the tiny tracked station files in `tests/fixtures/`, so it
+is the safest first check on a new machine.
+
 Some views depend on generated NOAA/model artifacts that are intentionally
 ignored by git; see `../docs/reviewer_runbook.md` for the practical review path.
-
