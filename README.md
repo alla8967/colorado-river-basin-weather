@@ -98,6 +98,10 @@ make run-backend
 
 Then open `http://127.0.0.1:8000/`. The first full-data startup can be slow because the C++ engine loads station CSVs into memory; later requests reuse the loaded process.
 
+## App Screenshots
+
+Screenshots are not embedded until a full-width browser capture with fully rendered map tiles is available. See `docs/screenshots.md` for the exact capture steps and filenames.
+
 ## Development
 
 Run the main fixture validation set:
@@ -125,4 +129,5 @@ This is a basin-scoped research and local-demo project, not a packaged productio
 - `docs/artifact_quarantine_plan.md`: generated artifact shelves and safe cleanup policy.
 - `docs/generated_artifact_audit.md`: commit/staging policy for generated files.
 - `docs/research_script_inventory.md`: research/model script map.
+- `docs/screenshots.md`: app screenshot capture instructions.
 - `weather_reconstruction_model/MODEL_RUNS.md`: verified model-run claims and artifact pointers.
