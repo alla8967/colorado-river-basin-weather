@@ -1,8 +1,7 @@
 """Test station engine backend selection without requiring the native extension."""
 
-from pathlib import Path
 import sys
-
+from pathlib import Path
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 BACKEND_DIR = PROJECT_DIR / "station-proxy-backend"

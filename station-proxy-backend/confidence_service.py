@@ -9,8 +9,12 @@ from pathlib import Path
 from typing import Optional
 
 from api_models import AnalyzeConfidenceResponse, ConfidenceSupportResponse, ErrorResponse
-# settings configures imports for weather_reconstruction_model/scripts.
+
+# settings must be imported before `common`: importing it adds
+# weather_reconstruction_model/scripts to sys.path.
 from settings import BackendSettings
+
+# isort: split
 from common.confidence_data import load_confidence_support_inputs
 from common.confidence_support import (
     ConfidenceSupportConfig,

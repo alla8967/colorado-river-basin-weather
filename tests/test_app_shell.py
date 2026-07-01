@@ -7,7 +7,6 @@ import re
 import sys
 from pathlib import Path
 
-
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 BACKEND_DIR = PROJECT_DIR / "station-proxy-backend"
 STATIC_REF_RE = re.compile(r"""["'](?P<path>/(?:static|assets)/[^"']+)["']""")

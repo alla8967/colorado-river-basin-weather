@@ -5,23 +5,21 @@ The report helps explain where confidence is strong, sparse, or physically risky
 from __future__ import annotations
 
 import argparse
-import csv
 import json
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Mapping
 
 import config
 from common.confidence_data import load_confidence_support_inputs
 from common.confidence_support import SupportStation
-from common.csv_utils import CsvRow, read_csv_rows, write_csv_rows
+from common.csv_utils import CsvRow, write_csv_rows
 from common.geo_utils import calculate_distance_km
 from common.model_runs import load_model_run, resolve_model_run
 from common.number_utils import to_optional_float
 from common.reporting import escape_html as escape
 from common.reporting import render_html_table, render_metric_card, trusted_html
-
 
 DEFAULT_MODEL_RUN_ID = (
     "option_c_limit97_5_hubs_10_target_neighbors_multiscale_terrain_"

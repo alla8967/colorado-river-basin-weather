@@ -4,10 +4,9 @@ This prevents Slurm wrappers from drifting away from the Python runner contract.
 
 from __future__ import annotations
 
-from pathlib import Path
 import argparse
 import sys
-
+from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPT_DIR))

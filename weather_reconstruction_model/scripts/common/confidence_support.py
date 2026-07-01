@@ -4,11 +4,10 @@ This shared logic keeps CLI scoring, grid building, and backend analysis consist
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Mapping, Sequence
 
 from common.geo_utils import calculate_distance_km
-
 
 SCORE_MIN = 0.0
 SCORE_MAX = 100.0

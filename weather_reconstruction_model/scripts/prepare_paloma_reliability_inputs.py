@@ -5,8 +5,8 @@ The script normalizes station metrics and writes metadata consumed by the reliab
 from __future__ import annotations
 
 import argparse
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Mapping
 
 import config
 from common.csv_utils import read_csv_rows, write_csv_rows
@@ -25,7 +25,6 @@ from common.reliability_surface import (
     first_present_float,
     first_present_int,
 )
-
 
 DEFAULT_BOUNDARY_FILE = (
     config.PROJECT_DIR

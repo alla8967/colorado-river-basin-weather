@@ -2,8 +2,8 @@
 
 This script powers the stronger Paloma-style random forest workflows used for model artifacts."""
 
-from pathlib import Path
 import argparse
+from pathlib import Path
 from time import perf_counter
 
 import config
@@ -23,7 +23,6 @@ from pipeline.training_data import (
     temperature_prediction_fieldnames,
 )
 
-
 PREDICTION_DIR = config.PREDICTION_DIR
 REPORT_DIR = config.REPORT_DIR
 DEFAULT_TRAIN_END_YEAR = config.DEFAULT_TRAIN_END_YEAR
@@ -36,8 +35,7 @@ ML_GOAL_PASS_RATE = config.ML_GOAL_PASS_RATE
 
 def import_sklearn_models():
     try:
-        from sklearn.ensemble import HistGradientBoostingRegressor
-        from sklearn.ensemble import RandomForestRegressor
+        from sklearn.ensemble import HistGradientBoostingRegressor, RandomForestRegressor
     except ModuleNotFoundError as error:
         raise SystemExit(
             "scikit-learn is required for tree-model training. "

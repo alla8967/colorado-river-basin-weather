@@ -6,8 +6,8 @@ from __future__ import annotations
 
 import argparse
 import shutil
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 import config
 from common.confidence_data import (
@@ -37,7 +37,6 @@ from common.model_artifacts import (
 from common.model_runs import resolve_model_run
 from common.number_utils import to_optional_float
 from pipeline.model_features import resolve_model_feature_selection
-
 
 MODEL_RUN_ID = (
     "option_c_limit97_5_hubs_10_target_neighbors_multiscale_terrain_"

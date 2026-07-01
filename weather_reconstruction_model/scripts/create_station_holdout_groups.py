@@ -16,7 +16,6 @@ from common.csv_utils import write_csv_rows
 from common.number_utils import to_float
 from common.weather_cache import TEMPERATURE_VARIABLES, validate_temperature_variable
 
-
 DEFAULT_OUTPUT_ROOT = config.OUTPUT_DIR / "paloma" / "station_holdout_groups"
 
 
@@ -366,7 +365,7 @@ def main() -> None:
     master_file = output_dir / "holdout_groups.csv"
     write_csv_rows(master_file, rows, fieldnames)
 
-    for group_index, group in enumerate(groups, start=1):
+    for group_index, _group in enumerate(groups, start=1):
         group_id = f"group_{group_index:03d}"
         group_file = output_dir / f"{group_id}.csv"
         write_csv_rows(

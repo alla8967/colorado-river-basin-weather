@@ -13,7 +13,6 @@ from pathlib import Path
 import config
 from common.weather_cache import TEMPERATURE_VARIABLES, validate_temperature_variable
 
-
 DEFAULT_ACTIVE_TABLE = (
     config.GENERAL_TABLE_DIR
     / "option_c_limit97_5_hubs_10_target_neighbors_multiscale_terrain.csv"

@@ -13,19 +13,20 @@ from typing import Any
 from fastapi import HTTPException
 from fastapi.responses import FileResponse
 
+# settings must be imported before `common`: importing it adds
+# weather_reconstruction_model/scripts to sys.path.
 from settings import BackendSettings
 
-# settings configures imports for weather_reconstruction_model/scripts.
+# isort: split
 from common.csv_utils import read_csv_rows
 from common.geo_utils import calculate_distance_km
 from common.model_runs import load_json_file, resolve_model_run
 from common.reliability_surface import (
     RELIABILITY_LAYERS,
-    SURFACE_SCHEMA_VERSION,
     SUMMARY_SCHEMA_VERSION,
+    SURFACE_SCHEMA_VERSION,
     normalize_layer,
 )
-
 
 MAX_PREDICTION_SERIES_POINTS = 800
 

@@ -11,7 +11,6 @@ from typing import Any
 
 from common.csv_utils import CsvRow, read_csv_rows
 
-
 REQUIRED_MODEL_RUN_FILES = {
     "manifest": "model_manifest.json",
     "feature_schema": "feature_schema.json",

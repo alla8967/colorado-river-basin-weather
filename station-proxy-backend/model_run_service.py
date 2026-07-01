@@ -6,11 +6,14 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
+from api_models import ConfidenceGridSummary, CurrentModelRunResponse
 from fastapi import HTTPException
 
-from api_models import ConfidenceGridSummary, CurrentModelRunResponse
-# settings configures imports for weather_reconstruction_model/scripts.
+# settings must be imported before `common`: importing it adds
+# weather_reconstruction_model/scripts to sys.path.
 from settings import BackendSettings
+
+# isort: split
 from common.model_runs import (
     load_confidence_grid,
     load_model_manifest,

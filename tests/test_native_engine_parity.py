@@ -1,8 +1,7 @@
 """Compare native and subprocess engine responses when the pybind extension exists."""
 
-from pathlib import Path
 import sys
-
+from pathlib import Path
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 BACKEND_DIR = PROJECT_DIR / "station-proxy-backend"

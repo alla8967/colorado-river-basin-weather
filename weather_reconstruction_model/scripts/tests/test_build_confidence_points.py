@@ -4,12 +4,11 @@ The coverage verifies generated JSON shape without requiring local model artifac
 
 from __future__ import annotations
 
-from pathlib import Path
 import json
 import subprocess
 import sys
 import tempfile
-
+from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1]
 PROJECT_DIR = SCRIPT_DIR.parents[1]

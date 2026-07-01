@@ -4,14 +4,13 @@ The scoring combines distance, elevation, terrain, and optional pairwise skill e
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
 import math
-from typing import Mapping, Sequence
+from collections.abc import Mapping, Sequence
+from dataclasses import asdict, dataclass
 
 from common.geo_utils import calculate_distance_km
 from common.number_utils import to_float, to_optional_float
 from common.pairwise_skill import PAIRWISE_SKILL_COLUMNS
-
 
 StationRow = Mapping[str, str]
 StationDates = Mapping[str, set[str]]

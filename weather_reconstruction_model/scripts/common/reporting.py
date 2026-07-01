@@ -5,7 +5,7 @@ The goal is consistent escaping, tables, and metric cards without introducing a 
 from __future__ import annotations
 
 import html
-from typing import Sequence
+from collections.abc import Sequence
 
 
 class TrustedHtml(str):

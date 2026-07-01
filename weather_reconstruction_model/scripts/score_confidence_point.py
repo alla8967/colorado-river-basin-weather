@@ -11,12 +11,11 @@ from pathlib import Path
 import config
 from common.confidence_data import load_confidence_support_inputs
 from common.confidence_support import (
-    ConfidenceSupportConfig,
     DEFAULT_COMPONENT_WEIGHTS,
+    ConfidenceSupportConfig,
     SupportPoint,
     calculate_confidence_support,
 )
-
 
 DEFAULT_VALIDATION_METRICS_FILE = (
     config.REPORT_DIR

@@ -2,9 +2,9 @@
 
 It remains useful as a simpler comparison point for newer tree/general model workflows."""
 
-from pathlib import Path
 import argparse
 import csv
+from pathlib import Path
 
 import config
 from common.metrics import calculate_metrics, mean

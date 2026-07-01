@@ -2,12 +2,13 @@
 
 It assembles target, hub, terrain, offset, and optional pairwise-skill features into model-ready CSV rows."""
 
-from pathlib import Path
 import argparse
+from pathlib import Path
 
 import batch_validate_models as batch_tools
 import config
 from common.csv_utils import read_csv_rows
+from common.geo_utils import calculate_distance_km
 from common.number_utils import to_float
 from common.weather_cache import (
     HUB_SOURCE,
@@ -19,13 +20,11 @@ from common.weather_cache import (
     load_year_coverage_for_station_ids,
     validate_temperature_variable,
 )
-from common.geo_utils import calculate_distance_km
 from pipeline.station_selection import find_training_eligible_hubs
 from pipeline.training_tables import (
     build_general_rows_for_target,
     open_streaming_general_table_writer,
 )
-
 
 GENERAL_TABLE_DIR = config.GENERAL_TABLE_DIR
 TARGET_CANDIDATE_FILE = config.TARGET_CANDIDATE_FILE

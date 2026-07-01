@@ -10,8 +10,8 @@ import csv
 import json
 import math
 from collections import defaultdict
+from collections.abc import Iterable, Mapping
 from pathlib import Path
-from typing import Iterable, Mapping
 
 import config
 from common.csv_utils import write_csv_rows
@@ -21,7 +21,6 @@ from common.number_utils import to_float
 from common.reporting import escape_html as escape
 from common.reporting import render_metric_card
 from train_station_holdout_model import is_strict_pass
-
 
 DEFAULT_MODEL_METRICS = (
     config.PROJECT_DIR

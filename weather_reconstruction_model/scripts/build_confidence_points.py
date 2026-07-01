@@ -7,9 +7,9 @@ from __future__ import annotations
 import argparse
 import json
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Sequence
 
 import config
 from common.confidence_data import ConfidenceSupportInputs, load_confidence_support_inputs
@@ -23,7 +23,6 @@ from score_confidence_point import (
     DEFAULT_VALIDATION_METRICS_FILE,
     parse_component_weights,
 )
-
 
 DEFAULT_OUTPUT_FILE = config.PROJECT_DIR / "station-proxy-backend" / "assets" / "confidence-points.json"
 

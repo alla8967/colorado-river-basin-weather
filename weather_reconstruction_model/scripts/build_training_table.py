@@ -2,7 +2,6 @@
 
 It joins target and hub observations on shared dates and adds distance-based features."""
 
-from pathlib import Path
 import csv
 import sys
 

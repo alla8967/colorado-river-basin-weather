@@ -4,8 +4,8 @@ This keeps model trainers and artifact exporters aligned on which columns belong
 
 from __future__ import annotations
 
+from collections.abc import Collection, Iterable
 from dataclasses import dataclass, replace
-from typing import Collection, Iterable
 
 import train_general_temperature_model as general_model
 from common.pairwise_skill import PAIRWISE_SKILL_COLUMNS
@@ -39,7 +39,7 @@ class ModelFeatureSelection:
     def with_feature_columns(
         self,
         feature_columns: Iterable[str],
-    ) -> "ModelFeatureSelection":
+    ) -> ModelFeatureSelection:
         return replace(self, feature_columns=list(feature_columns))
 
 

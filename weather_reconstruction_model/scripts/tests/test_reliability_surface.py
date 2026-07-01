@@ -4,12 +4,11 @@ The coverage verifies map payloads, station overlays, and CLI behavior without r
 
 from __future__ import annotations
 
-from pathlib import Path
 import json
 import subprocess
 import sys
 import tempfile
-
+from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1]
 PROJECT_DIR = SCRIPT_DIR.parents[1]
@@ -25,7 +24,6 @@ from common.reliability_surface import (
     empirical_percentile,
     expected_mae_usefulness_score,
     extract_polygon_rings,
-    load_boundary_geojson,
     point_in_boundary,
     reliability_from_expected_mae,
     surface_relative_visual_scale,

@@ -4,17 +4,16 @@ The fixtures protect array-job preparation and consolidation behavior."""
 
 from __future__ import annotations
 
-from pathlib import Path
 import sys
 import tempfile
-
+from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from common.csv_utils import write_csv_rows
 import create_station_holdout_chunks as chunker
 import merge_station_holdout_results as merger
+from common.csv_utils import write_csv_rows
 
 
 def test_unique_target_stations_are_sorted_and_deduped() -> None:

@@ -2,11 +2,10 @@
 
 These checks protect backend/report consumers from malformed generated run folders."""
 
-from pathlib import Path
 import json
 import sys
 import tempfile
-
+from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPT_DIR))
@@ -17,7 +16,6 @@ from common.model_runs import (
     missing_model_run_files,
     resolve_model_run,
 )
-
 
 MODEL_RUN_ID = "example_model_run"
 

@@ -2,8 +2,8 @@
 
 This is the main configurable trainer for multiscale, terrain, offset, and pairwise-skill feature sets."""
 
-from pathlib import Path
 import argparse
+from pathlib import Path
 
 import config
 import train_temperature_model as regression
@@ -12,7 +12,6 @@ from common.metrics import calculate_metrics, mean
 from common.number_utils import to_float
 from common.pairwise_skill import PAIRWISE_SKILL_COLUMNS
 from common.weather_cache import TEMPERATURE_VARIABLES, validate_temperature_variable
-
 
 GENERAL_TABLE_DIR = config.GENERAL_TABLE_DIR
 PREDICTION_DIR = config.PREDICTION_DIR

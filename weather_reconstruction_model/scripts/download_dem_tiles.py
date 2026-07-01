@@ -2,7 +2,6 @@
 
 This is only needed when rebuilding local terrain rasters rather than using processed terrain artifacts."""
 
-from pathlib import Path
 import argparse
 import re
 import sys
@@ -10,7 +9,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-
+from pathlib import Path
 
 PROJECT_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_MANIFEST = PROJECT_DIR / "Raw_DEM" / "data.csv"

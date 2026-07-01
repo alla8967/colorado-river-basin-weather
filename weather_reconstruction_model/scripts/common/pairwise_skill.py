@@ -5,11 +5,10 @@ The shared implementation prevents training-table builders and tests from drifti
 from __future__ import annotations
 
 import math
-from typing import Mapping
+from collections.abc import Mapping
 
 from common.metrics import calculate_correlation, calculate_mae, calculate_rmse
 from common.number_utils import to_optional_float
-
 
 PAIRWISE_SKILL_COLUMNS = [
     "pair_overlap_days",

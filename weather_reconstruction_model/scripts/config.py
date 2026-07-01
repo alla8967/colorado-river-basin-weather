@@ -4,7 +4,6 @@ Scripts import this module so generated inputs, outputs, caches, and model runs 
 
 from pathlib import Path
 
-
 PROJECT_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_DIR / "NOAA_Inventory_Sort"
 OUTPUT_DIR = PROJECT_DIR / "weather_reconstruction_model" / "outputs"

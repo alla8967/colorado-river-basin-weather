@@ -10,7 +10,6 @@ from pathlib import Path
 
 import config
 
-
 REQUIRED_FILES = [
     config.TARGET_CANDIDATE_FILE,
     config.HUB_CANDIDATE_FILE,

@@ -11,12 +11,12 @@ from pathlib import Path
 import config
 from common.csv_utils import read_csv_rows
 from common.geo_utils import calculate_distance_km
+from common.number_utils import to_float
 from common.pairwise_skill import (
     PAIRWISE_SKILL_COLUMNS,
     calculate_pairwise_skill,
     format_pairwise_skill_row,
 )
-from common.number_utils import to_float
 from common.weather_cache import (
     HUB_SOURCE,
     TARGET_SOURCE,
@@ -24,7 +24,6 @@ from common.weather_cache import (
     load_daily_for_station_ids,
     validate_temperature_variable,
 )
-
 
 DEFAULT_OUTPUT_FILE = config.CACHE_DIR / "pairwise_station_skill_features.csv"
 IDENTITY_COLUMNS = [

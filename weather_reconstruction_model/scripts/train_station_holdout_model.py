@@ -33,7 +33,6 @@ from train_tree_temperature_model import (
     import_sklearn_models,
 )
 
-
 PREDICTION_DIR = config.PREDICTION_DIR
 REPORT_DIR = config.REPORT_DIR
 DEFAULT_TRAIN_END_YEAR = config.DEFAULT_TRAIN_END_YEAR

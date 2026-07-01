@@ -8,7 +8,6 @@ import re
 import sys
 from pathlib import Path
 
-
 FIELDS = [
     "RUN_ID",
     "JOB_ID",

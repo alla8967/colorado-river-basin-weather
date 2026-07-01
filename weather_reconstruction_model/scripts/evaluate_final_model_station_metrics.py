@@ -7,11 +7,11 @@ from __future__ import annotations
 import argparse
 import csv
 import math
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 from time import perf_counter
-from typing import Iterable
 
 import config
 from common.json_utils import write_json_file
@@ -19,7 +19,6 @@ from common.model_artifacts import project_relative_path
 from common.model_runs import resolve_model_run
 from common.number_utils import to_float
 from common.weather_cache import TEMPERATURE_VARIABLES, validate_temperature_variable
-
 
 DEFAULT_BATCH_ROWS = 5000
 METRIC_FIELDNAMES = [

@@ -6,9 +6,10 @@ from __future__ import annotations
 
 import argparse
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Mapping
+from typing import Callable
 
 import config
 from common.csv_utils import CsvRow, read_csv_rows, write_csv_rows
@@ -17,7 +18,6 @@ from common.model_runs import load_model_run, resolve_model_run
 from common.number_utils import to_optional_float
 from common.reporting import escape_html as escape
 from common.reporting import render_html_table, trusted_html
-
 
 DEFAULT_MODEL_RUN_ID = (
     "option_c_limit97_5_hubs_10_target_neighbors_multiscale_terrain_"

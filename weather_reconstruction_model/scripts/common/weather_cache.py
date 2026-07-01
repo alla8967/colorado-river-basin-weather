@@ -6,11 +6,10 @@ from __future__ import annotations
 
 import csv
 import sqlite3
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from common.number_utils import to_float
-
 
 TARGET_SOURCE = "target"
 HUB_SOURCE = "hub"

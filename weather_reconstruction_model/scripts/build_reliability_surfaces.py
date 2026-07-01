@@ -15,15 +15,14 @@ from common.reliability_surface import (
     build_grid_cells,
     build_helpfulness_surface_payload,
     build_overall_surface_payload,
+    build_station_extent_boundary_geojson,
     build_summary_payload,
     build_variable_surface_payload,
-    build_station_extent_boundary_geojson,
     extract_polygon_rings,
     load_boundary_geojson,
     normalize_holdout_anchors,
     write_reliability_png,
 )
-
 
 DEFAULT_RELIABILITY_RUN_ID = "paloma_v1_reliability"
 DEFAULT_VARIABLE_RUN_IDS = {

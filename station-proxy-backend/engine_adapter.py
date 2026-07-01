@@ -5,7 +5,6 @@ from __future__ import annotations
 from engine_client import EngineClient, EngineClientConfig
 from native_engine_client import NativeEngineClient
 
-
 VALID_ENGINE_MODES = {"process", "native", "auto"}
 
 

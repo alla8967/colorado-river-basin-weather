@@ -12,7 +12,6 @@ from typing import Optional
 
 from engine_client import EngineClientConfig
 
-
 try:
     import _station_proxy_engine as native_engine
 except Exception as import_error:  # pragma: no cover - depends on local extension

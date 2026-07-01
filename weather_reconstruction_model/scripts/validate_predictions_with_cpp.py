@@ -12,7 +12,6 @@ from pathlib import Path
 import config
 from common.csv_utils import write_csv_rows
 
-
 PROJECT_DIR = config.PROJECT_DIR
 VALIDATION_DIR = config.VALIDATION_DIR
 REPORT_DIR = config.REPORT_DIR

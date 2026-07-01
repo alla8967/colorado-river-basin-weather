@@ -8,9 +8,9 @@ import argparse
 import csv
 import math
 from collections import defaultdict
+from collections.abc import Iterable
 from datetime import date
 from pathlib import Path
-from typing import Iterable
 
 from common.metrics import calculate_correlation, calculate_mae, calculate_rmse, mean
 from common.number_utils import to_float
@@ -24,7 +24,6 @@ from config import (
     PREDICTION_DIR,
     REPORT_DIR,
 )
-
 
 STRICT_MAX_MAE = ML_GOAL_MAX_MAE
 STRICT_MAX_RMSE = ML_GOAL_MAX_RMSE

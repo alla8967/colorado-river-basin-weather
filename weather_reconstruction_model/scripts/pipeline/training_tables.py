@@ -6,15 +6,15 @@ from __future__ import annotations
 
 import csv
 import math
+from collections.abc import Mapping
 from datetime import date
 from pathlib import Path
-from typing import Mapping, Union
+from typing import Union
 
 from common.csv_utils import write_csv_rows
 from common.number_utils import to_float
 from common.pairwise_skill import PAIRWISE_SKILL_COLUMNS
 from common.weather_cache import validate_temperature_variable
-
 
 DailySeries = Mapping[str, float]
 DailyByStation = Mapping[str, DailySeries]
@@ -89,16 +89,16 @@ def build_shared_date_rows(
     for hub_id in hub_ids:
         shared_dates = shared_dates.intersection(hub_daily[hub_id].keys())
 
-    for date in sorted(shared_dates):
+    for date_text in sorted(shared_dates):
         row = {
-            "date": date,
+            "date": date_text,
             "target_station_id": target_station_id,
-            "target_tavg": f"{target_series[date]:.2f}",
+            "target_tavg": f"{target_series[date_text]:.2f}",
         }
 
         for index, hub_id in enumerate(hub_ids, start=1):
             row[f"hub_{index}_station_id"] = hub_id
-            row[f"hub_{index}_tavg"] = f"{hub_daily[hub_id][date]:.2f}"
+            row[f"hub_{index}_tavg"] = f"{hub_daily[hub_id][date_text]:.2f}"
 
         rows.append(row)
 

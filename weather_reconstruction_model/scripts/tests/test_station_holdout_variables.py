@@ -4,19 +4,18 @@ The coverage protects Paloma holdout workflows across TAVG, TMIN, and TMAX runs.
 
 from __future__ import annotations
 
-from pathlib import Path
 import argparse
 import csv
 import sys
 import tempfile
-
+from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPT_DIR))
 
+import train_station_holdout_model as holdout
 from common.csv_utils import write_csv_rows
 from pipeline.station_holdouts import row_uses_any_station, row_uses_station
-import train_station_holdout_model as holdout
 
 
 def test_prediction_rows_are_variable_specific() -> None:

@@ -11,7 +11,6 @@ import config
 from common.json_utils import write_json_file
 from common.reliability_surface import build_station_extent_boundary_geojson
 
-
 DEFAULT_OUTPUT_FILE = (
     config.PROJECT_DIR
     / "weather_reconstruction_model"

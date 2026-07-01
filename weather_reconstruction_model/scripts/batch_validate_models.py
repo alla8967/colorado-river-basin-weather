@@ -2,9 +2,9 @@
 
 This script is the baseline batch evaluator for comparing reconstruction model choices."""
 
-from pathlib import Path
 import argparse
 import csv
+from pathlib import Path
 
 import config
 import train_temperature_model as model_trainer
@@ -20,7 +20,6 @@ from common.weather_cache import (
 )
 from pipeline.station_selection import find_training_eligible_hubs
 from pipeline.training_tables import build_shared_date_rows
-
 
 PROJECT_DIR = config.PROJECT_DIR
 REPORT_DIR = config.REPORT_DIR

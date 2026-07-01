@@ -10,13 +10,11 @@ import math
 from pathlib import Path
 
 import config
-from common.csv_utils import CsvRow, read_csv_rows
+from common.csv_utils import CsvRow
 from common.model_runs import load_model_run, resolve_model_run
 from common.number_utils import to_optional_float
 from common.reporting import escape_html as escape
-from common.reporting import render_metric_card
-from common.reporting import render_html_table, trusted_html
-
+from common.reporting import render_html_table, render_metric_card, trusted_html
 
 DEFAULT_MODEL_RUN_ID = (
     "option_c_limit97_5_hubs_10_target_neighbors_multiscale_terrain_"

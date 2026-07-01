@@ -3,12 +3,11 @@
 These checks protect the no-leakage and same-row comparison assumptions used by
 the Paloma baseline report."""
 
-from pathlib import Path
-from types import SimpleNamespace
 import csv
 import sys
 import tempfile
-
+from pathlib import Path
+from types import SimpleNamespace
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPT_DIR))

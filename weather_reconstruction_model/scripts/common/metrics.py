@@ -3,8 +3,7 @@
 The module keeps MAE, RMSE, correlation, and paired-value checks consistent across reports and trainers."""
 
 import math
-from typing import Sequence
-
+from collections.abc import Sequence
 
 NumericSequence = Sequence[float]
 MetricResults = dict[str, float]

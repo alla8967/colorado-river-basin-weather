@@ -6,7 +6,6 @@ import json
 import subprocess
 from pathlib import Path
 
-
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 TARGET_FIXTURE = PROJECT_DIR / "tests" / "fixtures" / "target_daily_app_ready.csv"
 HUB_FIXTURE = PROJECT_DIR / "tests" / "fixtures" / "hub_daily_app_ready.csv"

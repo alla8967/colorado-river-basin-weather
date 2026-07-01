@@ -33,7 +33,6 @@ from pipeline.training_data import (
     build_unscaled_features_and_labels,
 )
 
-
 DEFAULT_MODEL_RUN_ID = (
     "option_c_limit97_5_hubs_10_target_neighbors_multiscale_terrain_"
     "offset_terrain_standard_random_forest"

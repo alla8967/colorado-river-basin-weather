@@ -4,9 +4,9 @@ The helpers turn validation, terrain, and candidate-station files into typed rec
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Mapping, Sequence
 
 from common.confidence_support import (
     SupportStation,
@@ -15,7 +15,6 @@ from common.confidence_support import (
 )
 from common.csv_utils import CsvRow, read_csv_rows
 from common.number_utils import to_optional_float
-
 
 STATION_ID_FIELDS = [
     "station_id",

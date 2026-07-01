@@ -14,7 +14,6 @@ from common.number_utils import to_float
 from common.reporting import escape_html as escape
 from common.reporting import render_metric_card
 
-
 REPORT_DIR = config.REPORT_DIR
 DEFAULT_TEMPORAL_DIRECT = (
     REPORT_DIR

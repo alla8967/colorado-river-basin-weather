@@ -2,10 +2,9 @@
 
 Centralizing these wrappers keeps command-line entry points focused on workflow logic."""
 
-from pathlib import Path
 import csv
-from typing import Mapping, Sequence
-
+from collections.abc import Mapping, Sequence
+from pathlib import Path
 
 CsvRow = dict[str, str]
 WritableCsvRow = Mapping[str, object]

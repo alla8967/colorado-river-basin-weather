@@ -4,11 +4,10 @@ These helpers keep exported validation and production model folders self-describ
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
-from typing import Mapping, Sequence
-
 
 NO_SERIALIZED_ESTIMATOR_NOTE = "No serialized estimator is present for this run yet."
 SERIALIZED_ESTIMATOR_NOTE = (

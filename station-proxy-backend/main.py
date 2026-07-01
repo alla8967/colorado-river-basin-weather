@@ -5,23 +5,23 @@ This is the local web entry point that connects browser requests to the C++ engi
 import atexit
 from typing import Optional
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
-
 from api_models import (
     AnalyzeConfidenceResponse,
     CurrentModelRunResponse,
     HealthResponse,
 )
-# settings configures imports for weather_reconstruction_model/scripts.
-from settings import settings
 from confidence_service import ConfidenceService
 from engine_adapter import build_engine_client
 from engine_client import EngineClientConfig
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from model_run_service import ModelRunService
 from reliability_service import ReliabilitySurfaceService
+
+# settings configures imports for weather_reconstruction_model/scripts.
+from settings import settings
 
 app = FastAPI()
 

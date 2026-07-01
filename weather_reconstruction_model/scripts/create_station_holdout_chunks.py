@@ -11,7 +11,6 @@ import config
 from common.csv_utils import read_csv_rows, write_csv_rows
 from common.weather_cache import TEMPERATURE_VARIABLES, validate_temperature_variable
 
-
 DEFAULT_OUTPUT_ROOT = config.OUTPUT_DIR / "paloma" / "station_holdout_chunks"
 
 

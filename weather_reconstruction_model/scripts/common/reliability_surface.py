@@ -8,14 +8,14 @@ import json
 import math
 import struct
 import zlib
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any
 
-from common.csv_utils import CsvRow, read_csv_rows
+from common.csv_utils import read_csv_rows
 from common.geo_utils import calculate_distance_km
 from common.number_utils import to_optional_float
-
 
 VARIABLE_LAYERS = ("tavg", "tmin", "tmax")
 HELPFULNESS_LAYER = "helpfulness"
@@ -668,7 +668,6 @@ def predict_variable_cell(
 
     local_mae = weighted_mean(local_pairs)
     local_std = weighted_std(local_pairs, local_mae)
-    median_mae = quantile(sorted_maes, 0.5)
     p25_mae = quantile(sorted_maes, 0.25)
     p75_mae = quantile(sorted_maes, 0.75)
     iqr = max(0.1, p75_mae - p25_mae)

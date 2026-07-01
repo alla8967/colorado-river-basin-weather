@@ -12,7 +12,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-
 DEFAULT_READY_TIMEOUT_SECONDS = 60.0
 
 

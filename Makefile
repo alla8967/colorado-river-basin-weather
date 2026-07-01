@@ -126,12 +126,15 @@ native-engine:
 validate-prediction:
 	$(CXX) $(CXXFLAGS) $(VALIDATE_PREDICTION_SOURCES) -o "$(VALIDATE_PREDICTION_TARGET)"
 
-check: check-js check-python-compile test-app-shell test-engine-adapter test-native-parity test-reliability-backend test-engine test-cpp-unit validate-prediction
+check: check-js lint check-python-compile test-app-shell test-engine-adapter test-native-parity test-reliability-backend test-engine test-cpp-unit validate-prediction
 
 check-js:
 	@for file in $(FRONTEND_JS_FILES); do \
 		node --check "$$file" || exit 1; \
 	done
+
+lint:
+	$(PYTHON) -m ruff check .
 
 check-python-compile:
 	PYTHONPYCACHEPREFIX="$(PYCACHE_PREFIX)" $(PYTHON) -m py_compile $(PYTHON_COMPILE_FILES)

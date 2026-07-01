@@ -13,7 +13,6 @@ from common.csv_utils import read_csv_rows, write_csv_rows
 from common.number_utils import to_float
 from common.weather_cache import TEMPERATURE_VARIABLES, validate_temperature_variable
 
-
 DEFAULT_INPUT_DIR = config.REPORT_DIR
 DEFAULT_OUTPUT = config.OUTPUT_DIR / "paloma" / "paloma_v1_tavg_station_holdout_master.csv"
 

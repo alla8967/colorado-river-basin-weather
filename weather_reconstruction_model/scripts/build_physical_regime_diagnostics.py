@@ -7,15 +7,14 @@ from __future__ import annotations
 import argparse
 import math
 from collections import Counter
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Mapping
 
 import config
 from build_failure_diagnostics_report import (
     DEFAULT_GENERAL_TABLE,
     DEFAULT_MODEL_RUN_ID,
     SEASONS,
-    bias_interpretation,
     collect_error_diagnostics,
     stream_predictor_metadata,
     worst_season,
@@ -25,7 +24,6 @@ from common.model_runs import load_model_run, resolve_model_run
 from common.number_utils import to_optional_float
 from common.reporting import escape_html as escape
 from common.reporting import render_html_table, render_metric_card, trusted_html
-
 
 SCORE_FIELDNAMES = [
     "station_id",

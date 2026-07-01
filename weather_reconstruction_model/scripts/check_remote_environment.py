@@ -13,7 +13,6 @@ from shutil import disk_usage
 
 import config
 
-
 MIN_FREE_DISK_GB = 10.0
 
 

@@ -2,9 +2,8 @@
 
 The checks cover physical similarity, training eligibility, and hub scoring rules."""
 
-from pathlib import Path
 import sys
-
+from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPT_DIR))
@@ -12,8 +11,8 @@ sys.path.insert(0, str(SCRIPT_DIR))
 from pipeline.station_selection import (
     find_training_eligible_hubs,
     is_training_eligible,
-    score_physical_similarity,
     score_hub,
+    score_physical_similarity,
 )
 from pipeline.training_tables import build_shared_date_rows
 

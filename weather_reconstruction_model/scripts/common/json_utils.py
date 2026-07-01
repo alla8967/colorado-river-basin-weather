@@ -5,8 +5,8 @@ Using one helper keeps generated JSON formatting predictable across scripts."""
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Mapping
 
 
 def write_json_file(file_path: Path, payload: Mapping[str, object]) -> None:

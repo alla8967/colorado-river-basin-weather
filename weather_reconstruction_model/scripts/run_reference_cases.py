@@ -2,16 +2,15 @@
 
 Reference cases make it easier to spot regressions in representative station-proxy scenarios."""
 
-from pathlib import Path
 import argparse
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 import config
 from common.csv_utils import read_csv_rows
 from common.metrics import calculate_metrics as calculate_standard_metrics
-
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = config.PROJECT_DIR

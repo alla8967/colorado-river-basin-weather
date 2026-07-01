@@ -71,3 +71,6 @@ terrain_data/processed/
 
 # Generated frontend/model handoff data
 station-proxy-backend/assets/confidence-points.json
+
+# Claude Code local session config
+.claude/

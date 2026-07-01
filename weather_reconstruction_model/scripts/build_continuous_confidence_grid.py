@@ -5,12 +5,14 @@ This creates the gridded confidence layer used by the browser map to show spatia
 from __future__ import annotations
 
 import argparse
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Mapping
 
 import config
 from build_calibrated_confidence_comparison import (
     SCORE_VERSION as ANCHOR_SCORE_VERSION,
+)
+from build_calibrated_confidence_comparison import (
     confidence_label,
     fit_expected_mae_model,
     pearson_correlation,
@@ -26,7 +28,6 @@ from common.csv_utils import read_csv_rows
 from common.json_utils import write_json_file
 from common.model_runs import load_confidence_grid, resolve_model_run
 from common.number_utils import to_optional_float
-
 
 DEFAULT_MODEL_RUN_ID = (
     "option_c_limit97_5_hubs_10_target_neighbors_multiscale_terrain_"
