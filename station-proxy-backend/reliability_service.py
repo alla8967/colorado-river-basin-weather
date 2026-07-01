@@ -4,6 +4,7 @@ It turns generated Paloma reliability artifacts into lightweight FastAPI respons
 
 from __future__ import annotations
 
+import csv
 import struct
 import zlib
 from pathlib import Path
@@ -24,6 +25,9 @@ from common.reliability_surface import (
     SUMMARY_SCHEMA_VERSION,
     normalize_layer,
 )
+
+
+MAX_PREDICTION_SERIES_POINTS = 800
 
 
 class ReliabilitySurfaceService:
@@ -178,6 +182,15 @@ class ReliabilitySurfaceService:
             "palomaFullV1": paloma_metrics,
             "stationHoldoutTest": self.station_holdout_metrics(station, normalized_layer),
             "holdoutRun": holdout_run,
+            "temperaturePredictionSeries": (
+                self.temperature_prediction_series(
+                    source_variable,
+                    requested_station_id,
+                    holdout_run,
+                )
+                if source_variable
+                else None
+            ),
             "context": {
                 "reliabilityModelRunId": self.settings.reliability_model_run_id,
                 "sourceModelRunId": self.source_model_run_id(payload, source_variable),
@@ -198,6 +211,227 @@ class ReliabilitySurfaceService:
                 ),
             },
         }
+
+    def temperature_prediction_series(
+        self,
+        variable: str,
+        station_id: str,
+        holdout_run: dict[str, Any] | None,
+    ) -> dict[str, Any]:
+        return {
+            "variable": variable,
+            "maxPoints": MAX_PREDICTION_SERIES_POINTS,
+            "finalModel": self.prediction_series_from_candidates(
+                self.final_model_prediction_path_candidates(variable),
+                variable,
+                station_id,
+                "final_model_vs_observed",
+                (
+                    "Daily final-model prediction rows were not found. "
+                    "Station-level final metrics are still available above."
+                ),
+            ),
+            "holdout": self.prediction_series_from_candidates(
+                self.holdout_prediction_path_candidates(variable, holdout_run),
+                variable,
+                station_id,
+                "station_holdout_reconstruction",
+                (
+                    "Daily holdout prediction rows were not found for this station. "
+                    "Station-level holdout metrics are still available above."
+                ),
+            ),
+        }
+
+    def final_model_prediction_path_candidates(self, variable: str) -> list[Path]:
+        normalized_variable = variable.strip().lower()
+        run_root = resolve_model_run(
+            self.settings.model_run_root,
+            f"paloma_v1_{normalized_variable}",
+        ).root
+        return [
+            run_root / "final_model_predictions.csv",
+            run_root / "final_model_station_predictions.csv",
+            run_root / f"paloma_v1_{normalized_variable}_final_model_predictions.csv",
+            run_root / f"paloma_v1_{normalized_variable}_final_predictions.csv",
+        ]
+
+    def holdout_prediction_path_candidates(
+        self,
+        variable: str,
+        holdout_run: dict[str, Any] | None,
+    ) -> list[Path]:
+        normalized_variable = variable.strip().lower()
+        candidates = []
+        group_id = str((holdout_run or {}).get("holdoutGroupId") or "").strip()
+        if group_id:
+            candidates.append(
+                self.settings.project_dir
+                / "alpine_outputs"
+                / "predictions"
+                / (
+                    f"paloma_v1_{normalized_variable}_group_holdout_"
+                    f"{group_id}_predictions.csv"
+                )
+            )
+
+        candidates.append(
+            resolve_model_run(
+                self.settings.model_run_root,
+                f"paloma_v1_{normalized_variable}",
+            ).root
+            / "validation_predictions.csv"
+        )
+        return candidates
+
+    def prediction_series_from_candidates(
+        self,
+        candidates: list[Path],
+        variable: str,
+        station_id: str,
+        series_type: str,
+        missing_message: str,
+    ) -> dict[str, Any]:
+        station_missing_payload = None
+
+        for path in candidates:
+            if not path.exists():
+                continue
+
+            points, total_rows = self.read_station_prediction_points(
+                path,
+                variable,
+                station_id,
+            )
+            if not points:
+                station_missing_payload = {
+                    "status": "station_not_found",
+                    "seriesType": series_type,
+                    "sourceFile": str(path),
+                    "message": "Prediction artifact exists, but this station has no rows in it.",
+                    "totalRows": 0,
+                    "points": [],
+                }
+                continue
+
+            sampled_points = self.downsample_prediction_points(points)
+            return {
+                "status": "available",
+                "seriesType": series_type,
+                "sourceFile": str(path),
+                "totalRows": total_rows,
+                "returnedRows": len(sampled_points),
+                "downsampled": len(sampled_points) < total_rows,
+                "points": sampled_points,
+            }
+
+        if station_missing_payload is not None:
+            return station_missing_payload
+
+        return {
+            "status": "missing_artifact",
+            "seriesType": series_type,
+            "sourceFile": None,
+            "expectedFiles": [str(path) for path in candidates],
+            "message": missing_message,
+            "totalRows": 0,
+            "points": [],
+        }
+
+    def read_station_prediction_points(
+        self,
+        path: Path,
+        variable: str,
+        station_id: str,
+    ) -> tuple[list[dict[str, Any]], int]:
+        requested_station_id = station_id.strip().upper()
+        normalized_variable = variable.strip().lower()
+        points: list[dict[str, Any]] = []
+
+        with path.open(newline="", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            fieldnames = reader.fieldnames or []
+            actual_field = self.first_available_field(
+                fieldnames,
+                [
+                    f"actual_{normalized_variable}",
+                    "actual_tavg",
+                    "actual_temperature_f",
+                    "actual",
+                ],
+            )
+            predicted_field = self.first_available_field(
+                fieldnames,
+                [
+                    f"predicted_{normalized_variable}",
+                    f"model_predicted_{normalized_variable}",
+                    f"final_predicted_{normalized_variable}",
+                    "predicted_tavg",
+                    "model_predicted_tavg",
+                    "prediction",
+                    "predicted",
+                ],
+            )
+            if actual_field is None or predicted_field is None:
+                return [], 0
+
+            for row in reader:
+                candidate_station_id = str(
+                    row.get("target_station_id")
+                    or row.get("station_id")
+                    or row.get("validation_station_id")
+                    or ""
+                ).strip().upper()
+                if candidate_station_id != requested_station_id:
+                    continue
+
+                actual = self.optional_float(row.get(actual_field))
+                predicted = self.optional_float(row.get(predicted_field))
+                date = str(row.get("date") or "").strip()
+                if actual is None or predicted is None or not date:
+                    continue
+
+                points.append({
+                    "date": date,
+                    "actualF": round(actual, 3),
+                    "predictedF": round(predicted, 3),
+                    "errorF": round(actual - predicted, 3),
+                })
+
+        points.sort(key=lambda point: str(point["date"]))
+        return points, len(points)
+
+    def first_available_field(
+        self,
+        fieldnames: list[str],
+        candidates: list[str],
+    ) -> str | None:
+        fields = set(fieldnames)
+        for candidate in candidates:
+            if candidate in fields:
+                return candidate
+        return None
+
+    def downsample_prediction_points(
+        self,
+        points: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        if len(points) <= MAX_PREDICTION_SERIES_POINTS:
+            return points
+
+        if MAX_PREDICTION_SERIES_POINTS <= 1:
+            return points[:1]
+
+        last_index = len(points) - 1
+        sampled_points = []
+        previous_index = -1
+        for index in range(MAX_PREDICTION_SERIES_POINTS):
+            source_index = round(index * last_index / (MAX_PREDICTION_SERIES_POINTS - 1))
+            if source_index == previous_index:
+                continue
+            sampled_points.append(points[source_index])
+            previous_index = source_index
+        return sampled_points
 
     def sample(self, layer: str, latitude: float, longitude: float) -> dict[str, Any]:
         normalized_layer = normalize_layer(layer)

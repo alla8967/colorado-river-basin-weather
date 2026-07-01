@@ -522,6 +522,58 @@ button:disabled {
     background: #dc2626;
 }
 
+.prediction-chart {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.prediction-chart.unavailable {
+    background: #ffffff;
+}
+
+.prediction-chart-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.prediction-chart-header h4 {
+    margin: 0;
+    color: #1f2933;
+    font-size: 14px;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.prediction-chart-header p {
+    margin: 4px 0 0 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.prediction-chart-header span {
+    color: #475569;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.prediction-chart svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
 .diagnostic-card {
     border-color: #fbbf24;
     background: #fffbeb;

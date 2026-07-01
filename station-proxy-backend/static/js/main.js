@@ -2,7 +2,7 @@
 
 import { fetchEngineStatus, fetchLocationAnalysis } from "./api.js";
 import { initializeMap, refreshMapSize } from "./maps.js";
-import { bindReliabilityControls, initializeReliabilityMap, refreshReliabilityMapSize } from "./reliability.js?v=holdout-error-maps-v1";
+import { bindReliabilityControls, initializeReliabilityMap, refreshReliabilityMapSize } from "./reliability.js?v=prediction-series-charts-v1";
 import { renderResults } from "./results.js";
 import { elements, state } from "./state.js";
 

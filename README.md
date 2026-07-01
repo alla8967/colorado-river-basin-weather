@@ -48,7 +48,7 @@ The project has four main lanes:
 
 ## Results
 
-The portfolio claim uses existing row-locked comparison artifacts only:
+The research claim uses existing row-locked comparison artifacts only:
 
 | Metric | Model | IDW 5-hub | Nearest hub |
 | --- | ---: | ---: | ---: |

@@ -191,6 +191,68 @@ def write_fixture_artifacts(root: Path, project_dir: Path) -> None:
         ],
     )
     write_csv_rows(
+        root / "paloma_v1_tavg" / "final_model_predictions.csv",
+        [
+            {
+                "date": "2020-01-01",
+                "target_station_id": "TEST001",
+                "target_name": "Test Station",
+                "actual_tavg": 50.0,
+                "predicted_tavg": 50.5,
+            },
+            {
+                "date": "2020-01-02",
+                "target_station_id": "TEST001",
+                "target_name": "Test Station",
+                "actual_tavg": 52.0,
+                "predicted_tavg": 51.4,
+            },
+            {
+                "date": "2020-01-03",
+                "target_station_id": "OTHER",
+                "target_name": "Other Station",
+                "actual_tavg": 44.0,
+                "predicted_tavg": 45.0,
+            },
+        ],
+        ["date", "target_station_id", "target_name", "actual_tavg", "predicted_tavg"],
+    )
+    write_csv_rows(
+        project_dir / "alpine_outputs" / "predictions" / "paloma_v1_tavg_group_holdout_group_001_predictions.csv",
+        [
+            {
+                "date": "2024-01-01",
+                "target_station_id": "TEST001",
+                "target_name": "Test Station",
+                "holdout_group_id": "group_001",
+                "holdout_group_size": 1,
+                "actual_tavg": 48.0,
+                "predicted_tavg": 47.4,
+                "error": 0.6,
+            },
+            {
+                "date": "2024-01-02",
+                "target_station_id": "TEST001",
+                "target_name": "Test Station",
+                "holdout_group_id": "group_001",
+                "holdout_group_size": 1,
+                "actual_tavg": 49.0,
+                "predicted_tavg": 50.2,
+                "error": -1.2,
+            },
+        ],
+        [
+            "date",
+            "target_station_id",
+            "target_name",
+            "holdout_group_id",
+            "holdout_group_size",
+            "actual_tavg",
+            "predicted_tavg",
+            "error",
+        ],
+    )
+    write_csv_rows(
         project_dir / "NOAA_Inventory_Sort" / "target_station_candidates.csv",
         [
             {
@@ -365,6 +427,23 @@ def test_reliability_backend_routes_return_fixture_artifacts() -> None:
     assert station["stationHoldoutTest"]["correlation"] == 0.982
     assert station["holdoutRun"]["biasF"] == -0.45
     assert station["holdoutRun"]["holdoutGroupId"] == "group_001"
+    assert station["temperaturePredictionSeries"]["variable"] == "tavg"
+    assert station["temperaturePredictionSeries"]["finalModel"]["status"] == "available"
+    assert station["temperaturePredictionSeries"]["finalModel"]["totalRows"] == 2
+    assert station["temperaturePredictionSeries"]["finalModel"]["points"][0] == {
+        "date": "2020-01-01",
+        "actualF": 50.0,
+        "predictedF": 50.5,
+        "errorF": -0.5,
+    }
+    assert station["temperaturePredictionSeries"]["holdout"]["status"] == "available"
+    assert station["temperaturePredictionSeries"]["holdout"]["totalRows"] == 2
+    assert station["temperaturePredictionSeries"]["holdout"]["points"][1] == {
+        "date": "2024-01-02",
+        "actualF": 49.0,
+        "predictedF": 50.2,
+        "errorF": -1.2,
+    }
     assert Path(image.path).name == "reliability_surface_overall.png"
     assert Path(bias_overlay.path).name == "reliability_station_overlay_overall_bias.png"
     assert Path(correlation_overlay.path).name == "reliability_station_overlay_overall_correlation.png"
