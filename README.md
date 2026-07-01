@@ -6,9 +6,11 @@ A full-stack station proxy and daily temperature reconstruction project for the 
 
 Pick any point in the basin: the app finds the nearest station, ranks long-record proxy stations, and shows reconstruction reliability evidence for that location. The modeling side is backed by a 739-station holdout where model predictions are compared against nearest-hub and IDW baselines on the same rows.
 
-![Row-locked baseline comparison](docs/assets/baseline_comparison.png)
+![App walkthrough: proxy analysis, reliability map, and station holdout charts](docs/assets/demo.gif)
 
 **Headline result:** Mean station MAE fell from 4.99 F with IDW interpolation to 2.68 F with the model, a ~46% reduction across 739 held-out stations.
+
+![Row-locked baseline comparison](docs/assets/baseline_comparison.png)
 
 ## Quick Start
 
@@ -26,17 +28,23 @@ Use the preset buttons for Denver, Grand Junction, and Lake Havasu to run a fixt
 
 ## Architecture
 
-```text
-Browser frontend
--> FastAPI backend
--> persistent C++ station engine
--> app-ready NOAA station CSVs
+```mermaid
+flowchart LR
+    subgraph app [Live app]
+        Browser[Browser frontend] --> FastAPI[FastAPI backend]
+        FastAPI --> Engine[Persistent C++ station engine]
+        Engine --> CSV[App-ready NOAA station CSVs]
+    end
 
-NOAA/terrain preprocessing
--> reconstruction training tables
--> Paloma model artifacts
--> row-locked holdout comparison reports
--> reliability surfaces served by FastAPI
+    subgraph research [Research pipeline]
+        NOAA[NOAA/terrain preprocessing] --> Tables[Reconstruction training tables]
+        Tables --> Paloma[Paloma model artifacts]
+        Paloma --> Holdout[Row-locked holdout comparison reports]
+        Paloma --> Surfaces[Reliability surfaces]
+    end
+
+    Surfaces --> FastAPI
+    Holdout -. verified claims .-> README[README results]
 ```
 
 The project has four main lanes:
@@ -100,14 +108,32 @@ Then open `http://127.0.0.1:8000/`. The first full-data startup can be slow beca
 
 ## App Screenshots
 
-Screenshots are not embedded until a full-width browser capture with fully rendered map tiles is available. See `docs/screenshots.md` for the exact capture steps and filenames.
+Proxy Finder: pick a point, get the nearest station and ranked long-record proxy stations from the C++ engine.
+
+![Proxy Finder analysis view](docs/assets/app_analysis.png)
+
+![Nearest station and proxy ranking results](docs/assets/app_results.png)
+
+Reliability Map: the Paloma v1 reliability surface clipped to the basin, with every holdout station colored by daily reconstruction quality. Clicking a station opens holdout metrics and daily prediction-vs-actual charts.
+
+![Reliability surface and holdout station map](docs/assets/app_reliability.png)
+
+![Holdout prediction vs actual daily temperature chart](docs/assets/app_prediction_chart.png)
+
+Capture steps and filenames are documented in `docs/screenshots.md`.
 
 ## Development
 
-Run the main fixture validation set:
+Run the main fixture validation set (JS syntax check, ruff lint, Python compile check, C++ unit tests, and fixture-backed smoke tests):
 
 ```bash
 make check PYTHON=.venv/bin/python
+```
+
+Run the Python linter on its own:
+
+```bash
+make lint PYTHON=.venv/bin/python
 ```
 
 Run the model-script pytest suite when changing research/model helpers:
