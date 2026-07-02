@@ -3,6 +3,7 @@
 This is the local web entry point that connects browser requests to the C++ engine and model artifact services."""
 
 import atexit
+from pathlib import Path
 from typing import Optional
 
 from api_models import (
@@ -13,8 +14,9 @@ from api_models import (
 from confidence_service import ConfidenceService
 from engine_adapter import build_engine_client
 from engine_client import EngineClientConfig
-from fastapi import FastAPI
+from fastapi import FastAPI, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from model_run_service import ModelRunService
@@ -25,16 +27,58 @@ from settings import settings
 
 app = FastAPI()
 
+# The API is public and read-only: no cookies or credentials exist, so
+# cross-origin GET reads are safe to allow.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_credentials=False,
+    allow_methods=["GET"],
     allow_headers=["*"],
 )
+app.add_middleware(GZipMiddleware, minimum_size=1024, compresslevel=6)
+
+# Model-run artifacts and static assets are immutable for a given deployment,
+# so browsers and CDNs may cache them. Query-string versions (?v=...) handle
+# cache busting for static files.
+CACHEABLE_PATH_PREFIXES = ("/model-runs/", "/static/", "/assets/")
+
+
+@app.middleware("http")
+async def artifact_cache_headers(request: Request, call_next):
+    response = await call_next(request)
+    if (
+        request.method == "GET"
+        and response.status_code == 200
+        and request.url.path.startswith(CACHEABLE_PATH_PREFIXES)
+    ):
+        response.headers.setdefault("Cache-Control", "public, max-age=86400")
+    return response
+
 
 app.mount("/assets", StaticFiles(directory=settings.backend_dir / "assets"), name="assets")
 app.mount("/static", StaticFiles(directory=settings.backend_dir / "static"), name="static")
+
+
+def display_path(path: Path) -> str:
+    """Report artifact locations relative to the project so absolute server paths stay private."""
+    try:
+        return str(Path(path).relative_to(settings.project_dir))
+    except ValueError:
+        return Path(path).name
+
+
+LATITUDE_QUERY = Query(ge=-90.0, le=90.0)
+LONGITUDE_QUERY = Query(ge=-180.0, le=180.0)
+ELEVATION_QUERY = Query(default=None, ge=-500.0, le=9000.0)
+
+
+def sanitize_engine_response(payload: dict) -> dict:
+    """Rewrite absolute file paths echoed by the C++ engine to project-relative paths."""
+    for key, value in payload.items():
+        if key.endswith(("File", "Executable")) and isinstance(value, str) and value.startswith("/"):
+            payload[key] = display_path(Path(value))
+    return payload
 
 engine_client = build_engine_client(
     EngineClientConfig(
@@ -67,6 +111,12 @@ def startup_event():
     except Exception as error:
         print(f"[confidence_support] Failed to load on FastAPI startup: {error}")
 
+    try:
+        warmed = reliability_service.warm_cache()
+        print(f"[reliability] Warmed artifact cache: {', '.join(warmed) or 'none available'}")
+    except Exception as error:
+        print(f"[reliability] Failed to warm artifact cache on startup: {error}")
+
 
 @app.on_event("shutdown")
 def shutdown_event():
@@ -90,14 +140,14 @@ def test() -> HealthResponse:
         status="ok",
         engine="Persistent C++ station matcher is connected through FastAPI",
         **engine_status,
-        engineExecutable=str(settings.engine_executable),
-        targetDataFile=str(settings.target_data_file),
-        hubDataFile=str(settings.hub_data_file),
+        engineExecutable=display_path(settings.engine_executable),
+        targetDataFile=display_path(settings.target_data_file),
+        hubDataFile=display_path(settings.hub_data_file),
         stationDataMode=settings.station_data_mode,
         stationDataNotice=settings.station_data_notice,
         engineMode=settings.engine_mode,
         activeModelRunId=settings.active_model_run_id,
-        modelRunRoot=str(settings.model_run_root),
+        modelRunRoot=display_path(settings.model_run_root),
     )
 
 
@@ -117,8 +167,9 @@ def reliability_summary():
 
 
 @app.get("/model-runs/reliability/surface")
-def reliability_surface(layer: str = "overall"):
-    return reliability_service.surface(layer)
+def reliability_surface(request: Request, layer: str = "overall"):
+    accepts_gzip = "gzip" in request.headers.get("accept-encoding", "")
+    return reliability_service.surface_response(layer, accepts_gzip)
 
 
 @app.get("/model-runs/reliability/surface.png")
@@ -132,7 +183,11 @@ def reliability_station_overlay_image(layer: str = "overall", mode: str = "bias"
 
 
 @app.get("/model-runs/reliability/sample")
-def reliability_surface_sample(lat: float, lon: float, layer: str = "overall"):
+def reliability_surface_sample(
+    lat: float = LATITUDE_QUERY,
+    lon: float = LONGITUDE_QUERY,
+    layer: str = "overall",
+):
     return reliability_service.sample(layer, lat, lon)
 
 
@@ -143,18 +198,18 @@ def reliability_station_detail(station_id: str, layer: str = "overall"):
 
 @app.get("/run-engine")
 def run_engine():
-    return engine_client.query(39.75, -105.0)
+    return sanitize_engine_response(engine_client.query(39.75, -105.0))
 
 
 @app.get("/analyze-location")
-def analyze_location(lat: float, lon: float):
-    return engine_client.query(lat, lon)
+def analyze_location(lat: float = LATITUDE_QUERY, lon: float = LONGITUDE_QUERY):
+    return sanitize_engine_response(engine_client.query(lat, lon))
 
 
 @app.get("/analyze-confidence", response_model=AnalyzeConfidenceResponse)
 def analyze_confidence(
-    lat: float,
-    lon: float,
-    elevation_m: Optional[float] = None,
+    lat: float = LATITUDE_QUERY,
+    lon: float = LONGITUDE_QUERY,
+    elevation_m: Optional[float] = ELEVATION_QUERY,
 ) -> AnalyzeConfidenceResponse:
     return confidence_service.analyze_point(lat, lon, elevation_m)

@@ -5,13 +5,15 @@ It turns generated Paloma reliability artifacts into lightweight FastAPI respons
 from __future__ import annotations
 
 import csv
+import gzip
+import json
 import struct
 import zlib
 from pathlib import Path
 from typing import Any
 
 from fastapi import HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 
 # settings must be imported before `common`: importing it adds
 # weather_reconstruction_model/scripts to sys.path.
@@ -40,6 +42,48 @@ class ReliabilitySurfaceService:
         self._final_model_station_metric_rows: dict[str, dict[str, dict[str, str]]] = {}
         self._station_candidate_rows: dict[str, dict[str, dict[str, str]]] = {}
         self._terrain_feature_rows: dict[str, dict[str, str]] | None = None
+        # Surface JSON artifacts run to several MB; parse, serialize, and
+        # compress each once per process instead of on every request.
+        self._summary_payload: dict[str, Any] | None = None
+        self._surface_payloads: dict[str, dict[str, Any]] = {}
+        self._surface_response_bytes: dict[str, tuple[bytes, bytes]] = {}
+
+    def warm_cache(self) -> list[str]:
+        """Build reliability response caches at startup instead of on first request."""
+        warmed = []
+        try:
+            self.summary()
+            warmed.append("summary")
+        except Exception:
+            pass
+        for layer in RELIABILITY_LAYERS:
+            try:
+                self.surface_bytes(layer)
+                warmed.append(layer)
+            except Exception:
+                continue
+        return warmed
+
+    def surface_bytes(self, layer: str) -> tuple[bytes, bytes]:
+        """Return (raw, gzipped) JSON bytes for a surface layer, cached per process."""
+        normalized_layer = normalize_layer(layer)
+        cached = self._surface_response_bytes.get(normalized_layer)
+        if cached is not None:
+            return cached
+
+        payload = self.surface(normalized_layer)
+        raw = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+        compressed = gzip.compress(raw, compresslevel=9)
+        self._surface_response_bytes[normalized_layer] = (raw, compressed)
+        return raw, compressed
+
+    def surface_response(self, layer: str, accepts_gzip: bool) -> Response:
+        raw, compressed = self.surface_bytes(layer)
+        headers = {"Vary": "Accept-Encoding"}
+        if accepts_gzip:
+            headers["Content-Encoding"] = "gzip"
+            return Response(content=compressed, media_type="application/json", headers=headers)
+        return Response(content=raw, media_type="application/json", headers=headers)
 
     @property
     def root(self) -> Path:
@@ -59,6 +103,9 @@ class ReliabilitySurfaceService:
         return self.root / f"reliability_station_overlay_{normalize_layer(layer)}_{normalized_mode}.png"
 
     def summary(self) -> dict[str, Any]:
+        if self._summary_payload is not None:
+            return self._summary_payload
+
         path = self.summary_path()
         if not path.exists():
             raise self.not_found_error("Reliability summary is unavailable.", path)
@@ -71,10 +118,15 @@ class ReliabilitySurfaceService:
 
         payload["surfaceBaseUrl"] = "/model-runs/reliability/surface"
         payload["imageBaseUrl"] = "/model-runs/reliability/surface.png"
+        self._summary_payload = payload
         return payload
 
     def surface(self, layer: str) -> dict[str, Any]:
         normalized_layer = normalize_layer(layer)
+        cached = self._surface_payloads.get(normalized_layer)
+        if cached is not None:
+            return cached
+
         path = self.surface_path(normalized_layer)
         if not path.exists():
             raise self.not_found_error(f"Reliability surface is unavailable: {normalized_layer}.", path)
@@ -114,6 +166,7 @@ class ReliabilitySurfaceService:
             "final-bias": f"/model-runs/reliability/station-overlay.png?layer={normalized_layer}&mode=final-bias",
         }
         self.enrich_holdout_stations(payload, normalized_layer)
+        self._surface_payloads[normalized_layer] = payload
         return payload
 
     def image_response(self, layer: str) -> FileResponse:

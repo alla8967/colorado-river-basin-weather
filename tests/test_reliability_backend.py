@@ -383,7 +383,14 @@ def test_reliability_backend_routes_return_fixture_artifacts() -> None:
         backend.reliability_service = backend.ReliabilitySurfaceService(settings)
 
         summary = backend.reliability_summary()
-        surface = backend.reliability_surface("overall")
+        surface = backend.reliability_service.surface("overall")
+        # Artifact payloads are parsed once and cached for the life of the process.
+        assert backend.reliability_service.surface("overall") is surface
+        assert backend.reliability_summary() is summary
+        raw_bytes, gzip_bytes = backend.reliability_service.surface_bytes("overall")
+        assert raw_bytes.startswith(b"{")
+        assert gzip_bytes[:2] == b"\x1f\x8b"
+        assert len(gzip_bytes) < len(raw_bytes)
         sample = backend.reliability_surface_sample(lat=39.1, lon=-105.1, layer="overall")
         station = backend.reliability_station_detail(station_id="TEST001", layer="overall")
         image = backend.reliability_surface_image("overall")
