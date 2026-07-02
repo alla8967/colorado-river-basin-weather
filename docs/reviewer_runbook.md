@@ -101,9 +101,11 @@ make check
 This command runs:
 
 - JavaScript syntax checks for `station-proxy-backend/static/js/*.js`,
-- Python compile checks for the FastAPI backend and app-shell smoke test,
-- the local app-shell smoke test,
-- the fixture-backed C++ station engine test,
+- ruff lint over the Python sources,
+- Python compile checks for the FastAPI backend and key scripts,
+- the app-shell, engine-adapter, native-parity, and reliability-backend smoke
+  tests,
+- the fixture-backed C++ station engine test and the C++ unit tests,
 - the C++ prediction-similarity validator build.
 
 It intentionally does not run the full model-script pytest suite. Use
@@ -354,8 +356,9 @@ make check
 ```
 
 `make check` is the practical local validation set for the web app and C++
-engine. It runs JavaScript syntax checks, backend Python compile checks, the app
-shell smoke test, the fixture-backed C++ engine test, and the prediction
+engine. It runs JavaScript syntax checks, ruff lint, backend Python compile
+checks, the fixture-backed smoke tests (app shell, engine adapter, native
+parity, reliability backend), the C++ engine and unit tests, and the prediction
 similarity validator build.
 
 To include the Python research-script pytest suite:

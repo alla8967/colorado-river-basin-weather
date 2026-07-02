@@ -13,6 +13,8 @@ routes, and model-run summary routes.
 
 - `main.py` wires FastAPI routes and static file serving.
 - `engine_client.py` manages the persistent C++ engine process.
+- `engine_adapter.py` and `native_engine_client.py` dispatch between the
+  subprocess engine and the optional pybind11 native extension.
 - `confidence_service.py`, `model_run_service.py`, and
   `reliability_service.py` load generated research/model artifacts for the UI.
 - `settings.py` centralizes default paths and environment-variable overrides.

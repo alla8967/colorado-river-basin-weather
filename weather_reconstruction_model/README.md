@@ -15,87 +15,50 @@ Measure how close the reconstruction was.
 
 This is a validation sandbox for the larger project goal: eventually letting a user click a point on the map and receive an estimated local climate history for that exact point.
 
+## Where Things Stand
+
+This README walks the research lane from the simplest baseline upward, in the
+order the work actually happened. The current strongest evidence is the Paloma
+v1 random-forest lane, validated on a 739-station grouped holdout (mean station
+MAE about 2.68 F) and compared row-locked against nearest-hub and IDW baselines.
+For the verified claims and artifact pointers, see `MODEL_RUNS.md`; for the
+headline summary, see the project root `README.md`.
+
 ---
 
 ## Folder Layout
 
 ```text
 weather_reconstruction_model/
-  README.md
+  README.md                 this document
+  MODEL_RUNS.md             verified model-run claims and artifact contract
+  ARTIFACTS.md              generated-artifact shapes
+  CONFIDENCE_SUPPORT.md     confidence scoring notes
 
-  scripts/
-    config.py
-    count_stations.py
-    build_training_table.py
-    train_temperature_model.py
-    batch_validate_models.py
-    analyze_batch_results.py
-    build_general_training_table.py
-    train_general_temperature_model.py
-    build_station_terrain_features.py
-    validate_dem_alignment.py
-    run_station_validation.py
-    run_reference_cases.py
-    common/
-      csv_utils.py
-      geo_utils.py
-      metrics.py
-      number_utils.py
-    pipeline/
-      station_selection.py
-      training_tables.py
-    tests/
-      test_common_utils.py
-      test_pipeline_utils.py
+  inputs/                   tracked model inputs (basin boundary geojson)
 
-  outputs/
-    training_tables/
-    predictions/
-    validation/
-    reports/
-    general_training_tables/
+  scripts/                  command-line entry points (about 40 scripts)
+    config.py               shared defaults and thresholds
+    common/                 reusable CSV/geo/metric/model-run/report helpers
+    pipeline/               station selection, training tables, features,
+                            holdout logic
+    tests/                  pytest suite for helpers and script contracts
+
+  outputs/                  generated tables, predictions, reports (ignored)
+  model_runs/               serialized model-run artifacts (ignored)
+  cache/                    local SQLite weather cache (ignored)
 ```
 
-### `scripts/`
-
-These are the Python tools that build, train, and validate the reconstruction model.
-
-### `scripts/common/`
-
-Small reusable helper modules:
-
-```text
-csv_utils.py      CSV reading and writing helpers
-geo_utils.py      distance calculations
-metrics.py        MAE, RMSE, correlation, and metric summaries
-number_utils.py   safe numeric parsing
-```
-
-These exist so scripts do not carry separate copies of the same helper functions.
-
-### `scripts/pipeline/`
-
-Shared model-pipeline logic:
-
-```text
-station_selection.py   scores, filters, and ranks eligible hub stations
-training_tables.py     builds shared-date target/hub training rows
-```
-
-These modules contain the core behavior that should stay consistent between the
-one-station workflow and the batch workflow.
-
-### `scripts/tests/`
-
-Small dependency-free unit tests for the shared helper and pipeline modules.
+Each `scripts/` subfolder has its own README, and
+`../docs/research_script_inventory.md` maps every entry-point script to its
+purpose. The layout above shows the boundaries rather than every file.
 
 ### `outputs/`
 
-These are generated CSV files. They are useful for inspection and validation, but they are outputs rather than source code.
-
-### `outputs/general_training_tables/`
-
-These are many-station training tables. They are meant for the next model phase, where one model can learn from many target stations instead of learning one separate formula per station.
+These are generated CSV files. They are useful for inspection and validation,
+but they are outputs rather than source code, so they stay out of git.
+`outputs/general_training_tables/` holds the many-station training tables used
+by the general and tree models described below.
 
 ---
 
@@ -172,9 +135,9 @@ C++ independently scores.
 
 ---
 
-## Current Model
+## The Baseline Model
 
-The current model is ordinary linear regression.
+The per-station baseline is ordinary linear regression.
 
 It learns a formula like this:
 
@@ -188,9 +151,11 @@ target_tavg =
   + weight_5 * hub_5_tavg
 ```
 
-The model is intentionally simple.
-
-That is a feature, not a bug. A simple model is easier to inspect, validate, and explain. More complex models should eventually be tested against this baseline.
+The baseline is intentionally simple. A simple model is easy to inspect,
+validate, and explain, and it sets the bar that more complex models must beat.
+The tree-based models later in this document did beat it, and the random-forest
+lane became the Paloma v1 production model — but every claim of improvement is
+still measured against baselines like this one on identical held-out rows.
 
 ---
 
@@ -1174,9 +1139,14 @@ If a future model improves Meteor Crater, that is a good sign. The point is not 
 
 ## How To Run The Lightweight Tests
 
-The shared helper and pipeline modules have small direct tests.
+The shared helper and pipeline modules have a pytest suite (18 test files).
+Run the whole suite from the project root:
 
-Run:
+```bash
+PYTHON=.venv/bin/python make test-python
+```
+
+Individual test files can also run directly:
 
 ```bash
 .venv/bin/python weather_reconstruction_model/scripts/tests/test_common_utils.py
@@ -1240,20 +1210,26 @@ This is why scripts import from `common` and `pipeline`, but `common` and
 It is fair to say:
 
 ```text
-This is a validated baseline temperature reconstruction model.
-It can reconstruct some target stations very well using nearby hub stations.
-It can identify where simple station-temperature regression is not enough.
+The Paloma v1 random-forest model reconstructs daily average temperature
+across a 739-station grouped holdout with mean station MAE of about 2.68 F.
+On the same held-out rows, it beats IDW interpolation at 80% of stations
+and nearest-hub at 85% of stations.
+The evidence is row-locked: baselines are scored on the exact prediction
+rows the model was scored on, and a C++ validator independently rechecks
+Python-reported metrics.
 ```
 
 It is not yet fair to say:
 
 ```text
 This can reconstruct the climate of any clicked point.
-This fully accounts for local geography.
-This is a finished scientific climate reconstruction product.
+This fully accounts for local geography (strict passes are 52 / 739).
+This generalizes outside the Colorado River Basin station corpus.
+This has been compared against PRISM or Daymet.
 ```
 
-The current model is a baseline. Its job is to establish what can be achieved with station temperatures alone before adding more complex geography.
+`MODEL_RUNS.md` is the source of truth for these claims and their artifact
+pointers.
 
 ---
 
@@ -1287,19 +1263,15 @@ correlation >= 0.985
 
 That target may change as more batch validation results come in.
 
-The next practical modeling step is to join the DEM-derived station terrain
-features into the general training table, then compare:
+The terrain-features comparison has already been run (see the tree-model
+section above): engineered terrain relationships improved the linear model
+from about 2.89 F to about 2.43 F MAE, and the random forest reached about
+2.18 F on that table. The open research directions now are:
 
 ```text
-general model without terrain features
-vs.
-general model with DEM elevation, slope, aspect, relief, and terrain position
-```
-
-That comparison should answer the next important research question:
-
-```text
-Does terrain context measurably improve reconstruction accuracy?
+Raise the strict-pass rate (currently 52 / 739 stations).
+Compare reconstructions against gridded products such as PRISM and Daymet.
+Understand and improve the physical regimes where errors stay large.
 ```
 
 ---

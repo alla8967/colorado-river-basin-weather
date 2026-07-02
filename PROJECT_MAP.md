@@ -70,13 +70,14 @@ metadata, and environment examples stay at the top level; detailed runbooks live
 under `docs/`, and folder-specific explanations live beside the code they
 describe.
 
-The cleanup work is intentionally improving boundaries inside those lanes
-without doing a risky top-level reshuffle.
+Boundaries are improved inside those lanes rather than through risky top-level
+reshuffles.
 
 ## Safe Local Commands
 
 ```bash
 make check
+make lint PYTHON=.venv/bin/python
 PYTHON=.venv/bin/python make test-python
 make clean-local-artifacts
 git status --ignored --short
