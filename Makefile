@@ -136,6 +136,24 @@ check-js:
 lint:
 	$(PYTHON) -m ruff check .
 
+# Cloud Run deployment with abuse-resistant defaults baked in: one instance
+# maximum, bounded concurrency, and a short request timeout put a hard ceiling
+# on what a traffic flood can cost. See docs/deploy_cloud_run.md.
+CLOUD_RUN_SERVICE ?= crb-weather-demo
+CLOUD_RUN_REGION ?= us-central1
+
+deploy-cloud-run:
+	gcloud run deploy $(CLOUD_RUN_SERVICE) \
+		--source . \
+		--region $(CLOUD_RUN_REGION) \
+		--allow-unauthenticated \
+		--memory 2Gi \
+		--cpu 1 \
+		--max-instances 1 \
+		--concurrency 20 \
+		--timeout 60 \
+		--cpu-boost
+
 check-python-compile:
 	PYTHONPYCACHEPREFIX="$(PYCACHE_PREFIX)" $(PYTHON) -m py_compile $(PYTHON_COMPILE_FILES)
 

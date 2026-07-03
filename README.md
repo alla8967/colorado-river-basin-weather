@@ -162,4 +162,5 @@ This is a basin-scoped research and local-demo project, not a packaged productio
 - `docs/generated_artifact_audit.md`: commit/staging policy for generated files.
 - `docs/research_script_inventory.md`: research/model script map.
 - `docs/screenshots.md`: app screenshot capture instructions.
+- `docs/deploy_cloud_run.md`: public demo deployment with cost-abuse guardrails.
 - `weather_reconstruction_model/MODEL_RUNS.md`: verified model-run claims and artifact pointers.

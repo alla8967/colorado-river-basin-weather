@@ -1,0 +1,44 @@
+# Controls what a local `docker build` sends to the Docker daemon.
+# Mirror of .gcloudignore — keep the two files identical below this header.
+
+.git
+.gitignore
+.gcloudignore
+.venv
+.pytest_cache
+.claude
+.github
+.env
+.env.example
+**/__pycache__/
+**/.DS_Store
+*.egg-info/
+
+# Large local-only artifact shelves the app does not read at runtime.
+model_runs/
+alpine_outputs/general_training_tables/
+alpine_outputs/reports/
+weather_reconstruction_model/outputs/
+weather_reconstruction_model/cache/
+weather_reconstruction_artifacts/
+terrain_data/
+Raw_DEM/
+ml_reconstruction/
+remote_jobs/
+
+# NOAA source archives and metadata not needed by the running app.
+NOAA_Inventory_Sort/NOAA_GHCN_ByYear/
+NOAA_Inventory_Sort/ghcnd-inventory.txt
+NOAA_Inventory_Sort/ghcnd-stations.txt
+NOAA_Inventory_Sort/*_daily_recent_long_format.csv
+
+# Local compiled binaries; the image compiles its own engine.
+station_engine_api_test
+validate_prediction_similarity
+Station_Engine_Server/station_engine_server
+C++_Weather_Station_Proxy_Engine/engine_unit_tests
+*.o
+
+# Docs, screenshots, and project meta not needed inside the image.
+docs/
+*.md
