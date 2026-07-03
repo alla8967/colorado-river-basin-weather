@@ -4,6 +4,8 @@
 
 A full-stack station proxy and daily temperature reconstruction project for the Colorado River Basin, combining NOAA station data, a persistent C++ matching engine, FastAPI, and row-locked model validation evidence.
 
+**Live demo:** <https://crb-weather-demo-88408160679.us-central1.run.app> — the first visit after an idle period takes about a minute while the C++ engine loads the station data; the app shows a loading banner until it is ready.
+
 Pick any point in the basin: the app finds the nearest station, ranks long-record proxy stations, and shows reconstruction reliability evidence for that location. The modeling side is backed by a 739-station holdout where model predictions are compared against nearest-hub and IDW baselines on the same rows.
 
 ![App walkthrough: proxy analysis, reliability map, and station holdout charts](docs/assets/demo.gif)
@@ -146,7 +148,7 @@ Do not retrain models, refresh holdout validation, or stage generated NOAA/model
 
 ## Limitations
 
-This is a basin-scoped research and local-demo project, not a packaged production weather service. The holdout evidence is strong for the current Colorado River Basin station corpus, with these boundaries:
+This is a basin-scoped research project with a hosted demo, not a production weather service. The holdout evidence is strong for the current Colorado River Basin station corpus, with these boundaries:
 
 - The app and model evidence are scoped to Colorado River Basin / in-basin use.
 - PRISM and Daymet comparisons have not been run yet.
