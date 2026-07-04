@@ -1,0 +1,331 @@
+// Purpose: Render the proxy-scoring methodology section, keeping its long-form copy out of index.html.
+
+// The content is static trusted markup (no artifact- or user-derived strings),
+// so it is safe to inject directly. MathJax typesets it after injection.
+
+const METHODOLOGY_HTML = `
+    <h2>Methodology</h2>
+    <p class="methodology-intro">
+        The app finds the nearest available station first. If that station is target-only, it ranks proxy hub stations; if that station is already a hub, it ranks the most similar other hubs.
+    </p>
+
+    <details class="method-card" open>
+        <summary>Target stations</summary>
+        <div class="method-body">
+            <p>Target stations are recent stations that can represent the clicked point when the nearest available station is not already a hub.</p>
+            <ul>
+                <li>Must have both TMAX and TMIN records.</li>
+                <li>Must be inside the study bounds: 31.0-43.5 latitude and -115.0 to -102.0 longitude.</li>
+                <li>Must have at least 20 usable overlapping years of TMAX and TMIN.</li>
+                <li>Must have usable temperature coverage ending in 2020 or later.</li>
+                <li>Target-only stations are compared against hub stations when they are the nearest station to the clicked point.</li>
+            </ul>
+        </div>
+    </details>
+
+    <details class="method-card">
+        <summary>Hub stations</summary>
+        <div class="method-body">
+            <p>Hub stations are longer-record stations that can act as proxy options, or as the nearest station itself when a clicked point lands closest to a hub.</p>
+            <ul>
+                <li>Must meet the same TMAX, TMIN, recency, and geographic bounds rules as target stations.</li>
+                <li>Must have at least 42 usable overlapping years of TMAX and TMIN.</li>
+                <li>Must have usable temperature coverage dating to 1960 or earlier.</li>
+                <li>The current hub set is generated directly from the NOAA inventory using these record-length rules.</li>
+                <li>If the nearest station is a hub, the app compares it with the five most similar other hubs.</li>
+            </ul>
+        </div>
+    </details>
+
+    <details class="method-card">
+        <summary>Proxy ranking filters</summary>
+        <div class="method-body">
+            <p>Before ranking, proxy candidates are screened so distant or weakly supported matches do not dominate the map.</p>
+            <ul>
+                <li>Maximum target-to-proxy distance: 300 km.</li>
+                <li>Maximum elevation difference: 1500 m.</li>
+                <li>Minimum paired daily observations: 365 days for full datasets.</li>
+                <li>Stations with missing daily correlation, MAD, or RMSE are excluded.</li>
+            </ul>
+        </div>
+    </details>
+
+    <details class="method-card">
+        <summary>Scoring metrics</summary>
+        <div class="method-body">
+            <p>The final score is a weighted 0-100 proxy score. Higher is better.</p>
+            <ul>
+                <li>Daily correlation measures whether the two stations move together through time.</li>
+                <li>Daily MAD measures average absolute temperature difference.</li>
+                <li>Daily RMSE penalizes occasional large mismatches more strongly.</li>
+                <li>Distance and elevation help keep physically plausible stations near the top.</li>
+                <li>Monthly metrics are reported for context, but the current score is driven by daily metrics plus geography.</li>
+            </ul>
+
+            <div class="formula-grid">
+                <div class="formula-card">
+                    <h4>Daily correlation</h4>
+                    <p class="formula-note">Correlation is calculated as Pearson correlation on paired daily average temperatures.</p>
+                    <div class="latex-formula">
+                        \\[
+                            r = \\frac{\\sum_i (T_i - \\bar{T})(P_i - \\bar{P})}
+                            {\\sqrt{\\sum_i (T_i - \\bar{T})^2}
+                            \\sqrt{\\sum_i (P_i - \\bar{P})^2}}
+                        \\]
+                        \\[
+                            S_r =
+                            \\begin{cases}
+                                1, & r \\ge 0.95 \\\\
+                                0, & r \\le 0.75 \\\\
+                                \\frac{1 + \\cos(\\pi \\cdot \\frac{0.95-r}{0.95-0.75})}{2}, & 0.75 < r < 0.95
+                            \\end{cases}
+                        \\]
+                    </div>
+                    <code class="formula">r = cov(target, proxy) / (sd(target) * sd(proxy))</code>
+                    <code class="formula">score = 1.0 if r >= 0.95<br>score = 0.0 if r <= 0.75<br>otherwise cosine-smoothed between 0.75 and 0.95</code>
+                    <figure class="curve-figure">
+                        <div class="curve-y-row">
+                            <span class="axis-label y-axis">Normalized score</span>
+                            <div>
+                                <div class="curve-plot">
+                                    <img src="/assets/daily-correlation-score-curve.png" alt="Daily correlation score curve" />
+                                </div>
+                                <span class="axis-label x-axis">Daily correlation r</span>
+                            </div>
+                        </div>
+                        <figcaption class="curve-caption">
+                            Correlations at or below 0.75 receive no credit, correlations at or above 0.95 receive full credit, and the transition is cosine-smoothed between those thresholds.
+                        </figcaption>
+                    </figure>
+                    <p class="formula-note">The cosine curve avoids a harsh cliff: a station does not suddenly become bad at 0.949, but very weak relationships still fall away quickly.</p>
+                </div>
+
+                <div class="formula-card">
+                    <h4>Daily MAD</h4>
+                    <p class="formula-note">Mean absolute difference captures the typical day-to-day temperature offset.</p>
+                    <div class="latex-formula">
+                        \\[
+                            MAD = \\frac{1}{n}\\sum_i |T_i - P_i|
+                        \\]
+                        \\[
+                            S_{MAD} =
+                            \\begin{cases}
+                                1, & MAD \\le 2.0 \\\\
+                                e^{-0.12(MAD - 2.0)}, & MAD > 2.0
+                            \\end{cases}
+                        \\]
+                    </div>
+                    <code class="formula">MAD = mean(abs(target_tavg - proxy_tavg))</code>
+                    <code class="formula">score = 1.0 if MAD <= 2.0 F<br>score = exp(-0.12 * (MAD - 2.0)) otherwise</code>
+                    <figure class="curve-figure">
+                        <div class="curve-y-row">
+                            <span class="axis-label y-axis">Normalized score</span>
+                            <div>
+                                <div class="curve-plot">
+                                    <img src="/assets/daily-mad-score-curve.png" alt="Daily MAD score curve" />
+                                </div>
+                                <span class="axis-label x-axis">Daily MAD (F)</span>
+                            </div>
+                        </div>
+                        <figcaption class="curve-caption">
+                            MAD values at or below 2.0 F receive full credit, then the score decays exponentially as the typical temperature offset grows.
+                        </figcaption>
+                    </figure>
+                    <p class="formula-note">This gets the largest weight because a proxy should be close in actual temperature, not just move in the same direction.</p>
+                </div>
+
+                <div class="formula-card">
+                    <h4>Daily RMSE</h4>
+                    <p class="formula-note">RMSE is similar to MAD, but larger mismatches are penalized more strongly.</p>
+                    <div class="latex-formula">
+                        \\[
+                            RMSE = \\sqrt{\\frac{1}{n}\\sum_i (T_i - P_i)^2}
+                        \\]
+                        \\[
+                            S_{RMSE} =
+                            \\begin{cases}
+                                1, & RMSE \\le 2.75 \\\\
+                                e^{-0.13(RMSE - 2.75)}, & RMSE > 2.75
+                            \\end{cases}
+                        \\]
+                    </div>
+                    <code class="formula">RMSE = sqrt(mean((target_tavg - proxy_tavg)^2))</code>
+                    <code class="formula">score = 1.0 if RMSE <= 2.75 F<br>score = exp(-0.13 * (RMSE - 2.75)) otherwise</code>
+                    <figure class="curve-figure">
+                        <div class="curve-y-row">
+                            <span class="axis-label y-axis">Normalized score</span>
+                            <div>
+                                <div class="curve-plot">
+                                    <img src="/assets/daily-rmse-score-curve.png" alt="Daily RMSE score curve" />
+                                </div>
+                                <span class="axis-label x-axis">Daily RMSE (F)</span>
+                            </div>
+                        </div>
+                        <figcaption class="curve-caption">
+                            RMSE values at or below 2.75 F receive full credit, then the score decays exponentially as larger errors become more severe.
+                        </figcaption>
+                    </figure>
+                    <p class="formula-note">This helps reject stations that usually look fine but occasionally diverge in a way that would be risky for proxy use.</p>
+                </div>
+
+                <div class="formula-card">
+                    <h4>Distance</h4>
+                    <p class="formula-note">Distance is calculated with the haversine formula between the target and proxy coordinates.</p>
+                    <div class="latex-formula">
+                        \\[
+                            a_1 = \\sin^2\\left(\\frac{\\Delta\\phi}{2}\\right)
+                        \\]
+                        \\[
+                            a_2 = \\cos(\\phi_1)\\cos(\\phi_2)
+                            \\sin^2\\left(\\frac{\\Delta\\lambda}{2}\\right)
+                        \\]
+                        \\[
+                            a = a_1 + a_2
+                        \\]
+                        \\[
+                            d = 2R\\arctan2(\\sqrt{a}, \\sqrt{1-a})
+                        \\]
+                        \\[
+                            S_d =
+                            \\begin{cases}
+                                1, & d \\le 35 \\\\
+                                e^{-0.006(d - 35)}, & d > 35
+                            \\end{cases}
+                        \\]
+                    </div>
+                    <code class="formula">distance = great-circle km between stations</code>
+                    <code class="formula">score = 1.0 if distance <= 35 km<br>score = exp(-0.006 * (distance - 35)) otherwise</code>
+                    <figure class="curve-figure">
+                        <div class="curve-y-row">
+                            <span class="axis-label y-axis">Normalized score</span>
+                            <div>
+                                <div class="curve-plot">
+                                    <img src="/assets/distance-score-curve.png" alt="Distance score curve" />
+                                </div>
+                                <span class="axis-label x-axis">Station distance (km)</span>
+                            </div>
+                        </div>
+                        <figcaption class="curve-caption">
+                            Distances at or below 35 km receive full credit, then distance credit decays gradually so nearby-but-not-perfect stations can still rank well.
+                        </figcaption>
+                    </figure>
+                    <p class="formula-note">Distance is not allowed to dominate temperature similarity, but nearby stations are more likely to share storm tracks, terrain exposure, and regional patterns.</p>
+                </div>
+
+                <div class="formula-card">
+                    <h4>Elevation</h4>
+                    <p class="formula-note">Elevation difference is the absolute vertical separation between the two stations.</p>
+                    <div class="latex-formula">
+                        \\[
+                            \\Delta z = |z_{target} - z_{proxy}|
+                        \\]
+                        \\[
+                            S_z =
+                            \\begin{cases}
+                                1, & \\Delta z \\le 50 \\\\
+                                e^{-0.0025(\\Delta z - 50)}, & \\Delta z > 50
+                            \\end{cases}
+                        \\]
+                    </div>
+                    <code class="formula">elevation_diff = abs(target_elevation - proxy_elevation)</code>
+                    <code class="formula">score = 1.0 if elevation_diff <= 50 m<br>score = exp(-0.0025 * (elevation_diff - 50)) otherwise</code>
+                    <figure class="curve-figure">
+                        <div class="curve-y-row">
+                            <span class="axis-label y-axis">Normalized score</span>
+                            <div>
+                                <div class="curve-plot">
+                                    <img src="/assets/elevation-score-curve.png" alt="Elevation difference score curve" />
+                                </div>
+                                <span class="axis-label x-axis">Elevation difference (m)</span>
+                            </div>
+                        </div>
+                        <figcaption class="curve-caption">
+                            Elevation differences at or below 50 m receive full credit, then elevation credit decays gradually as stations become vertically less comparable.
+                        </figcaption>
+                    </figure>
+                    <p class="formula-note">Elevation matters in mountain regions, but it gets the smallest weight because good climate matches can still exist across imperfect elevation pairs.</p>
+                </div>
+
+                <div class="formula-card">
+                    <h4>Final score</h4>
+                    <p class="formula-note">Each normalized metric becomes a 0-1 subscore. The weighted result is multiplied by 100.</p>
+                    <div class="latex-formula">
+                        \\[
+                            Score = 100(
+                            0.35S_{MAD} +
+                            0.25S_{RMSE} +
+                            0.20S_r +
+                            0.15S_d +
+                            0.05S_z)
+                        \\]
+                    </div>
+                    <code class="formula">final = 100 * (0.35*MAD + 0.25*RMSE + 0.20*r + 0.15*distance + 0.05*elevation)</code>
+                    <figure class="score-weight-graphic">
+                        <div class="stacked-weight-bar" aria-label="Final score weight distribution">
+                            <span class="weight-segment mad" title="Daily MAD: 35%"></span>
+                            <span class="weight-segment rmse" title="Daily RMSE: 25%"></span>
+                            <span class="weight-segment correlation" title="Daily correlation: 20%"></span>
+                            <span class="weight-segment distance" title="Distance: 15%"></span>
+                            <span class="weight-segment elevation" title="Elevation difference: 5%"></span>
+                        </div>
+                        <figcaption class="weight-legend">
+                            <span class="weight-legend-item"><span class="weight-swatch mad"></span><span>Daily MAD</span><strong>35%</strong></span>
+                            <span class="weight-legend-item"><span class="weight-swatch rmse"></span><span>Daily RMSE</span><strong>25%</strong></span>
+                            <span class="weight-legend-item"><span class="weight-swatch correlation"></span><span>Daily correlation</span><strong>20%</strong></span>
+                            <span class="weight-legend-item"><span class="weight-swatch distance"></span><span>Distance</span><strong>15%</strong></span>
+                            <span class="weight-legend-item"><span class="weight-swatch elevation"></span><span>Elevation</span><strong>5%</strong></span>
+                        </figcaption>
+                    </figure>
+                    <p class="formula-note">Record overlap is used as a quality gate rather than a direct score component, because targets and hubs are intentionally allowed to have different record lengths.</p>
+                </div>
+            </div>
+
+            <div class="weight-list">
+                <div class="weight-row">
+                    <span>Daily MAD</span>
+                    <span class="weight-track"><span class="weight-fill" style="width: 35%;"></span></span>
+                    <strong>35%</strong>
+                </div>
+                <div class="weight-row">
+                    <span>Daily RMSE</span>
+                    <span class="weight-track"><span class="weight-fill" style="width: 25%;"></span></span>
+                    <strong>25%</strong>
+                </div>
+                <div class="weight-row">
+                    <span>Daily correlation</span>
+                    <span class="weight-track"><span class="weight-fill" style="width: 20%;"></span></span>
+                    <strong>20%</strong>
+                </div>
+                <div class="weight-row">
+                    <span>Distance</span>
+                    <span class="weight-track"><span class="weight-fill" style="width: 15%;"></span></span>
+                    <strong>15%</strong>
+                </div>
+                <div class="weight-row">
+                    <span>Elevation difference</span>
+                    <span class="weight-track"><span class="weight-fill" style="width: 5%;"></span></span>
+                    <strong>5%</strong>
+                </div>
+            </div>
+        </div>
+    </details>
+`;
+
+export function renderMethodology() {
+    const container = document.getElementById("methodology-section");
+    if (!container) {
+        return;
+    }
+
+    container.innerHTML = METHODOLOGY_HTML;
+
+    // MathJax loads deferred and typesets the document before this injection
+    // runs, so ask it to typeset the methodology formulas once it is ready.
+    if (window.MathJax && window.MathJax.startup && window.MathJax.startup.promise) {
+        window.MathJax.startup.promise.then(() => {
+            if (window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([container]);
+            }
+        });
+    }
+}

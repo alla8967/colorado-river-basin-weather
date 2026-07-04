@@ -10,7 +10,7 @@ from pathlib import Path
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 BACKEND_DIR = PROJECT_DIR / "station-proxy-backend"
 STATIC_REF_RE = re.compile(r"""["'](?P<path>/(?:static|assets)/[^"']+)["']""")
-JS_IMPORT_RE = re.compile(r"""import\s+(?:[^"']+\s+from\s+)?["'](?P<path>\./[^"']+)["']""")
+JS_IMPORT_RE = re.compile(r"""import\s+(?:[^"']+\s+from\s+)?["'](?P<path>\.\.?/[^"']+)["']""")
 
 
 def load_backend_module():
@@ -54,7 +54,9 @@ def test_app_shell_serves_html_and_static_assets():
 
     assert "engine-status" in styles
     assert "mode-description" in styles
+    assert 'id="methodology-section"' in html
     assert "fetchEngineStatus" in main_js
+    assert "renderMethodology" in main_js
     assert "missing-runtime-files" in main_js
     assert "Missing required runtime files" in main_js
     assert "stationDataNotice" in main_js
@@ -104,7 +106,7 @@ def test_frontend_asset_graph_points_to_existing_files():
     assert missing_assets == []
 
     missing_modules = []
-    for js_file in sorted((BACKEND_DIR / "static" / "js").glob("*.js")):
+    for js_file in sorted((BACKEND_DIR / "static" / "js").rglob("*.js")):
         source = js_file.read_text()
         for match in JS_IMPORT_RE.finditer(source):
             import_path = match.group("path").split("?", 1)[0].split("#", 1)[0]

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+    <!-- Colorado River Basin: mountain ridge over a river bend -->
+    <rect width="32" height="32" rx="6" fill="#0f172a"/>
+    <path d="M4 19 L11 9 L15 14 L20 7 L28 19 Z" fill="#334155"/>
+    <path d="M4 22 C 10 20, 12 25, 17 23 S 26 20, 28 24" fill="none" stroke="#60a5fa" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M4 27 C 10 25, 13 29, 18 27 S 26 25, 28 28" fill="none" stroke="#3b82f6" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>
+</svg>
