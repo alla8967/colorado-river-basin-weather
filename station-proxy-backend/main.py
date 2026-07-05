@@ -123,14 +123,19 @@ def shutdown_event():
     engine_client.stop()
 
 
+# The HTML shell must always revalidate: versioned ?v= asset URLs only bust
+# caches if browsers re-read the HTML that references them.
+HTML_SHELL_HEADERS = {"Cache-Control": "no-cache"}
+
+
 @app.get("/")
 def home():
-    return FileResponse(settings.backend_dir / "index.html")
+    return FileResponse(settings.backend_dir / "index.html", headers=HTML_SHELL_HEADERS)
 
 
 @app.get("/index.html")
 def home_index():
-    return FileResponse(settings.backend_dir / "index.html")
+    return FileResponse(settings.backend_dir / "index.html", headers=HTML_SHELL_HEADERS)
 
 
 @app.get("/test", response_model=HealthResponse)
