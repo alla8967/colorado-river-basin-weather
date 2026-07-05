@@ -1,6 +1,6 @@
 // Purpose: Render the main analysis results, proxy station rankings, cards, and comparison charts.
 
-import { attachChartSelectInteractions, renderDailyComparisonChart, renderLowCorrelationExample, renderMonthlyComparisonChart } from "./charts.js";
+import { attachChartSelectInteractions, cleanComparisonOptions, renderDailyComparisonChart, renderLowCorrelationExample, renderMonthlyComparisonChart } from "./charts.js?v=low-correlation-v1";
 import { highlightProxyRank, plotAnalysisStations } from "./maps.js";
 import { elements, state } from "./state.js";
 import {
@@ -198,6 +198,8 @@ export function renderResults(data) {
     attachResultInteractions();
     state.currentMatchMode = data.matchMode || "target_to_hub";
     state.currentHighCorrelationOptions = data.highCorrelationComparisonOptions || [];
-    state.currentLowCorrelationOptions = data.lowCorrelationComparisonOptions || [];
+    // Keep the same filtered list the rendered dropdown was built from, so
+    // select indexes stay aligned.
+    state.currentLowCorrelationOptions = cleanComparisonOptions(data.lowCorrelationComparisonOptions);
     attachChartSelectInteractions();
 }

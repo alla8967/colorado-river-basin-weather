@@ -118,6 +118,80 @@ export function renderTemperatureComparisonChart(options) {
     `;
 }
 
+// The engine sends the last 365 paired days per station, but source records can
+// hide multi-year date gaps or stuck-instrument runs inside that window. Only
+// windows with day-for-day overlap and moving values are worth charting.
+const MIN_CONTIGUOUS_COMPARISON_DAYS = 180;
+const MAX_FLAT_RUN_DAYS = 6;
+
+export function comparisonDayNumber(point) {
+    return Math.round(Date.UTC(point.year, point.month - 1, point.day) / 86400000);
+}
+
+export function splitIntoContiguousSegments(points) {
+    const segments = [];
+    let current = [];
+
+    for (const point of points) {
+        const previous = current[current.length - 1];
+        if (previous && comparisonDayNumber(point) - comparisonDayNumber(previous) !== 1) {
+            segments.push(current);
+            current = [];
+        }
+        current.push(point);
+    }
+
+    if (current.length > 0) {
+        segments.push(current);
+    }
+
+    return segments;
+}
+
+export function hasLongFlatRun(points, valueKey) {
+    let runLength = 1;
+
+    for (let index = 1; index < points.length; index++) {
+        if (Number(points[index][valueKey]) === Number(points[index - 1][valueKey])) {
+            runLength += 1;
+            if (runLength > MAX_FLAT_RUN_DAYS) {
+                return true;
+            }
+        } else {
+            runLength = 1;
+        }
+    }
+
+    return false;
+}
+
+export function cleanComparisonSegment(points) {
+    // Most recent longest stretch of consecutive calendar days where neither
+    // series sits flat long enough to look like a stuck instrument.
+    let best = [];
+
+    for (const segment of splitIntoContiguousSegments(Array.isArray(points) ? points : [])) {
+        if (
+            segment.length >= best.length
+            && !hasLongFlatRun(segment, "targetTavg")
+            && !hasLongFlatRun(segment, "proxyTavg")
+        ) {
+            best = segment;
+        }
+    }
+
+    return best;
+}
+
+export function cleanComparisonOptions(options) {
+    return (options || [])
+        .map(option => ({
+            ...option,
+            dailyComparison: cleanComparisonSegment(option && option.dailyComparison)
+        }))
+        .filter(option => option.dailyComparison.length >= MIN_CONTIGUOUS_COMPARISON_DAYS);
+}
+
 export function comparisonOptionLabel(option, index, fallbackPrefix) {
     const match = option.match || {};
     const proxy = match.proxyStation || {};
@@ -194,9 +268,12 @@ export function renderDailyComparisonChart(data) {
 }
 
 export function renderLowCorrelationExample(data) {
-    const options = data.lowCorrelationComparisonOptions || [];
+    const rawOptions = (data.lowCorrelationComparisonOptions && data.lowCorrelationComparisonOptions.length > 0)
+        ? data.lowCorrelationComparisonOptions
+        : (data.lowCorrelationExample ? [data.lowCorrelationExample] : []);
+    const options = cleanComparisonOptions(rawOptions);
     const terms = matchTerms(data);
-    const example = options[0] || data.lowCorrelationExample;
+    const example = options[0];
 
     if (!example || !example.match) {
         return "";
@@ -208,15 +285,14 @@ export function renderLowCorrelationExample(data) {
         : `Low-correlation ${terms.chartProxyLabel.toLowerCase()}`;
 
     return renderTemperatureComparisonChart({
-        title: "Temporary Low-Correlation Example",
-        description: `Daily average temperature against ${proxyName} from`,
+        title: "Low-Correlation Comparison",
+        description: `A deliberately weak match, shown for contrast with the top-ranked results: daily average temperature against ${proxyName} from`,
         emptyMessage: "Low-correlation comparison data is not available in this response.",
         points: example.dailyComparison || [],
         includeDay: true,
         denseTicks: true,
         yAxisLabel: "Daily Avg Temp (F)",
         xAxisLabel: "Date",
-        cardClass: "diagnostic-card",
         proxyLabel: `${proxyName} (r = ${formatNumber(match.dailyCorrelation, 3)})`,
         controlHtml: renderComparisonSelect(
             "low-correlation-select",
@@ -298,13 +374,12 @@ export function attachChartSelectInteractions() {
                 this,
                 state.currentLowCorrelationOptions || [],
                 {
-                    title: "Temporary Low-Correlation Example",
-                    descriptionPrefix: "Daily average temperature against",
+                    title: "Low-Correlation Comparison",
+                    descriptionPrefix: "A deliberately weak match, shown for contrast with the top-ranked results: daily average temperature against",
                     emptyMessage: "Low-correlation comparison data is not available in this response.",
                     selectId: "low-correlation-select",
                     selectLabel: hubMode ? "Low-correlation similar hub example" : "Low-correlation example",
-                    fallbackProxyName: hubMode ? "Low-correlation similar hub" : "Low-correlation proxy",
-                    cardClass: "diagnostic-card"
+                    fallbackProxyName: hubMode ? "Low-correlation similar hub" : "Low-correlation proxy"
                 }
             );
         });

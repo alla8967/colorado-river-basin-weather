@@ -5,7 +5,7 @@ import { initializeMap, refreshMapSize } from "./maps.js";
 import { renderMethodology } from "./methodology.js?v=tabs-v1";
 import { renderModelTesting } from "./model-testing.js?v=model-testing-v1";
 import { bindReliabilityControls, initializeReliabilityMap, refreshReliabilityMapSize } from "./reliability.js?v=tabs-v1";
-import { renderResults } from "./results.js";
+import { renderResults } from "./results.js?v=low-correlation-v1";
 import { elements, state } from "./state.js";
 
 function escapeHtml(value) {
