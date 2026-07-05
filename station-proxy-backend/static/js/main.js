@@ -3,6 +3,7 @@
 import { fetchEngineStatus, fetchLocationAnalysis } from "./api.js";
 import { initializeMap, refreshMapSize } from "./maps.js";
 import { renderMethodology } from "./methodology.js?v=tabs-v1";
+import { renderModelTesting } from "./model-testing.js?v=model-testing-v1";
 import { bindReliabilityControls, initializeReliabilityMap, refreshReliabilityMapSize } from "./reliability.js?v=tabs-v1";
 import { renderResults } from "./results.js";
 import { elements, state } from "./state.js";
@@ -22,7 +23,9 @@ function activateTab(tabId) {
     });
 
     elements.tabButtons.forEach(button => {
-        button.classList.toggle("active", button.dataset.tabTarget === tabId);
+        const isActive = button.dataset.tabTarget === tabId;
+        button.classList.toggle("active", isActive);
+        button.setAttribute("aria-selected", isActive ? "true" : "false");
     });
 
     if (tabId === "model-reliability-tab") {
@@ -31,7 +34,9 @@ function activateTab(tabId) {
         return;
     }
 
-    refreshMapSize();
+    if (tabId === "proxy-tab") {
+        refreshMapSize();
+    }
 }
 
 function missingFilesHtml(files) {
@@ -197,6 +202,7 @@ function bindEvents() {
 
 function startApp() {
     renderMethodology();
+    renderModelTesting();
     bindEvents();
     initializeMap();
     checkEngineStatus();

@@ -12,6 +12,9 @@ This folder contains the browser-side modules for the station proxy app.
   the station detail panel with holdout metrics and daily prediction-vs-actual
   charts.
 - `results.js` renders station analysis results and proxy rankings.
+- `methodology.js` renders the proxy-scoring methodology copy.
+- `model-testing.js` renders the Model & Testing tab (validation design,
+  Alpine HPC hardware, and measured run timings).
 - `charts.js` renders SVG comparison charts.
 - `formatters.js` holds display, numeric, station, and map helper functions.
 

@@ -31,20 +31,28 @@ main {
 }
 
 .app-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 1100;
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     align-items: center;
+    padding: 10px 0;
+    margin: -10px 0;
+    background: #f4f6f8;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .tab-button {
     width: auto;
     margin: 0;
-    padding: 10px 14px;
+    padding: 10px 16px;
     border: 1px solid #cbd5e1;
-    border-radius: 8px;
+    border-radius: 999px;
     background: #ffffff;
     color: #334155;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .tab-button:hover {
@@ -58,6 +66,14 @@ main {
     color: #ffffff;
 }
 
+.tab-button:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid #1d4ed8;
+    outline-offset: 2px;
+}
+
 .tab-panel {
     display: none;
     gap: 24px;
@@ -65,6 +81,24 @@ main {
 
 .tab-panel.active {
     display: grid;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .tab-panel.active {
+        animation: panel-fade 0.25s ease;
+    }
+
+    @keyframes panel-fade {
+        from {
+            opacity: 0;
+            transform: translateY(4px);
+        }
+
+        to {
+            opacity: 1;
+            transform: none;
+        }
+    }
 }
 
 .panel,
@@ -1457,6 +1491,119 @@ details.method-card[open] summary {
     background: #dc2626;
 }
 
+.model-testing {
+    display: grid;
+    gap: 20px;
+}
+
+.model-testing h2 {
+    margin-bottom: 0;
+}
+
+.testing-headline {
+    margin-top: 4px;
+}
+
+.testing-section {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 18px;
+}
+
+.testing-section h3 {
+    margin: 0 0 10px 0;
+    font-size: 17px;
+}
+
+.testing-section p {
+    color: #334155;
+    line-height: 1.55;
+    margin: 0 0 10px 0;
+    max-width: 980px;
+}
+
+.testing-section table {
+    max-width: 980px;
+}
+
+.testing-section tbody tr {
+    cursor: default;
+}
+
+.testing-section tbody tr:hover {
+    background: transparent;
+}
+
+.testing-note {
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 10px 0 0 0;
+}
+
+.spec-table td:first-child {
+    color: #475569;
+    font-weight: bold;
+    width: 34%;
+}
+
+.mae-bars {
+    display: grid;
+    gap: 10px;
+    margin: 14px 0;
+    max-width: 720px;
+}
+
+.mae-bar-row {
+    display: grid;
+    grid-template-columns: minmax(110px, 150px) 1fr 58px;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #334155;
+}
+
+.mae-bar-track {
+    display: block;
+    height: 18px;
+    border-radius: 6px;
+    background: #eef2f7;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.mae-bar-fill {
+    display: block;
+    height: 100%;
+}
+
+.mae-bar-fill.model {
+    background: #2563eb;
+}
+
+.mae-bar-fill.idw {
+    background: #94a3b8;
+}
+
+.mae-bar-fill.nearest {
+    background: #cbd5e1;
+}
+
+.mae-bar-value {
+    font-weight: bold;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.provenance-list code,
+.testing-section code {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
 @media (max-width: 900px) {
     main {
         grid-template-columns: 1fr;
@@ -1497,6 +1644,15 @@ details.method-card[open] summary {
 
     .latex-formula {
         font-size: 12px;
+    }
+
+    .mae-bar-row {
+        grid-template-columns: 1fr auto;
+    }
+
+    .mae-bar-row .mae-bar-track {
+        order: 3;
+        grid-column: 1 / -1;
     }
 }
 

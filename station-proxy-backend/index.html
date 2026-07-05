@@ -5,26 +5,29 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NOAA Station Proxy Finder</title>
+    <title>Colorado River Basin Weather</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-    <link rel="stylesheet" href="/static/styles.css?v=prediction-series-charts-v1" />
+    <link rel="stylesheet" href="/static/styles.css?v=model-testing-v1" />
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
 </head>
 <body>
     <header>
-        <h1>NOAA Weather Station Proxy Finder</h1>
+        <h1>Colorado River Basin Weather</h1>
         <p>
-            Enter a latitude and longitude to find the nearest station in the current dataset,
-            then identify the best representative proxy stations using the C++ scoring engine.
+            A NOAA station-matching engine and a temperature reconstruction model for the
+            Colorado River Basin. Find proxy stations for any point, explore the Paloma v1
+            model's reliability across the basin, and see how the model was trained,
+            validated, and run.
         </p>
     </header>
 
     <main>
-        <nav class="app-tabs" aria-label="Application views">
-            <button class="tab-button active" type="button" data-tab-target="proxy-tab">Proxy Finder</button>
-            <button class="tab-button" type="button" data-tab-target="model-reliability-tab">Reliability Map</button>
+        <nav class="app-tabs" role="tablist" aria-label="Application views">
+            <button class="tab-button active" type="button" role="tab" aria-selected="true" aria-controls="proxy-tab" data-tab-target="proxy-tab">Proxy Finder</button>
+            <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="model-reliability-tab" data-tab-target="model-reliability-tab">Paloma Reliability Map</button>
+            <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="model-testing-tab" data-tab-target="model-testing-tab">Model &amp; Testing</button>
         </nav>
 
         <div id="proxy-tab" class="tab-panel active" role="tabpanel">
@@ -135,6 +138,11 @@
                 </div>
             </section>
         </div>
+
+        <div id="model-testing-tab" class="tab-panel" role="tabpanel">
+            <section class="panel model-testing" id="model-testing-section">
+            </section>
+        </div>
     </main>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -150,6 +158,6 @@
         };
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-    <script type="module" src="/static/js/main.js?v=tabs-v1"></script>
+    <script type="module" src="/static/js/main.js?v=model-testing-v1"></script>
 </body>
 </html>

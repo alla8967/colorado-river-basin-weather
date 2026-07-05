@@ -44,6 +44,8 @@ def test_app_shell_serves_html_and_static_assets():
     assert "<option value=\"rmse\">Holdout RMSE</option>" in html
     assert "<option value=\"bias\">Holdout Bias</option>" in html
     assert "Show Stations" in html
+    assert 'data-tab-target="model-testing-tab"' in html
+    assert 'id="model-testing-section"' in html
     assert "Model Support" not in html
     assert "model-support-tab" not in html
     assert "confidence-map" not in html
@@ -57,6 +59,7 @@ def test_app_shell_serves_html_and_static_assets():
     assert 'id="methodology-section"' in html
     assert "fetchEngineStatus" in main_js
     assert "renderMethodology" in main_js
+    assert "renderModelTesting" in main_js
     assert "missing-runtime-files" in main_js
     assert "Missing required runtime files" in main_js
     assert "stationDataNotice" in main_js
