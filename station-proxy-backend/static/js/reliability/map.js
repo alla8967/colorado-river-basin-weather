@@ -29,7 +29,7 @@ import {
     renderReliabilityOverview,
     renderReliabilitySample,
     renderReliabilityStationDetails
-} from "./station-details.js?v=tabs-v1";
+} from "./station-details.js?v=reliability-guide-v1";
 
 export function refreshReliabilityMapSize() {
     if (!state.reliabilityMap) {

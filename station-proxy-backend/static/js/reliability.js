@@ -9,4 +9,4 @@ export {
     bindReliabilityControls,
     initializeReliabilityMap,
     refreshReliabilityMapSize
-} from "./reliability/map.js?v=tabs-v1";
+} from "./reliability/map.js?v=reliability-guide-v1";

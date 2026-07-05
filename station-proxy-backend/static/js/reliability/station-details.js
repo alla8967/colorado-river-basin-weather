@@ -549,13 +549,21 @@ export function renderReliabilitySample(data) {
 
     const sample = data.sample || {};
     const layerLabel = LAYER_LABELS[data.layer] || data.layer;
-    const scoreLabel = data.layer === "helpfulness" ? "Helpfulness" : "Reliability";
+    // Headline the calibrated helpfulness blend, not the raw percentile rank:
+    // half the basin ranks below 50 by construction, so the rank alone reads
+    // like a failing grade even where the model is near its median accuracy.
+    const headlineScore = sample.modelHelpfulness !== undefined
+        ? sample.modelHelpfulness
+        : sample.reliability;
+    const scoreLabel = data.layer === "helpfulness" || sample.modelHelpfulness !== undefined
+        ? "Model helpfulness"
+        : "Reliability";
     const highStation = sample.nearestHighMaeStation;
     const lowStation = sample.nearestLowMaeStation;
     const generalizationMetric = sample.generalizationReliability !== undefined
         ? `
             <div class="metric">
-                <div class="metric-label">Generalization reliability</div>
+                <div class="metric-label">Generalization percentile</div>
                 <div class="metric-value">${formatNumber(sample.generalizationReliability, 1)}</div>
             </div>
         `
@@ -580,8 +588,8 @@ export function renderReliabilitySample(data) {
                         nearest grid cell ${formatNumber(data.nearestSurfaceDistanceKm, 1)} km
                     </p>
                 </div>
-                <div class="support-score-badge ${sample.reliability >= 75 ? "high" : sample.reliability >= 65 ? "moderate" : sample.reliability >= 50 ? "low" : "very-low"}">
-                    <span class="support-score-number">${formatNumber(sample.reliability, 1)}</span>
+                <div class="support-score-badge ${headlineScore >= 75 ? "high" : headlineScore >= 65 ? "moderate" : headlineScore >= 50 ? "low" : "very-low"}">
+                    <span class="support-score-number">${formatNumber(headlineScore, 1)}</span>
                     <span class="support-score-label">${escapeHtml(scoreLabel)}</span>
                 </div>
             </div>
@@ -606,7 +614,7 @@ export function renderReliabilitySample(data) {
                         </div>
                     </div>
                     <div class="score-band">
-                        ${renderScoreBar(scoreLabel, sample.reliability)}
+                        ${renderScoreBar(scoreLabel, headlineScore)}
                         ${renderScoreBar("Evidence strength", sample.evidenceStrength)}
                     </div>
                 </section>

@@ -13,6 +13,8 @@ This folder contains the browser-side modules for the station proxy app.
   charts.
 - `results.js` renders station analysis results and proxy rankings.
 - `methodology.js` renders the proxy-scoring methodology copy.
+- `reliability-guide.js` renders the reliability-map guide (raster meaning,
+  grid-cell scoring, calibration anchors, and quality tiers).
 - `model-testing.js` renders the Model & Testing tab (validation design,
   Alpine HPC hardware, and measured run timings).
 - `charts.js` renders SVG comparison charts.
