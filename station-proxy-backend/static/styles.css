@@ -1481,6 +1481,69 @@ details.method-card[open] summary {
     background: #dc2626;
 }
 
+.guide-figure {
+    margin: 14px 0 10px 0;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.guide-figure svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+}
+
+.guide-figure figcaption {
+    margin-top: 10px;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.band-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0 4px 0;
+}
+
+.band-chip {
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid #cbd5e1;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.band-chip.band-high {
+    background: #ccfbf1;
+    border-color: #5eead4;
+    color: #115e59;
+}
+
+.band-chip.band-moderate {
+    background: #fef9c3;
+    border-color: #fde047;
+    color: #854d0e;
+}
+
+.band-chip.band-low {
+    background: #ffedd5;
+    border-color: #fdba74;
+    color: #9a3412;
+}
+
+.band-chip.band-very-low {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #991b1b;
+}
+
 .model-testing {
     display: grid;
     gap: 20px;
