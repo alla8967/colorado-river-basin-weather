@@ -5,6 +5,7 @@ CXXFLAGS = -std=c++17 -O2 -DNDEBUG -Wall -Wextra -I"C++_Weather_Station_Proxy_En
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
 UVICORN ?= $(PYTHON) -m uvicorn
+NODE ?= node
 PYTHON_CMD = $(if $(findstring /,$(PYTHON)),$(abspath $(PYTHON)),$(PYTHON))
 PYCACHE_PREFIX ?= /tmp/crb_pycache
 
@@ -51,6 +52,7 @@ PYTHON_COMPILE_FILES = \
 	$(BACKEND_DIR)/engine_adapter.py \
 	$(BACKEND_DIR)/native_engine_client.py \
 	$(BACKEND_DIR)/api_models.py \
+	$(BACKEND_DIR)/response_safety.py \
 	$(BACKEND_DIR)/confidence_service.py \
 	$(BACKEND_DIR)/model_run_service.py \
 	$(BACKEND_DIR)/reliability_service.py \
@@ -60,7 +62,8 @@ PYTHON_COMPILE_FILES = \
 	tests/test_app_shell.py \
 	tests/test_engine_adapter.py \
 	tests/test_native_engine_parity.py \
-	tests/test_reliability_backend.py
+	tests/test_reliability_backend.py \
+	tests/test_security_hardening.py
 
 COMMON_ENGINE_SOURCES = \
 	$(ENGINE_DIR)/STATION_PROXY_ENGINE.cpp \
@@ -100,7 +103,7 @@ NATIVE_ENGINE_SOURCES = \
 	$(ENGINE_DIR)/python_bindings.cpp \
 	$(COMMON_ENGINE_SOURCES)
 
-.PHONY: all setup setup-backend setup-model server api native-engine validate-prediction check check-js check-python-compile test test-engine test-cpp-unit test-app-shell test-engine-adapter test-native-parity test-reliability-backend test-python bootstrap-fixture demo run run-api run-backend run-backend-fixture doctor clean clean-local-artifacts
+.PHONY: all setup setup-backend setup-model server api native-engine validate-prediction check check-js check-python-compile test test-engine test-cpp-unit test-app-shell test-engine-adapter test-native-parity test-reliability-backend test-security-hardening test-python bootstrap-fixture demo run run-api run-backend run-backend-fixture doctor clean clean-local-artifacts
 
 all: server api
 
@@ -126,11 +129,11 @@ native-engine:
 validate-prediction:
 	$(CXX) $(CXXFLAGS) $(VALIDATE_PREDICTION_SOURCES) -o "$(VALIDATE_PREDICTION_TARGET)"
 
-check: check-js lint check-python-compile test-app-shell test-engine-adapter test-native-parity test-reliability-backend test-engine test-cpp-unit validate-prediction
+check: check-js lint check-python-compile test-app-shell test-engine-adapter test-native-parity test-reliability-backend test-security-hardening test-engine test-cpp-unit validate-prediction
 
 check-js:
 	@for file in $(FRONTEND_JS_FILES); do \
-		node --check "$$file" || exit 1; \
+		$(NODE) --check "$$file" || exit 1; \
 	done
 
 lint:
@@ -157,7 +160,7 @@ deploy-cloud-run:
 check-python-compile:
 	PYTHONPYCACHEPREFIX="$(PYCACHE_PREFIX)" $(PYTHON) -m py_compile $(PYTHON_COMPILE_FILES)
 
-test: test-engine test-cpp-unit test-app-shell test-engine-adapter test-native-parity test-reliability-backend test-python
+test: test-engine test-cpp-unit test-app-shell test-engine-adapter test-native-parity test-reliability-backend test-security-hardening test-python
 
 test-engine:
 	$(PYTHON) tests/test_engine_fixture.py
@@ -177,6 +180,9 @@ test-native-parity: server
 
 test-reliability-backend:
 	$(PYTHON) tests/test_reliability_backend.py
+
+test-security-hardening:
+	$(PYTHON) tests/test_security_hardening.py
 
 test-python:
 	$(PYTHON) -m pytest weather_reconstruction_model/scripts/tests

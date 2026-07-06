@@ -2,6 +2,7 @@
 
 import { state } from "./state.js";
 import {
+    escapeHtml,
     formatNumber,
     matchTerms,
     stationHasCoordinates,
@@ -89,8 +90,8 @@ export function plotAnalysisStations(data) {
             radius: 9,
             popupHtml: `
                 <strong>Nearest ${stationRoleLabel(nearest)}</strong><br>
-                ${nearest.stationName}<br>
-                ${nearest.stationID}<br>
+                ${escapeHtml(nearest.stationName)}<br>
+                ${escapeHtml(nearest.stationID)}<br>
                 ${stationRoleLabel(nearest)}<br>
                 Elevation: ${formatNumber(nearest.elevation, 1)} m
             `
@@ -120,9 +121,9 @@ export function plotAnalysisStations(data) {
             fillColor: "#f87171",
             radius: Math.max(5, 9 - (match.rank || 1)),
             popupHtml: `
-                <strong>${terms.mapStationLabel} #${match.rank}</strong><br>
-                ${proxy.stationName}<br>
-                ${proxy.stationID}<br>
+                <strong>${escapeHtml(terms.mapStationLabel)} #${escapeHtml(match.rank)}</strong><br>
+                ${escapeHtml(proxy.stationName)}<br>
+                ${escapeHtml(proxy.stationID)}<br>
                 Score: ${formatNumber(match.score, 2)}<br>
                 Distance: ${formatNumber(match.distanceKm, 1)} km<br>
                 Daily r: ${formatNumber(match.dailyCorrelation, 3)}

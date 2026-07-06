@@ -1,7 +1,7 @@
 // Purpose: Render SVG charts for station comparison metrics in the results panel.
 
 import { state } from "./state.js";
-import { formatNumber, matchTerms } from "./formatters.js";
+import { escapeHtml, formatNumber, matchTerms } from "./formatters.js";
 
 export function buildChartPath(points) {
     return points.map((point, index) => {
@@ -11,14 +11,15 @@ export function buildChartPath(points) {
 }
 
 export function formatComparisonDate(point, includeDay = false) {
-    const year = point.year;
-    const month = String(point.month).padStart(2, "0");
+    const year = Number.isFinite(Number(point.year)) ? Number(point.year) : 0;
+    const month = String(Number.isFinite(Number(point.month)) ? Number(point.month) : 0).padStart(2, "0");
 
     if (!includeDay) {
-        return `${year}-${month}`;
+        return String(year) + "-" + month;
     }
 
-    return `${year}-${month}-${String(point.day).padStart(2, "0")}`;
+    const day = String(Number.isFinite(Number(point.day)) ? Number(point.day) : 0).padStart(2, "0");
+    return String(year) + "-" + month + "-" + day;
 }
 
 export function renderTemperatureComparisonChart(options) {
@@ -27,9 +28,9 @@ export function renderTemperatureComparisonChart(options) {
     if (points.length < 2) {
         return `
             <div class="card">
-                <h2>${options.title}</h2>
+                <h2>${escapeHtml(options.title)}</h2>
                 <p class="placeholder">
-                    ${options.emptyMessage}
+                    ${escapeHtml(options.emptyMessage)}
                 </p>
             </div>
         `;
@@ -84,16 +85,16 @@ export function renderTemperatureComparisonChart(options) {
     const lastPoint = points[points.length - 1];
 
     return `
-        <div class="card ${options.cardClass || ""}">
-            <h2>${options.title}</h2>
+        <div class="card ${escapeHtml(options.cardClass || "")}">
+            <h2>${escapeHtml(options.title)}</h2>
             ${options.controlHtml || ""}
             <div class="comparison-chart">
             <p class="placeholder">
-                ${options.description}
-                ${formatComparisonDate(firstPoint, options.includeDay)} to
-                ${formatComparisonDate(lastPoint, options.includeDay)}.
+                ${escapeHtml(options.description)}
+                ${escapeHtml(formatComparisonDate(firstPoint, options.includeDay))} to
+                ${escapeHtml(formatComparisonDate(lastPoint, options.includeDay))}.
             </p>
-            <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${options.title}">
+            <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(options.title)}">
                 <line x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${height - padding.bottom}" stroke="#94a3b8" />
                 <line x1="${padding.left}" y1="${height - padding.bottom}" x2="${width - padding.right}" y2="${height - padding.bottom}" stroke="#94a3b8" />
                 ${yTicks.map(tick => `
@@ -102,16 +103,16 @@ export function renderTemperatureComparisonChart(options) {
                 `).join("")}
                 ${xTicks.map(tick => `
                     <line x1="${tick.x}" y1="${height - padding.bottom}" x2="${tick.x}" y2="${height - padding.bottom + 5}" stroke="#94a3b8" />
-                    <text x="${tick.x}" y="${height - padding.bottom + 22}" text-anchor="middle" fill="#64748b" font-size="12">${tick.label}</text>
+                    <text x="${tick.x}" y="${height - padding.bottom + 22}" text-anchor="middle" fill="#64748b" font-size="12">${escapeHtml(tick.label)}</text>
                 `).join("")}
-                <text x="18" y="${padding.top + chartHeight / 2}" text-anchor="middle" transform="rotate(-90 18 ${padding.top + chartHeight / 2})" fill="#475569" font-size="12" font-weight="bold">${options.yAxisLabel}</text>
-                <text x="${padding.left + chartWidth / 2}" y="${height - 10}" text-anchor="middle" fill="#475569" font-size="12" font-weight="bold">${options.xAxisLabel}</text>
+                <text x="18" y="${padding.top + chartHeight / 2}" text-anchor="middle" transform="rotate(-90 18 ${padding.top + chartHeight / 2})" fill="#475569" font-size="12" font-weight="bold">${escapeHtml(options.yAxisLabel)}</text>
+                <text x="${padding.left + chartWidth / 2}" y="${height - 10}" text-anchor="middle" fill="#475569" font-size="12" font-weight="bold">${escapeHtml(options.xAxisLabel)}</text>
                 <path d="${targetPath}" fill="none" stroke="#2563eb" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
                 <path d="${proxyPath}" fill="none" stroke="#dc2626" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
             </svg>
             <div class="chart-legend">
-                <span class="chart-legend-item"><span class="chart-swatch target"></span>${options.targetLabel || "Nearest station"}</span>
-                <span class="chart-legend-item"><span class="chart-swatch proxy"></span>${options.proxyLabel || "Top proxy station"}</span>
+                <span class="chart-legend-item"><span class="chart-swatch target"></span>${escapeHtml(options.targetLabel || "Nearest station")}</span>
+                <span class="chart-legend-item"><span class="chart-swatch proxy"></span>${escapeHtml(options.proxyLabel || "Top proxy station")}</span>
             </div>
             </div>
         </div>
@@ -211,13 +212,13 @@ export function renderComparisonSelect(selectId, label, options, fallbackPrefix,
     }
 
     const optionHtml = options.map((option, index) => `
-        <option value="${index}" ${index === selectedIndex ? "selected" : ""}>${comparisonOptionLabel(option, index, fallbackPrefix)}</option>
+        <option value="${index}" ${index === selectedIndex ? "selected" : ""}>${escapeHtml(comparisonOptionLabel(option, index, fallbackPrefix))}</option>
     `).join("");
 
     return `
         <div class="chart-control">
-            <label for="${selectId}">${label}</label>
-            <select id="${selectId}" data-comparison-select="${selectId}">
+            <label for="${escapeHtml(selectId)}">${escapeHtml(label)}</label>
+            <select id="${escapeHtml(selectId)}" data-comparison-select="${escapeHtml(selectId)}">
                 ${optionHtml}
             </select>
         </div>

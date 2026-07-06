@@ -21,6 +21,8 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from model_run_service import ModelRunService
 from reliability_service import ReliabilitySurfaceService
+from response_safety import display_path as safe_display_path
+from response_safety import sanitize_response_paths
 
 # settings configures imports for weather_reconstruction_model/scripts.
 from settings import settings
@@ -31,7 +33,7 @@ app = FastAPI()
 # cross-origin GET reads are safe to allow.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.cors_allow_origins,
     allow_credentials=False,
     allow_methods=["GET"],
     allow_headers=["*"],
@@ -42,11 +44,31 @@ app.add_middleware(GZipMiddleware, minimum_size=1024, compresslevel=6)
 # so browsers and CDNs may cache them. Query-string versions (?v=...) handle
 # cache busting for static files.
 CACHEABLE_PATH_PREFIXES = ("/model-runs/", "/static/", "/assets/")
+SECURITY_HEADERS = {
+    "Content-Security-Policy": (
+        "default-src 'self'; "
+        "script-src 'self' https://unpkg.com https://cdn.jsdelivr.net; "
+        "style-src 'self' https://unpkg.com 'unsafe-inline'; "
+        "img-src 'self' data: https://server.arcgisonline.com; "
+        "connect-src 'self' http://127.0.0.1:8000 http://127.0.0.1:8001 "
+        "http://localhost:8000 http://localhost:8001; "
+        "font-src 'self' data:; "
+        "object-src 'none'; "
+        "base-uri 'self'; "
+        "frame-ancestors 'none'"
+    ),
+    "Cross-Origin-Opener-Policy": "same-origin",
+    "Permissions-Policy": "camera=(), geolocation=(), microphone=()",
+    "Referrer-Policy": "no-referrer",
+    "X-Content-Type-Options": "nosniff",
+}
 
 
 @app.middleware("http")
 async def artifact_cache_headers(request: Request, call_next):
     response = await call_next(request)
+    for header, value in SECURITY_HEADERS.items():
+        response.headers.setdefault(header, value)
     if (
         request.method == "GET"
         and response.status_code == 200
@@ -62,10 +84,7 @@ app.mount("/static", StaticFiles(directory=settings.backend_dir / "static"), nam
 
 def display_path(path: Path) -> str:
     """Report artifact locations relative to the project so absolute server paths stay private."""
-    try:
-        return str(Path(path).relative_to(settings.project_dir))
-    except ValueError:
-        return Path(path).name
+    return safe_display_path(path, settings.project_dir)
 
 
 LATITUDE_QUERY = Query(ge=-90.0, le=90.0)
@@ -75,10 +94,7 @@ ELEVATION_QUERY = Query(default=None, ge=-500.0, le=9000.0)
 
 def sanitize_engine_response(payload: dict) -> dict:
     """Rewrite absolute file paths echoed by the C++ engine to project-relative paths."""
-    for key, value in payload.items():
-        if key.endswith(("File", "Executable")) and isinstance(value, str) and value.startswith("/"):
-            payload[key] = display_path(Path(value))
-    return payload
+    return sanitize_response_paths(payload, settings.project_dir)
 
 engine_client = build_engine_client(
     EngineClientConfig(
@@ -140,7 +156,7 @@ def home_index():
 
 @app.get("/test", response_model=HealthResponse)
 def test() -> HealthResponse:
-    engine_status = engine_client.status()
+    engine_status = sanitize_response_paths(engine_client.status(), settings.project_dir)
     return HealthResponse(
         status="ok",
         engine="Persistent C++ station matcher is connected through FastAPI",

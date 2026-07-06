@@ -34,8 +34,8 @@ RUN g++ -std=c++17 -O2 -DNDEBUG -Wall -Wextra \
 # --- Stage 2: Python runtime with app code and data ---------------------------
 FROM python:3.11-slim
 
-# Keep these pins in sync with [project.dependencies] in pyproject.toml.
-RUN pip install --no-cache-dir "fastapi>=0.110" "uvicorn[standard]>=0.29"
+# Keep these bounds in sync with [project.dependencies] in pyproject.toml.
+RUN pip install --no-cache-dir "fastapi>=0.110,<1.0" "uvicorn[standard]>=0.29,<1.0"
 
 WORKDIR /app
 
@@ -58,5 +58,9 @@ COPY tests/fixtures/ tests/fixtures/
 ENV PORT=8080
 EXPOSE 8080
 
+RUN useradd --create-home --uid 10001 appuser \
+    && chown -R appuser:appuser /app
+USER appuser
+
 WORKDIR /app/station-proxy-backend
-CMD exec uvicorn main:app --host 0.0.0.0 --port ${PORT}
+CMD exec uvicorn main:app --host 0.0.0.0 --port ${PORT} --no-access-log

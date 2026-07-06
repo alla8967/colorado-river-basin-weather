@@ -38,10 +38,18 @@ class BackendSettings:
     active_model_run_id: str
     reliability_model_run_id: str
     engine_mode: str
+    cors_allow_origins: list[str]
 
 
 def env_path(name: str, default: Path) -> Path:
     return Path(os.getenv(name, default)).resolve()
+
+
+def env_list(name: str, default: list[str]) -> list[str]:
+    configured = os.getenv(name, "")
+    if not configured.strip():
+        return default
+    return [item.strip() for item in configured.split(",") if item.strip()]
 
 
 def load_settings() -> BackendSettings:
@@ -130,6 +138,16 @@ def load_settings() -> BackendSettings:
             "paloma_v1_reliability",
         ),
         engine_mode=os.getenv("STATION_PROXY_ENGINE_MODE", "process"),
+        cors_allow_origins=env_list(
+            "STATION_PROXY_CORS_ALLOW_ORIGINS",
+            [
+                "http://127.0.0.1:8000",
+                "http://127.0.0.1:8001",
+                "http://localhost:8000",
+                "http://localhost:8001",
+                "null",
+            ],
+        ),
     )
 
 

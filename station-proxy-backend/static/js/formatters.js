@@ -11,7 +11,7 @@ export function stationHasCoordinates(station) {
 }
 
 export function escapeHtml(value) {
-    return String(value)
+    return String(value ?? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
@@ -64,8 +64,8 @@ export function calculateDistanceKm(latitudeA, longitudeA, latitudeB, longitudeB
 export function renderMetric(label, value) {
     return `
         <div class="metric">
-            <div class="metric-label">${label}</div>
-            <div class="metric-value">${value}</div>
+            <div class="metric-label">${escapeHtml(label)}</div>
+            <div class="metric-value">${escapeHtml(value)}</div>
         </div>
     `;
 }
@@ -127,11 +127,11 @@ export function clampPercent(value) {
 export function renderScoreItem(label, value, percent) {
     return `
         <div class="score-item">
-            <div class="score-label">${label}</div>
+            <div class="score-label">${escapeHtml(label)}</div>
             <div class="score-bar">
                 <div class="score-fill" style="width: ${clampPercent(percent)}%;"></div>
             </div>
-            <div class="score-value">${value}</div>
+            <div class="score-value">${escapeHtml(value)}</div>
         </div>
     `;
 }

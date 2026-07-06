@@ -6,6 +6,7 @@ import { elements, state } from "./state.js";
 import {
     calculateDistanceKm,
     correlationPercent,
+    escapeHtml,
     formatNumber,
     formatObservationPeriod,
     formatPreparedObservationPeriod,
@@ -63,7 +64,7 @@ export function renderResults(data) {
         elements.resultsContainer.innerHTML = `
             <div class="card">
                 <h2>Error</h2>
-                <div class="error">${data.message || "Unknown error"}</div>
+                <div class="error">${escapeHtml(data.message || "Unknown error")}</div>
             </div>
         `;
         return;
@@ -89,8 +90,8 @@ export function renderResults(data) {
         bestProxyHtml = `
             <div class="card">
                 <h2>${terms.bestHeading}</h2>
-                <h3>${best.proxyStation.stationName}</h3>
-                <p><strong>Station ID:</strong> ${best.proxyStation.stationID}</p>
+                <h3>${escapeHtml(best.proxyStation.stationName)}</h3>
+                <p><strong>Station ID:</strong> ${escapeHtml(best.proxyStation.stationID)}</p>
                 <p><strong>Full usable observation period:</strong> ${formatObservationPeriod(best.proxyStation)} (${best.proxyStation.fullObservationYears || "N/A"} years)</p>
                 <p><strong>Prepared comparison window:</strong> ${formatPreparedObservationPeriod(best.proxyStation)} (${best.proxyStation.dailyRecords || "N/A"} daily records loaded)</p>
                 ${renderProxySummary(best, terms)}
@@ -120,10 +121,13 @@ export function renderResults(data) {
         `;
     }
 
-    const tableRows = matches.map(match => `
-        <tr data-proxy-rank="${match.rank}">
-            <td>${match.rank}</td>
-            <td>${match.proxyStation.stationName}</td>
+    const tableRows = matches.map(match => {
+        const rank = Number(match.rank);
+        const rankLabel = Number.isFinite(rank) ? rank : "";
+        return `
+        <tr data-proxy-rank="${rankLabel}">
+            <td>${rankLabel}</td>
+            <td>${escapeHtml(match.proxyStation.stationName)}</td>
             <td>${formatNumber(match.score, 2)}</td>
             <td>${formatNumber(match.distanceKm, 1)} km</td>
             <td>${formatNumber(match.elevationDifferenceM, 1)} m</td>
@@ -132,7 +136,8 @@ export function renderResults(data) {
             <td>${formatNumber(match.dailyRMSE, 2)}</td>
             <td>${formatObservationPeriod(match.proxyStation)}</td>
         </tr>
-    `).join("");
+    `;
+    }).join("");
 
     elements.resultsContainer.innerHTML = `
         <div class="card">
@@ -146,8 +151,8 @@ export function renderResults(data) {
 
         <div class="card">
             <h2>Nearest Station</h2>
-            <h3>${nearest.stationName}</h3>
-            <p><strong>Station ID:</strong> ${nearest.stationID}</p>
+            <h3>${escapeHtml(nearest.stationName)}</h3>
+            <p><strong>Station ID:</strong> ${escapeHtml(nearest.stationID)}</p>
             <p><strong>Station type:</strong> ${stationRoleLabel(nearest)}</p>
             ${nearest.isHubStation ? `<p class="summary">This is a hub station with a full usable observation period of ${formatObservationPeriod(nearest)} (${nearest.fullObservationYears || "N/A"} years), so the matches below are the most similar other hubs.</p>` : `<p class="summary">This is a target station, so the matches below are proxy hub stations.</p>`}
             <p><strong>Distance from selected point:</strong> ${formatNumber(nearestDistanceKm, 2)} km</p>

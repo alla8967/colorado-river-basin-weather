@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Optional
 
 from api_models import AnalyzeConfidenceResponse, ConfidenceSupportResponse, ErrorResponse
+from response_safety import sanitize_response_paths
 
 # settings must be imported before `common`: importing it adds
 # weather_reconstruction_model/scripts to sys.path.
@@ -104,10 +105,12 @@ class ConfidenceService:
                     else None
                 ),
             }
-            return ConfidenceSupportResponse(**data)
+            return ConfidenceSupportResponse(
+                **sanitize_response_paths(data, self.settings.project_dir)
+            )
         except Exception as error:
             return ErrorResponse(
                 status="error",
                 message="Failed to analyze confidence support",
-                details=str(error),
+                details=sanitize_response_paths(str(error), self.settings.project_dir, "details"),
             )

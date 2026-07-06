@@ -29,6 +29,7 @@ from common.reliability_surface import (
     SURFACE_SCHEMA_VERSION,
     normalize_layer,
 )
+from response_safety import sanitize_response_paths
 
 MAX_PREDICTION_SERIES_POINTS = 800
 
@@ -66,7 +67,7 @@ class ReliabilitySurfaceService:
 
     def surface_bytes(self, layer: str) -> tuple[bytes, bytes]:
         """Return (raw, gzipped) JSON bytes for a surface layer, cached per process."""
-        normalized_layer = normalize_layer(layer)
+        normalized_layer = self.normalize_request_layer(layer)
         cached = self._surface_response_bytes.get(normalized_layer)
         if cached is not None:
             return cached
@@ -88,6 +89,15 @@ class ReliabilitySurfaceService:
     @property
     def root(self) -> Path:
         return self.settings.model_run_root / self.settings.reliability_model_run_id
+
+    def public_payload(self, payload: Any) -> Any:
+        return sanitize_response_paths(payload, self.settings.project_dir)
+
+    def normalize_request_layer(self, layer: str) -> str:
+        try:
+            return normalize_layer(layer)
+        except (AttributeError, ValueError) as error:
+            raise self.bad_request_error(str(error)) from error
 
     def summary_path(self) -> Path:
         return self.root / "reliability_summary.json"
@@ -118,11 +128,11 @@ class ReliabilitySurfaceService:
 
         payload["surfaceBaseUrl"] = "/model-runs/reliability/surface"
         payload["imageBaseUrl"] = "/model-runs/reliability/surface.png"
-        self._summary_payload = payload
-        return payload
+        self._summary_payload = self.public_payload(payload)
+        return self._summary_payload
 
     def surface(self, layer: str) -> dict[str, Any]:
-        normalized_layer = normalize_layer(layer)
+        normalized_layer = self.normalize_request_layer(layer)
         cached = self._surface_payloads.get(normalized_layer)
         if cached is not None:
             return cached
@@ -166,11 +176,11 @@ class ReliabilitySurfaceService:
             "final-bias": f"/model-runs/reliability/station-overlay.png?layer={normalized_layer}&mode=final-bias",
         }
         self.enrich_holdout_stations(payload, normalized_layer)
-        self._surface_payloads[normalized_layer] = payload
-        return payload
+        self._surface_payloads[normalized_layer] = self.public_payload(payload)
+        return self._surface_payloads[normalized_layer]
 
     def image_response(self, layer: str) -> FileResponse:
-        normalized_layer = normalize_layer(layer)
+        normalized_layer = self.normalize_request_layer(layer)
         path = self.image_path(normalized_layer)
         if not path.exists():
             raise self.not_found_error(f"Reliability PNG is unavailable: {normalized_layer}.", path)
@@ -178,7 +188,7 @@ class ReliabilitySurfaceService:
         return FileResponse(path, media_type="image/png")
 
     def station_overlay_image_response(self, layer: str, mode: str) -> FileResponse:
-        normalized_layer = normalize_layer(layer)
+        normalized_layer = self.normalize_request_layer(layer)
         normalized_mode = self.normalize_station_overlay_mode(mode)
         path = self.station_overlay_image_path(normalized_layer, normalized_mode)
         if self.station_overlay_is_stale(normalized_layer, normalized_mode, path):
@@ -187,10 +197,10 @@ class ReliabilitySurfaceService:
         return FileResponse(path, media_type="image/png")
 
     def station(self, layer: str, station_id: str) -> dict[str, Any]:
-        normalized_layer = normalize_layer(layer)
+        normalized_layer = self.normalize_request_layer(layer)
         requested_station_id = station_id.strip()
         if not requested_station_id:
-            raise self.validation_error("Station id is required.")
+            raise self.bad_request_error("Station id is required.")
 
         payload = self.surface(normalized_layer)
         station = self.find_holdout_station(payload, requested_station_id)
@@ -219,7 +229,7 @@ class ReliabilitySurfaceService:
         station_profile = self.station_record_profile(requested_station_id)
         terrain_features = self.station_terrain_features(requested_station_id)
 
-        return {
+        return self.public_payload({
             "status": "ok",
             "layer": normalized_layer,
             "station": {
@@ -264,7 +274,7 @@ class ReliabilitySurfaceService:
                     paloma_metrics.get("source") if paloma_metrics else None
                 ),
             },
-        }
+        })
 
     def temperature_prediction_series(
         self,
@@ -488,7 +498,7 @@ class ReliabilitySurfaceService:
         return sampled_points
 
     def sample(self, layer: str, latitude: float, longitude: float) -> dict[str, Any]:
-        normalized_layer = normalize_layer(layer)
+        normalized_layer = self.normalize_request_layer(layer)
         payload = self.surface(normalized_layer)
         points = payload.get("points") or []
         if not points:
@@ -521,7 +531,7 @@ class ReliabilitySurfaceService:
                 },
             )
 
-        return {
+        return self.public_payload({
             "status": "ok",
             "layer": normalized_layer,
             "query": {
@@ -530,7 +540,7 @@ class ReliabilitySurfaceService:
             },
             "nearestSurfaceDistanceKm": round(nearest_distance, 3),
             "sample": nearest,
-        }
+        })
 
     def find_holdout_station(
         self,
@@ -613,7 +623,7 @@ class ReliabilitySurfaceService:
             "final-bias",
         }
         if normalized not in allowed_modes:
-            raise self.validation_error(
+            raise self.bad_request_error(
                 "Station overlay mode must be one of: bias, correlation, mae, rmse, "
                 "final-correlation, final-mae, final-rmse, final-bias."
             )
@@ -1208,8 +1218,27 @@ class ReliabilitySurfaceService:
             detail={
                 "status": "error",
                 "message": message,
-                "details": str(path),
-                "modelRunRoot": str(self.settings.model_run_root),
+                "details": sanitize_response_paths(
+                    str(path),
+                    self.settings.project_dir,
+                    "details",
+                ),
+                "modelRunRoot": sanitize_response_paths(
+                    str(self.settings.model_run_root),
+                    self.settings.project_dir,
+                    "modelRunRoot",
+                ),
+                "reliabilityModelRunId": self.settings.reliability_model_run_id,
+            },
+        )
+
+    def bad_request_error(self, message: str) -> HTTPException:
+        return HTTPException(
+            status_code=422,
+            detail={
+                "status": "error",
+                "message": message,
+                "allowedLayers": list(RELIABILITY_LAYERS),
                 "reliabilityModelRunId": self.settings.reliability_model_run_id,
             },
         )
