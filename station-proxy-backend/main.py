@@ -49,7 +49,9 @@ SECURITY_HEADERS = {
         "default-src 'self'; "
         "script-src 'self' https://unpkg.com https://cdn.jsdelivr.net; "
         "style-src 'self' https://unpkg.com 'unsafe-inline'; "
-        "img-src 'self' data: https://server.arcgisonline.com; "
+        # unpkg.com serves Leaflet's default marker icons (marker-icon.png etc.)
+        # alongside leaflet.js/css, so images from it must stay allowed.
+        "img-src 'self' data: https://server.arcgisonline.com https://unpkg.com; "
         "connect-src 'self' http://127.0.0.1:8000 http://127.0.0.1:8001 "
         "http://localhost:8000 http://localhost:8001; "
         "font-src 'self' data:; "
