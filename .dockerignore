@@ -1,6 +1,5 @@
 # Controls what a local `docker build` sends to the Docker daemon.
-# Near-mirror of .gcloudignore; the model_runs rule is spelled per-parser
-# (see the comment in .gcloudignore).
+# Near-mirror of the hosted-build ignore rules.
 
 .git
 .gitignore
@@ -10,17 +9,11 @@
 .claude
 .github
 .env
-.env.example
 **/__pycache__/
 **/.DS_Store
 *.egg-info/
 
 # Large local-only artifact shelves the app does not read at runtime.
-# (Leading slash required: gcloud matches unanchored dir patterns at any
-# depth, which would also drop the needed
-# weather_reconstruction_model/model_runs artifacts. The .dockerignore
-# spells this rule "model_runs" because Docker anchors patterns to the
-# context root and rejects the leading slash instead.)
 model_runs
 alpine_outputs/general_training_tables/
 alpine_outputs/reports/

@@ -7,7 +7,7 @@ that may be physically present in the working folder.
 ## Start Here
 
 1. Read `README.md` for the project purpose, pipeline, and common commands.
-2. Use `docs/reviewer_runbook.md` for the practical review path.
+2. Use `docs/public_review_notes.md` for the public review boundary.
 3. Run `make check` for the local app and C++ engine validation set.
 4. Use `docs/research_script_inventory.md` when reviewing model/research scripts.
 5. Use `docs/artifact_quarantine_plan.md` before moving, deleting, or staging
@@ -24,7 +24,7 @@ of that collection before you open individual files.
 | `PROJECT_MAP.md` | Visual navigation guide. | Use this when the folder looks noisy. |
 | `Makefile` | Build, test, run, and cleanup entry points. | `make check` is the main reviewer command. |
 | `pyproject.toml` | Python package/dependency metadata. | Dev/model extras live here. |
-| `docs/` | Human-facing runbooks, inventories, artifact policy, and remote-run docs. | Review this before diving into scripts. |
+| `docs/` | Human-facing notes, inventories, artifact policy, and remote-run docs. | Review this before diving into scripts. |
 | `station-proxy-backend/` | FastAPI backend and browser frontend. | Local web app lives here. |
 | `C++_Weather_Station_Proxy_Engine/` | Reusable C++ station matching engine. | Core station similarity logic. |
 | `Station_Engine_Server/` | Persistent C++ server wrapper. | Keeps large NOAA data loaded for FastAPI. |
@@ -66,8 +66,8 @@ The project has four main lanes:
 - Remote-run lane: `remote_jobs/`.
 
 The repository root is intentionally kept small: project overview, map, build
-metadata, and environment examples stay at the top level; detailed runbooks live
-under `docs/`, and folder-specific explanations live beside the code they
+metadata stay at the top level; public notes live under `docs/`, and
+folder-specific explanations live beside the code they
 describe.
 
 Boundaries are improved inside those lanes rather than through risky top-level
@@ -87,16 +87,9 @@ git status --ignored --short
 rebuildable compiled/test byproducts only; it does not delete NOAA archives,
 model runs, DEM data, or research outputs.
 
-## Alpine Safety Boundary
+## Remote-Run Boundary
 
-Active or pending station-holdout jobs may be using the copied code under:
-
-```text
-/scratch/alpine/$USER/crb_weather_runs/current/weather_reconstruction_model/scripts
-/scratch/alpine/$USER/crb_weather_runs/current/remote_jobs
-```
-
-Do not rsync, sync, rename, or reorganize that Alpine scratch copy while those
-jobs are running. This local cleanup branch can change local files, but Alpine
-scratch remains frozen run code until a new version is validated and
-intentionally synced.
+Remote research jobs may use their own copied source tree and artifact shelves.
+Do not sync, rename, or reorganize remote run copies while jobs are active.
+Validate local changes first, then update remote run environments intentionally
+through private operator notes.

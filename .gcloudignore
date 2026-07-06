@@ -1,7 +1,5 @@
-# Controls what `gcloud run deploy --source .` uploads to Cloud Build.
-# Unlike .gitignore, this must INCLUDE the untracked runtime data the image
-# bakes in (app-ready NOAA CSVs, model-run artifacts, holdout predictions)
-# while excluding everything else that is large or local-only.
+# Controls hosted build source uploads. Unlike .gitignore, this keeps the
+# untracked runtime data needed by the image while excluding local-only shelves.
 # Keep in sync with .dockerignore.
 
 .git
@@ -12,17 +10,11 @@
 .claude
 .github
 .env
-.env.example
 **/__pycache__/
 **/.DS_Store
 *.egg-info/
 
 # Large local-only artifact shelves the app does not read at runtime.
-# (Leading slash required: gcloud matches unanchored dir patterns at any
-# depth, which would also drop the needed
-# weather_reconstruction_model/model_runs artifacts. The .dockerignore
-# spells this rule "model_runs" because Docker anchors patterns to the
-# context root and rejects the leading slash instead.)
 /model_runs/
 alpine_outputs/general_training_tables/
 alpine_outputs/reports/

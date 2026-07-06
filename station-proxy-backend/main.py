@@ -52,8 +52,7 @@ SECURITY_HEADERS = {
         # unpkg.com serves Leaflet's default marker icons (marker-icon.png etc.)
         # alongside leaflet.js/css, so images from it must stay allowed.
         "img-src 'self' data: https://server.arcgisonline.com https://unpkg.com; "
-        "connect-src 'self' http://127.0.0.1:8000 http://127.0.0.1:8001 "
-        "http://localhost:8000 http://localhost:8001; "
+        "connect-src 'self'; "
         "font-src 'self' data:; "
         "object-src 'none'; "
         "base-uri 'self'; "
@@ -62,6 +61,7 @@ SECURITY_HEADERS = {
     "Cross-Origin-Opener-Policy": "same-origin",
     "Permissions-Policy": "camera=(), geolocation=(), microphone=()",
     "Referrer-Policy": "no-referrer",
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
     "X-Content-Type-Options": "nosniff",
 }
 

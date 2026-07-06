@@ -169,13 +169,11 @@ const MODEL_TESTING_HTML = `
     <div class="testing-section">
         <h3>Where It Ran</h3>
         <p>
-            All Paloma training and holdout validation ran on <strong>CU Boulder's Alpine
-            supercomputer</strong> (CU Research Computing) as Slurm batch jobs on CPU partitions,
-            with no GPUs involved. The project keeps a durable copy in <code>/projects</code> storage and runs
-            jobs from <code>/scratch</code>; every job runs an environment and cache-integrity check
-            before touching the model, and results sync back to durable storage before being
-            retrieved into this repository. The app you are using now runs separately on
-            Google Cloud Run.
+            Paloma training and holdout validation ran on university high-performance
+            computing infrastructure as CPU batch jobs, with no GPUs involved. Each
+            job used environment and cache-integrity checks before touching the model,
+            and results were copied back into the project evidence shelf after the run.
+            The hosted app runs separately from that research compute environment.
         </p>
         <table>
             <thead>

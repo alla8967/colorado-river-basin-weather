@@ -1,9 +1,9 @@
-# Container image for the Station Proxy app on Cloud Run (or any container host).
+# Container image for the Station Proxy app.
 #
 # Build context requirements: this image bakes in the full app-ready NOAA CSVs
 # and model-run artifacts, which are intentionally not tracked in git. Build
-# from a machine that has them locally (see docs/deploy_cloud_run.md). If the
-# full CSVs are absent, the app falls back to the tiny tracked fixtures.
+# from a machine that has them locally. If the full CSVs are absent, the app
+# falls back to the tiny tracked fixtures.
 
 # --- Stage 1: compile the persistent C++ station engine -----------------------
 FROM debian:bookworm-slim AS engine-build

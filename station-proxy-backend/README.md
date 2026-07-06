@@ -22,46 +22,12 @@ routes, and model-run summary routes.
 - `index.html` is the polished application shell.
 - `static/` contains CSS, JavaScript modules, and small documentation images.
 
-## Local Run
+## Public Review Scope
 
-From the project root:
-
-```bash
-make server
-make run-backend
-```
-
-Then open `http://127.0.0.1:8000/`.
-
-For a clean fixture-only run that does not require the full NOAA CSVs:
-
-```bash
-make bootstrap-fixture
-make run-backend-fixture
-```
-
-The fixture app uses the tiny tracked station files in `tests/fixtures/`, so it
-is the safest first check on a new machine.
-
-## Engine Modes
-
-The backend defaults to the persistent subprocess engine:
-
-```text
-STATION_PROXY_ENGINE_MODE=process
-```
-
-An optional pybind11 path is available for local experiments:
-
-```bash
-.venv/bin/python -m pip install -e ".[native]"
-make native-engine PYTHON=.venv/bin/python
-STATION_PROXY_ENGINE_MODE=auto make run-backend-fixture PYTHON=.venv/bin/python
-```
-
-`auto` uses the native extension only when it is importable; otherwise it falls
-back to the subprocess engine. `native` requires the extension and reports
-`native-unavailable` in `/test` if it has not been built.
+The public repository keeps this folder reviewable as application source while
+leaving production operating details out of tree. The fixture workflow in the
+top-level README is the intended public smoke path.
 
 Some views depend on generated NOAA/model artifacts that are intentionally
-ignored by git; see `../docs/reviewer_runbook.md` for the practical review path.
+ignored by git. Those artifacts are described at a high level in
+`../docs/public_review_notes.md` and `../docs/generated_artifact_audit.md`.

@@ -26,7 +26,7 @@ These categories are ignored and should remain out of source commits:
 
 - macOS finder files and Python bytecode: `.DS_Store`, `__pycache__/`,
   `*.pyc`.
-- local environment override files: `.env`, `.env.*`, except `.env.example`.
+- local environment override files: `.env`, `.env.*`.
 - local virtual environments, editable-install metadata, and tool caches:
   `.venv/`, `venv/`, `env/`, `*.egg-info/`, `.pytest_cache/`,
   `.mypy_cache/`, `.ruff_cache/`.
@@ -57,6 +57,6 @@ git status --short
 git status --ignored --short
 ```
 
-Stage only source code, tests, docs, small fixtures, and intentionally curated
-configuration examples. Do not stage generated outputs, scratch data, local
-environments, compiled binaries, model files, or Alpine run results.
+Stage only source code, tests, docs, and small fixtures. Do not stage generated
+outputs, scratch data, local environments, compiled binaries, model files,
+cloud operator notes, or Alpine run results.

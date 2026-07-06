@@ -84,8 +84,13 @@ def test_security_headers_are_configured() -> None:
 
     headers = backend.SECURITY_HEADERS
     assert "Content-Security-Policy" in headers
-    assert "frame-ancestors 'none'" in headers["Content-Security-Policy"]
+    csp = headers["Content-Security-Policy"]
+    assert "connect-src 'self'" in csp
+    assert "localhost" not in csp
+    assert "127.0.0.1" not in csp
+    assert "frame-ancestors 'none'" in csp
     assert headers["Referrer-Policy"] == "no-referrer"
+    assert headers["Strict-Transport-Security"] == "max-age=31536000; includeSubDomains"
     assert headers["X-Content-Type-Options"] == "nosniff"
 
 

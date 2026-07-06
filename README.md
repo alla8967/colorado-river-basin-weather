@@ -4,7 +4,8 @@
 
 A full-stack station proxy and daily temperature reconstruction project for the Colorado River Basin, combining NOAA station data, a persistent C++ matching engine, FastAPI, and row-locked model validation evidence.
 
-**Live demo:** <https://crb-weather-demo-88408160679.us-central1.run.app> — the first visit after an idle period takes about a minute while the C++ engine loads the station data; the app shows a loading banner until it is ready.
+A hosted demo exists for portfolio/review use, but the public repository keeps
+the operating details separate from the research and application source.
 
 Pick any point in the basin: the app finds the nearest station, ranks long-record proxy stations, and shows reconstruction reliability evidence for that location. The modeling side is backed by a 739-station holdout where model predictions are compared against nearest-hub and IDW baselines on the same rows.
 
@@ -91,7 +92,7 @@ Regenerate the figure after installing the optional plotting extra:
 
 The reconstruction model evidence is separate from the live fixture demo: holdout reports are stored under `weather_reconstruction_model/outputs/reports/comparisons/`, while the demo uses tiny tracked files in `tests/fixtures/`.
 
-## Demo
+## Local Fixture Demo
 
 For a fixture-only app run that does not require full NOAA data:
 
@@ -99,14 +100,9 @@ For a fixture-only app run that does not require full NOAA data:
 make demo
 ```
 
-For a manual backend run with full local app-ready data, build and start the server:
-
-```bash
-make server
-make run-backend
-```
-
-Then open `http://127.0.0.1:8000/`. The first full-data startup can be slow because the C++ engine loads station CSVs into memory; later requests reuse the loaded process.
+The fixture app uses tiny tracked files in `tests/fixtures/` so reviewers can
+exercise the UI and C++ matching path without needing the full private runtime
+artifact shelf.
 
 ## App Screenshots
 
@@ -159,10 +155,10 @@ This is a basin-scoped research project with a hosted demo, not a production wea
 ## Reviewer/Runbook Links
 
 - `PROJECT_MAP.md`: top-level navigation and what to ignore while browsing.
-- `docs/reviewer_runbook.md`: setup, validation, local run steps, Alpine safety, and the archived pre-portfolio README text.
+- `docs/public_review_notes.md`: public review scope, safety posture, and artifact boundaries.
 - `docs/artifact_quarantine_plan.md`: generated artifact shelves and safe cleanup policy.
 - `docs/generated_artifact_audit.md`: commit/staging policy for generated files.
 - `docs/research_script_inventory.md`: research/model script map.
 - `docs/screenshots.md`: app screenshot capture instructions.
-- `docs/deploy_cloud_run.md`: public demo deployment with cost-abuse guardrails.
+- `docs/hosted_demo.md`: high-level hosted demo posture without operator commands.
 - `weather_reconstruction_model/MODEL_RUNS.md`: verified model-run claims and artifact pointers.
