@@ -21,7 +21,7 @@ const RELIABILITY_GUIDE_HTML = `
     <h2>How to Read This Map</h2>
     <p class="methodology-intro">
         Everything on this tab comes from one experiment: the Paloma v1 grouped station holdout
-        (739 stations, 416,892 held-out daily observations). If you take away one number, make it
+        (739 stations, 416,892 held-out station days). If you take away one number, make it
         this: a typical station reconstructs to within about <strong>2.5 F per day</strong>. The
         cards below explain the raster, every score in the inspector, and why the scoring is
         calibrated the way it is.
@@ -33,19 +33,19 @@ const RELIABILITY_GUIDE_HTML = `
             <p>
                 The surface is a 25 km grid (2,793 cells) clipped to the Colorado River Basin
                 boundary. Each cell is scored from the holdout stations around it, so the raster is
-                an interpolation between real validated stations &mdash; strongest near station
+                an interpolation between real validated stations: strongest near station
                 clusters, weakest in empty terrain.
             </p>
             <ul>
                 <li><strong>Layer</strong> (TAVG, TMIN, TMAX) picks which variable's holdout evidence drives the surface.</li>
                 <li><strong>Map</strong> picks what the station dots show: the Overall quality tier, a single holdout metric (correlation, MAE, RMSE, bias), or the same metrics for the fully trained production model.</li>
-                <li>The raster shading is <strong>relative</strong>: it ranks each cell against the 739 validated stations, showing where in the basin the model generalizes best and worst. It is a ranking, not a grade.</li>
-                <li>Station dots are <strong>measured results</strong>, not interpolation: each one is a station the model reconstructed while that station was fully held out of training.</li>
+                <li>The raster shading is <strong>relative</strong>: it ranks each cell against the 739 validated stations, showing where in the basin the model generalizes best and worst. Treat it as a ranking rather than a grade.</li>
+                <li>Station dots are <strong>measured results</strong> rather than interpolation: each one is a station the model reconstructed while that station was fully held out of training.</li>
             </ul>
             <p>
-                "Holdout" metrics are honest generalization evidence. "Fully Trained" metrics are
-                the production model scored on data it trained on &mdash; useful as a fit diagnostic,
-                never as proof of accuracy.
+                "Holdout" metrics are honest generalization evidence. "Fully Trained" metrics come
+                from the production model scored on data it trained on, so they help diagnose fit
+                but cannot prove accuracy.
             </p>
         </div>
     </details>
@@ -55,15 +55,15 @@ const RELIABILITY_GUIDE_HTML = `
         <div class="method-body">
             <p>Click any shaded cell and the inspector breaks its score into four ingredients:</p>
             <ul>
-                <li><strong>Expected MAE</strong> &mdash; a distance-weighted average of holdout station MAEs within 450 km (weight 1 / distance<sup>1.6</sup>). Thin evidence pulls the estimate toward the basin's 75th-percentile MAE, so sparse areas are scored conservatively, never optimistically. Small penalties apply when nearby stations disagree or the nearest one is over 120 km away.</li>
-                <li><strong>Evidence strength (0&ndash;100)</strong> &mdash; up to 50 points for proximity (fading to zero at 180 km) plus up to 50 for density (8 points per station within 50 km, 4 within 100 km, 1.5 within 200 km).</li>
-                <li><strong>Generalization percentile (0&ndash;100)</strong> &mdash; where the cell's expected MAE ranks among the 739 validated stations. 50 means "middle of the pack for this model", not "50% correct" &mdash; half the basin sits below 50 by definition. This rank is what the raster shading shows.</li>
-                <li><strong>Expected MAE usefulness (0&ndash;100)</strong> &mdash; an absolute scale that only cares about the temperature error itself:</li>
+                <li><strong>Expected MAE:</strong> a distance-weighted average of holdout station MAEs within 450 km (weight 1 / distance<sup>1.6</sup>). Thin evidence pulls the estimate toward the basin's 75th-percentile MAE, so sparse areas get conservative scores instead of optimistic ones. Small penalties apply when nearby stations disagree or the nearest one is over 120 km away.</li>
+                <li><strong>Evidence strength (0&ndash;100):</strong> up to 50 points for proximity (fading to zero at 180 km) plus up to 50 for density (8 points per station within 50 km, 4 within 100 km, 1.5 within 200 km).</li>
+                <li><strong>Generalization percentile (0&ndash;100):</strong> where the cell's expected MAE ranks among the 739 validated stations. A 50 means the middle of the pack for this model, and half the basin sits below 50 by definition. This rank is what the raster shading shows.</li>
+                <li><strong>Expected MAE usefulness (0&ndash;100):</strong> an absolute scale that only cares about the temperature error itself:</li>
             </ul>
             <figure class="guide-figure">
                 ${USEFULNESS_CURVE_SVG}
                 <figcaption>
-                    The usefulness curve is pinned to meaningful temperatures, not to the basin
+                    The usefulness curve is pinned to meaningful temperatures rather than the basin
                     average: hitting the strict validation bar (1.5 F) scores 95, matching a typical
                     station (2.5 F) scores 80, and by the time expected error approaches the dumb-baseline
                     zone near 5 F the score has fallen to about 40.
@@ -83,8 +83,8 @@ const RELIABILITY_GUIDE_HTML = `
                 </div>
             </figure>
             <p>
-                One guardrail on top: when evidence strength drops below 45, up to 20 points are
-                subtracted &mdash; a confident-sounding estimate with little real validation nearby
+                One guardrail sits on top: when evidence strength drops below 45, up to 20 points
+                are subtracted. A confident-sounding estimate with little real validation nearby
                 gets marked down for it.
             </p>
         </div>
@@ -94,7 +94,7 @@ const RELIABILITY_GUIDE_HTML = `
         <summary>Why the scoring is calibrated this way</summary>
         <div class="method-body">
             <p>
-                Every anchor traces back to this distribution &mdash; the actual holdout MAE of all
+                Every anchor traces back to this distribution, the actual holdout MAE of all
                 739 validated stations:
             </p>
             <figure class="guide-figure">
@@ -110,11 +110,11 @@ const RELIABILITY_GUIDE_HTML = `
             <p>
                 <strong>What we recalibrated.</strong> The inspector used to headline the
                 generalization percentile colored as if it were a grade. Since half the basin ranks
-                below 50 by definition, typical areas looked like failures &mdash; a cell with expected
+                below 50 by definition, typical areas looked like failures. A cell with expected
                 MAE 2.63 F (within 6% of the median above, and roughly twice as accurate as the IDW
                 baseline) showed a red 44. The headline is now the Model helpfulness blend, which is
                 pinned to the fixed temperature anchors in the chart; the percentile stays visible
-                for comparing locations within the basin. No model outputs changed &mdash; both values
+                for comparing locations within the basin. No model outputs changed; both values
                 were always in the published artifacts.
             </p>
             <p>The badge and score bars read on the helpfulness scale (basin-wide median is about 66):</p>
@@ -131,8 +131,8 @@ const RELIABILITY_GUIDE_HTML = `
         <summary>Station markers and quality tiers</summary>
         <div class="method-body">
             <p>
-                In Overall mode, each station dot is tiered by all three holdout metrics together
-                &mdash; a station must clear every threshold in a tier to earn it:
+                In Overall mode, each station dot is tiered by all three holdout metrics together.
+                A station must clear every threshold in a tier to earn it:
             </p>
             <ul>
                 <li><span class="legend-dot quality-excellent"></span> <strong>Excellent:</strong> correlation &ge; 0.97, MAE &le; 1.25 F, RMSE &le; 2.0 F</li>
@@ -145,8 +145,8 @@ const RELIABILITY_GUIDE_HTML = `
             <figure class="guide-figure">
                 ${CORRELATION_DISTRIBUTION_SVG}
                 <figcaption>
-                    Daily temperatures follow the seasonal cycle, so correlation runs naturally high
-                    &mdash; 87% of stations clear the Excellent bar of 0.97 and 97% clear 0.95.
+                    Daily temperatures follow the seasonal cycle, so correlation runs naturally
+                    high: 87% of stations clear the Excellent bar of 0.97 and 97% clear 0.95.
                     Correlation mostly flags broken records (six stations sit below 0.88, one with a
                     negative correlation); the real grading work is done by MAE and RMSE.
                 </figcaption>
@@ -163,12 +163,12 @@ const RELIABILITY_GUIDE_HTML = `
         <div class="method-body">
             <p>After clicking the raster, the Reliability Inspector reports, in order of importance:</p>
             <ul>
-                <li><strong>Model helpfulness</strong> (the badge) &mdash; the calibrated blend above. It answers "how much should I trust a reconstruction here?"</li>
-                <li><strong>Expected MAE</strong> &mdash; the interpolated daily error estimate in F. Compare it to the anchors: 2.49 F is typical, 1.5 F is excellent, near 5 F is baseline-level.</li>
-                <li><strong>Evidence strength</strong> &mdash; how much real validation sits nearby. A confident-looking score with weak evidence is still a guess; the helpfulness blend already discounts it.</li>
-                <li><strong>Generalization percentile</strong> &mdash; this location's rank within the basin. Useful for comparing sites, not for judging absolute quality.</li>
-                <li><strong>Limiting variable</strong> &mdash; on combined layers, which of TAVG/TMIN/TMAX drags the cell down.</li>
-                <li><strong>Nearby holdout stations</strong> &mdash; the actual measured stations behind the estimate, with distance and holdout MAE, plus the nearest notably-good and notably-bad stations for context.</li>
+                <li><strong>Model helpfulness</strong> (the badge): the calibrated blend above. It answers "how much should I trust a reconstruction here?"</li>
+                <li><strong>Expected MAE:</strong> the interpolated daily error estimate in F. Compare it to the anchors: 2.49 F is typical, 1.5 F is excellent, near 5 F is baseline-level.</li>
+                <li><strong>Evidence strength:</strong> how much real validation sits nearby. A confident-looking score with weak evidence is still a guess; the helpfulness blend already discounts it.</li>
+                <li><strong>Generalization percentile:</strong> this location's rank within the basin. Useful for comparing sites rather than judging absolute quality.</li>
+                <li><strong>Limiting variable:</strong> on combined layers, which of TAVG/TMIN/TMAX drags the cell down.</li>
+                <li><strong>Nearby holdout stations:</strong> the actual measured stations behind the estimate, with distance and holdout MAE, plus the nearest notably-good and notably-bad stations for context.</li>
             </ul>
             <p>
                 Sources: <code>reliability_surface_&lt;layer&gt;.json</code> artifacts built by
