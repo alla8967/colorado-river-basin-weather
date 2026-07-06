@@ -49,6 +49,15 @@ def parse_arguments() -> argparse.Namespace:
         help="C++ validate_prediction_similarity executable.",
     )
     parser.add_argument(
+        "--predicted-column",
+        default="predicted_tavg",
+        help=(
+            "Column holding the predicted TAVG values, for prediction files "
+            "that name it differently (for example model_predicted_tavg in "
+            "the row-locked baseline comparison artifact)."
+        ),
+    )
+    parser.add_argument(
         "--skip-build",
         action="store_true",
         help="Use the existing C++ executable without rebuilding it first.",
@@ -81,6 +90,7 @@ def write_station_validation_files(
     station_id: str,
     rows: list[dict[str, str]],
     output_dir: Path,
+    predicted_column: str = "predicted_tavg",
 ) -> tuple[Path, Path]:
     output_dir.mkdir(parents=True, exist_ok=True)
     actual_file = output_dir / f"{station_id}_actual.csv"
@@ -123,8 +133,8 @@ def write_station_validation_files(
                 "longitude": "0",
                 "elevation": "0",
                 "date": row["date"],
-                "tmax": row["predicted_tavg"],
-                "tmin": row["predicted_tavg"],
+                "tmax": row[predicted_column],
+                "tmin": row[predicted_column],
             })
 
     return actual_file, predicted_file
@@ -202,6 +212,7 @@ def main() -> None:
             station_id,
             rows,
             output_dir,
+            arguments.predicted_column,
         )
         cpp_metrics = run_cpp_validation(
             arguments.executable,

@@ -39,6 +39,46 @@ strict passes: model 52 | IDW 9 | nearest hub 8
 Note: the local comparison run had no terrain feature file, so relief/slope
 segment bands report "unknown"; elevation bands are populated.
 
+## Independent C++ Re-Score (run 2026-07-06)
+
+The row-locked model predictions were re-scored end to end by the C++
+validator (`C++_Weather_Station_Proxy_Engine/validate_prediction_similarity.cpp`),
+which reloads the exported actual/predicted values with the app engine's own
+CSV loader and similarity code. This is a cross-language check on the holdout
+metrics themselves: none of the numbers below depend on the Python metric
+implementation.
+
+```text
+input: paloma_v1_tavg_holdout_baseline_comparison_row_locked_predictions.csv
+stations re-scored: 739 (416,892 paired days)
+mean station MAE:   2.6838 F   (Python master: 2.68 F)
+median station MAE: 2.4855 F   (Python master: 2.49 F)
+p90 station MAE:    3.9982 F   (Python master: 4.00 F)
+hardest station:    9.6080 F   (Python master: 9.61 F)
+strict passes:      52 / 739   (identical stations)
+```
+
+Per-station agreement between the two implementations: max MAE deviation
+0.0024 F, max RMSE deviation 0.0026 F, max correlation deviation 0.0018,
+consistent with the 4-decimal rounding in the exported CSV. The per-station
+C++ results are committed at
+`docs/evidence/paloma_v1_tavg_holdout_cpp_validation.csv`.
+
+Two stations (USC00051743 COLLBRAN 1WSW, USC00052196 DELTA 3E) report a
+correlation of exactly -1.0 in both implementations. Each has only 2 paired
+holdout days, and two points always correlate at exactly plus or minus 1, so
+this is a degenerate statistic rather than a model failure; their MAEs are
+1.40 F and 0.98 F.
+
+To reproduce:
+
+```bash
+cd weather_reconstruction_model/scripts
+../../.venv/bin/python validate_predictions_with_cpp.py \
+  ../outputs/reports/comparisons/paloma_v1_tavg_holdout_baseline_comparison_row_locked_predictions.csv \
+  --predicted-column model_predicted_tavg
+```
+
 The older model-run contract example below remains useful history and schema
 documentation. It should not be confused with the broader Paloma evidence above.
 
