@@ -147,8 +147,10 @@ const RELIABILITY_GUIDE_HTML = `
                 <figcaption>
                     Daily temperatures follow the seasonal cycle, so correlation runs naturally
                     high: 87% of stations clear the Excellent bar of 0.97 and 97% clear 0.95.
-                    Correlation mostly flags broken records (six stations sit below 0.88, one with a
-                    negative correlation); the real grading work is done by MAE and RMSE.
+                    Correlation mostly flags broken or tiny records: six stations sit below 0.88,
+                    and the two reading exactly -1.0 had only two paired holdout days each, where
+                    correlation is always plus or minus 1. The real grading work is done by MAE
+                    and RMSE.
                 </figcaption>
             </figure>
             <p>

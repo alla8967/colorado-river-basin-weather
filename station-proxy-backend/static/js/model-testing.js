@@ -102,8 +102,10 @@ const MODEL_TESTING_HTML = `
         <p>
             Two guardrails keep the metrics honest: baseline comparisons are <strong>row-locked</strong>
             (evaluated on the exact prediction rows, failing loudly if any baseline row is missing),
-            and exported prediction CSVs are independently re-scored by a separate C++ validator,
-            so the headline numbers do not depend on a single implementation.
+            and the exported predictions are independently re-scored by a separate C++ validator
+            built on the app engine's own similarity code. The 2026-07-06 re-score reproduced the
+            Python metrics at all 739 stations to within 0.003 F per station, so the headline
+            numbers do not depend on a single implementation.
         </p>
         <table>
             <thead>
@@ -232,6 +234,7 @@ const MODEL_TESTING_HTML = `
             <li><code>alpine_outputs/paloma/paloma_v1_tavg_station_holdout_master.csv</code>: per-station holdout metrics and measured fit times</li>
             <li><code>model_runs/paloma_v1/paloma_v1_tavg/model_manifest.json</code>: production model card (rows, features, hyperparameters)</li>
             <li><code>weather_reconstruction_model/MODEL_RUNS.md</code>: verified claims and the row-locked baseline comparison</li>
+            <li><code>docs/evidence/paloma_v1_tavg_holdout_cpp_validation.csv</code>: independent C++ re-score of all 739 holdout stations</li>
             <li><code>remote_jobs/*.sh</code>: Slurm job definitions (partitions, cores, memory, wall limits)</li>
         </ul>
     </div>

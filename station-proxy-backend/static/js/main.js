@@ -3,8 +3,8 @@
 import { fetchEngineStatus, fetchLocationAnalysis } from "./api.js";
 import { initializeMap, refreshMapSize } from "./maps.js";
 import { renderMethodology } from "./methodology.js?v=tabs-v1";
-import { renderModelTesting } from "./model-testing.js?v=model-testing-v3";
-import { renderReliabilityGuide } from "./reliability-guide.js?v=reliability-guide-v3";
+import { renderModelTesting } from "./model-testing.js?v=model-testing-v4";
+import { renderReliabilityGuide } from "./reliability-guide.js?v=reliability-guide-v4";
 import { bindReliabilityControls, initializeReliabilityMap, refreshReliabilityMapSize } from "./reliability.js?v=reliability-guide-v1";
 import { renderResults } from "./results.js?v=low-correlation-v1";
 import { elements, state } from "./state.js";
