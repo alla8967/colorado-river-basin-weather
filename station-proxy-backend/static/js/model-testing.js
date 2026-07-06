@@ -22,26 +22,30 @@ const BASELINE_CDF_SVG = `<svg viewBox="0 0 760 320" role="img" aria-label="Cumu
 const MODEL_TESTING_HTML = `
     <h2>Model &amp; Testing</h2>
     <p class="methodology-intro">
-        How the Paloma v1 reconstruction model was built, how it was validated, where it ran,
-        and how long the runs took. Every number on this page is measured from a run artifact
-        or manifest &mdash; the sources are listed at the bottom.
+        Paloma v1 reconstructs daily temperatures for weather stations with missing or
+        incomplete records. It learns how each station's temperatures relate to nearby
+        long-record stations and the surrounding terrain, then uses those relationships to
+        estimate what the station would have measured on any given day. The rest of this page
+        gets specific: how the model is put together, how it was tested, where the computing
+        happened, and how long it took. Every number is measured from a saved run artifact,
+        and the sources are listed at the bottom.
     </p>
 
     <div class="station-glance-grid testing-headline">
         <div class="station-glance-card">
             <div class="station-glance-label">Validation Stations</div>
             <div class="station-glance-value">739</div>
-            <div class="station-glance-detail">Grouped station holdout &mdash; each station fully excluded from the forest that scored it.</div>
+            <div class="station-glance-detail">Every eligible station the model trains on. Each was scored by a forest trained with that station completely removed.</div>
         </div>
         <div class="station-glance-card">
-            <div class="station-glance-label">Held-Out Daily Rows</div>
+            <div class="station-glance-label">Held-Out Station Days</div>
             <div class="station-glance-value">416,892</div>
-            <div class="station-glance-detail">Real observed days compared against the model's reconstruction.</div>
+            <div class="station-glance-detail">Each one is a single day at a single station: the model's estimate checked against the temperature actually recorded that day.</div>
         </div>
         <div class="station-glance-card">
             <div class="station-glance-label">Mean Station MAE</div>
             <div class="station-glance-value">2.68 F</div>
-            <div class="station-glance-detail">Median 2.49 F across the 739 held-out stations (TAVG).</div>
+            <div class="station-glance-detail">The average of each station's daily error (TAVG). The median station comes in at 2.49 F.</div>
         </div>
         <div class="station-glance-card">
             <div class="station-glance-label">Validation Compute</div>
@@ -53,10 +57,10 @@ const MODEL_TESTING_HTML = `
     <div class="testing-section">
         <h3>The Model</h3>
         <p>
-            Paloma v1 reconstructs a target weather station's daily temperatures from surrounding
-            stations and terrain. Instead of predicting temperature directly, each random forest
-            predicts the <strong>offset from a regional hub baseline</strong>, then adds it back.
-            That keeps the trees focused on local deviation rather than relearning the seasonal cycle.
+            The model is a set of random forests, one per temperature variable. Each forest
+            predicts the <strong>offset from a regional hub baseline</strong> instead of the
+            temperature itself, and the baseline is added back afterward. That keeps the trees
+            focused on local deviation rather than relearning the seasonal cycle.
         </p>
         <figure class="guide-figure">
             ${MODEL_FLOW_DIAGRAM_SVG}
@@ -73,7 +77,7 @@ const MODEL_TESTING_HTML = `
                 <tr><td>Features</td><td>873 inputs: 5 hub stations, 10 nearest neighbor stations, seasonality, station geometry, and DEM terrain (elevation, slope, aspect, relief)</td></tr>
                 <tr><td>Production training set</td><td>2,174,509 daily rows across 761 target stations (TAVG)</td></tr>
                 <tr><td>Production hyperparameters</td><td>300 trees, max depth 20, min 5 samples per leaf, fixed random seed</td></tr>
-                <tr><td>Exported</td><td>2026-05-27 &mdash; serialized <code>model.joblib</code> with a model manifest and feature schema</td></tr>
+                <tr><td>Exported</td><td>2026-05-27 (serialized <code>model.joblib</code> with a model manifest and feature schema)</td></tr>
             </tbody>
         </table>
     </div>
@@ -84,15 +88,15 @@ const MODEL_TESTING_HTML = `
             <strong>Grouped station holdout.</strong> The 739 validation stations were split into
             189 groups of 2&ndash;5 stations. For each group, a separate forest was trained with every
             station in that group fully excluded, then asked to reconstruct those stations' real
-            daily records &mdash; 416,892 held-out rows in total. Because whole stations are held out
-            rather than random rows, the score measures reconstructing a station the model has
-            never seen, not memorization.
+            daily records. That adds up to 416,892 held-out station days. Because whole stations
+            are held out rather than random days, each score shows how the model handles a
+            station it has never seen before.
         </p>
         <figure class="guide-figure">
             ${HOLDOUT_SCHEMATIC_SVG}
             <figcaption>
                 This cycle repeats 189 times, once per group, so every one of the 739 stations is
-                scored by a forest that never saw it &mdash; 416,892 scored days in total.
+                scored by a forest that never saw it: 416,892 scored station days in total.
             </figcaption>
         </figure>
         <p>
@@ -114,15 +118,15 @@ const MODEL_TESTING_HTML = `
             </tbody>
         </table>
         <p class="testing-note">
-            The strict-pass bar is intentionally hard and stays visible: 52 stations meet it today.
-            That frontier is reported, not hidden.
+            The strict-pass bar is intentionally hard. 52 stations meet it today, and the count
+            stays on the page so progress against it is visible.
         </p>
     </div>
 
     <div class="testing-section">
         <h3>Against Simple Baselines</h3>
         <p>
-            Same 739 stations, same 416,892 prediction rows, zero missing baseline rows
+            Same 739 stations, same 416,892 held-out station days, zero missing baseline rows
             (row-locked comparison run 2026-06-11). Lower is better:
         </p>
         <div class="mae-bars" role="img" aria-label="Mean station MAE comparison: Paloma v1 2.68 F, inverse-distance weighting of 5 hubs 4.99 F, nearest hub 5.58 F">
@@ -152,7 +156,7 @@ const MODEL_TESTING_HTML = `
             ${BASELINE_CDF_SVG}
             <figcaption>
                 How to read it: for any error level on the x-axis, the curve height is the share of
-                stations reconstructed at least that well &mdash; higher and further left is better.
+                stations reconstructed at least that well. Higher and further left is better.
                 Half the stations come in under 2.49 F with the model; on the exact same prediction
                 rows, the IDW baseline does not reach its halfway point until about 4.2 F and the
                 nearest hub until about 4.8 F.
@@ -164,8 +168,8 @@ const MODEL_TESTING_HTML = `
         <h3>Where It Ran</h3>
         <p>
             All Paloma training and holdout validation ran on <strong>CU Boulder's Alpine
-            supercomputer</strong> (CU Research Computing) as Slurm batch jobs on CPU partitions
-            &mdash; no GPUs. The project keeps a durable copy in <code>/projects</code> storage and runs
+            supercomputer</strong> (CU Research Computing) as Slurm batch jobs on CPU partitions,
+            with no GPUs involved. The project keeps a durable copy in <code>/projects</code> storage and runs
             jobs from <code>/scratch</code>; every job runs an environment and cache-integrity check
             before touching the model, and results sync back to durable storage before being
             retrieved into this repository. The app you are using now runs separately on
@@ -216,7 +220,8 @@ const MODEL_TESTING_HTML = `
         </figure>
         <p class="testing-note">
             Timings are the <code>elapsed_seconds</code> values the training script wrote into the
-            holdout master artifact &mdash; measured wall time per group fit, not scheduler estimates.
+            holdout master artifact. They are measured wall time for each group fit, not
+            scheduler estimates.
         </p>
     </div>
 
@@ -224,10 +229,10 @@ const MODEL_TESTING_HTML = `
         <h3>Sources</h3>
         <p class="testing-note">Every figure above traces to one of these project artifacts:</p>
         <ul class="support-list provenance-list">
-            <li><code>alpine_outputs/paloma/paloma_v1_tavg_station_holdout_master.csv</code> &mdash; per-station holdout metrics and measured fit times</li>
-            <li><code>model_runs/paloma_v1/paloma_v1_tavg/model_manifest.json</code> &mdash; production model card (rows, features, hyperparameters)</li>
-            <li><code>weather_reconstruction_model/MODEL_RUNS.md</code> &mdash; verified claims and the row-locked baseline comparison</li>
-            <li><code>remote_jobs/*.sh</code> &mdash; Slurm job definitions (partitions, cores, memory, wall limits)</li>
+            <li><code>alpine_outputs/paloma/paloma_v1_tavg_station_holdout_master.csv</code>: per-station holdout metrics and measured fit times</li>
+            <li><code>model_runs/paloma_v1/paloma_v1_tavg/model_manifest.json</code>: production model card (rows, features, hyperparameters)</li>
+            <li><code>weather_reconstruction_model/MODEL_RUNS.md</code>: verified claims and the row-locked baseline comparison</li>
+            <li><code>remote_jobs/*.sh</code>: Slurm job definitions (partitions, cores, memory, wall limits)</li>
         </ul>
     </div>
 `;
