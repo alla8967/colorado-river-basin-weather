@@ -9,6 +9,8 @@ the operating details separate from the research and application source.
 
 Pick any point in the basin: the app finds the nearest station, ranks long-record proxy stations, and shows reconstruction reliability evidence for that location. The modeling side is backed by a 739-station holdout where model predictions are compared against nearest-hub and IDW baselines on the same rows.
 
+Go to https://crb-weather-demo-4x7bdpopba-uc.a.run.app/ to view the live frontend.
+
 ![App walkthrough: proxy analysis, reliability map, and station holdout charts](docs/assets/demo.gif)
 
 **Headline result:** Mean station MAE fell from 4.99 F with IDW interpolation to 2.68 F with the model, a ~46% reduction across 739 held-out stations.
