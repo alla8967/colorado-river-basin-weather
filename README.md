@@ -11,6 +11,7 @@ Pick any point in the basin: the app finds the nearest station, ranks long-recor
 
 Go to https://crb-weather-demo-4x7bdpopba-uc.a.run.app/ to view the live frontend.
 
+
 ![App walkthrough: proxy analysis, reliability map, and station holdout charts](docs/assets/demo.gif)
 
 **Headline result:** Mean station MAE fell from 4.99 F with IDW interpolation to 2.68 F with the model, a ~46% reduction across 739 held-out stations.
